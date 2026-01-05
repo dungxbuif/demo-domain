@@ -1,0 +1,48 @@
+{
+  "name": "QnUtilities",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@ncc:dungxbuif-ncc/QnUtilities.git",
+  "author": "jackbui <dung.bui@speedydd.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev:web": "nx dev web",
+    "build:web": "nx build web",
+    "start:web": "nx start web",
+    "lint:web": "nx lint web",
+    "dev:api": "nx dev api",
+    "build:api": "nx build api",
+    "start:api": "nx start api",
+    "lint:api": "nx lint api",
+    "build": "nx run-many --target=build --all",
+    "lint": "nx run-many --target=lint --all",
+    "test": "nx run-many --target=test --all"
+  },
+  "devDependencies": {
+    "@nx/devkit": "22.3.3",
+    "@nx/js": "22.3.3",
+    "@nx/next": "^22.3.3",
+    "@nx/playwright": "22.3.3",
+    "@nx/workspace": "^22.3.3",
+    "@playwright/test": "^1.36.0",
+    "@swc-node/register": "~1.9.1",
+    "@swc/cli": "~0.6.0",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "nx": "22.3.3",
+    "prettier": "~3.6.2",
+    "tslib": "^2.3.0",
+    "typescript": "~5.9.2"
+  },
+  "dependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "autoprefixer": "^10.4.23",
+    "next": "~16.0.1",
+    "postcss": "^8.5.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.18"
+  }
+}
