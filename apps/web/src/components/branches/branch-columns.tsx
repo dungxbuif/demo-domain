@@ -141,7 +141,6 @@ export const createBranchColumns = (
   },
   {
     id: 'actions',
-    enableHiding: false,
     cell: ({ row }) => {
       const branch = row.original;
       return (

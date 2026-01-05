@@ -17,7 +17,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { PATHS } from '@/constants/paths';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

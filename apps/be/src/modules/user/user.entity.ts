@@ -1,6 +1,7 @@
 import { UserRole } from '@src/common/constants/user.constants';
 import { AbstractAuditEntity } from '@src/common/database/abstract.entity';
-import { Column, Entity } from 'typeorm';
+import StaffEntity from '@src/modules/staff/staff.entity';
+import { AfterInsert, Column, Entity, EntityManager, IsNull } from 'typeorm';
 
 @Entity('users')
 export default class UserEntity extends AbstractAuditEntity {
@@ -22,4 +23,18 @@ export default class UserEntity extends AbstractAuditEntity {
     default: UserRole.STAFF,
   })
   role: UserRole;
+
+  @AfterInsert()
+  async logInsert(event: { entity: UserEntity; entityManager: EntityManager }) {
+    const manager = event?.entityManager;
+    if (!manager || !event?.entity?.email) return;
+    const existStaff = await manager.findOneBy(StaffEntity, {
+      email: event.entity.email,
+      userId: IsNull(),
+    });
+    if (existStaff) {
+      existStaff.userId = event.entity.mezonId;
+      await manager.save(StaffEntity, existStaff);
+    }
+  }
 }

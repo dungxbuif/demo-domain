@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
 import { AppPaginationDto } from '@src/common/dtos/paginate.dto';
+import CreateStaffDto from '@src/modules/staff/dtos/create-staff.dto';
 import StaffEntity from '@src/modules/staff/staff.entity';
+import { UserService } from '@src/modules/user/user.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -10,6 +12,7 @@ export class StaffService {
   constructor(
     @InjectRepository(StaffEntity)
     private readonly staffRepository: Repository<StaffEntity>,
+    private readonly userService: UserService,
   ) {}
 
   async getStaffs(
@@ -25,5 +28,34 @@ export class StaffService {
       total,
       result: data,
     };
+  }
+
+  async createStaff(staffPayload: CreateStaffDto): Promise<StaffEntity> {
+    const [existingUser, existingStaff] = await Promise.all([
+      this.userService.findByEmail(staffPayload.email),
+      this.staffRepository.findOneBy({ email: staffPayload.email }),
+    ]);
+
+    if (existingStaff) {
+      throw new BadRequestException('Staff with this email already exists');
+    }
+    return this.staffRepository.save(
+      this.staffRepository.create({
+        ...staffPayload,
+        userId: (existingUser?.mezonId || null) as string | null,
+      }),
+    );
+  }
+
+  async updateStaffUserId(
+    staffId: number,
+    userId: string | null,
+  ): Promise<StaffEntity> {
+    const staff = await this.staffRepository.findOneBy({ id: staffId });
+    if (!staff) {
+      throw new BadRequestException('Staff not found');
+    }
+    staff.userId = userId;
+    return this.staffRepository.save(staff);
   }
 }

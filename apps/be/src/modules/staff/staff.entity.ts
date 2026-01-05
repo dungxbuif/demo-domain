@@ -1,23 +1,42 @@
+import { UserRole } from '@src/common/constants/user.constants';
 import { AbstractEntity } from '@src/common/database/abstract.entity';
+import { BranchEntity } from '@src/modules/branch/branch.entity';
 import UserEntity from '@src/modules/user/user.entity';
-import { Column, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 export enum StaffStatus {
   ACTIVE = 0,
   ON_LEAVE = 1,
   LEAVED = 2,
 }
 
+@Entity('staffs')
 export default class StaffEntity extends AbstractEntity {
+  @Column({ unique: true })
+  email: string;
+
   @Column({
     type: 'int',
     default: StaffStatus.ACTIVE,
   })
   status: StaffStatus;
 
-  @Column({})
-  userId: string;
+  @Column({ nullable: true })
+  userId: string | null;
+
+  @Column({
+    type: 'int',
+    nullable: true,
+  })
+  role: UserRole | null;
+
+  @Column({ unique: false })
+  branchId: number;
 
   @OneToOne(() => UserEntity, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
+
+  @ManyToOne(() => BranchEntity, (branch) => branch.staffs, { eager: true })
+  @JoinColumn({ name: 'branch_id' })
+  branch: BranchEntity;
 }

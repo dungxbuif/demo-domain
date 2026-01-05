@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/contexts/auth-context';
+import { AuthProvider } from '@/lib/auth/auth-context';
 import { SessionData, isSessionExpired, sessionOptions } from '@/lib/session';
 import ReactQueryProvider from '@/providers/query-provider';
 import { getIronSession } from 'iron-session';

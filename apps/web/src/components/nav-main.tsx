@@ -19,6 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
+import { Permission, ProtectedComponent } from '@/lib/auth';
 
 export function NavMain({
   items,
@@ -28,9 +29,11 @@ export function NavMain({
     href: string;
     icon?: string;
     isActive?: boolean;
+    permission?: Permission;
     items?: {
       title: string;
       href: string;
+      permission?: Permission;
     }[];
   }[];
 }) {
@@ -44,56 +47,60 @@ export function NavMain({
           const isActive = pathname === item.href;
           const hasSubItems = item.items && item.items.length > 0;
 
-          if (hasSubItems) {
-            // Multi-level item with collapsible functionality
-            return (
-              <Collapsible
-                key={item.title}
-                asChild
-                defaultOpen={item.isActive}
-                className="group/collapsible"
-              >
+          return (
+            <ProtectedComponent key={item.title} permission={item.permission}>
+              {hasSubItems ? (
+                // Multi-level item with collapsible functionality
+                <Collapsible
+                  asChild
+                  defaultOpen={item.isActive}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={item.title}>
+                        <span className="text-xl">{item.icon}</span>
+                        <span>{item.title}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.items?.map((subItem) => (
+                          <ProtectedComponent
+                            key={subItem.title}
+                            permission={subItem.permission}
+                          >
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton asChild>
+                                <Link href={subItem.href}>
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          </ProtectedComponent>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ) : (
+                // Single-level item
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={isActive}
+                  >
+                    <Link href={item.href}>
                       <span className="text-xl">{item.icon}</span>
                       <span>{item.title}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <Link href={subItem.href}>
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
+                      <ChevronRight className="ml-auto h-4 w-4" />
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
-              </Collapsible>
-            );
-          }
-
-          // Single-level item (not collapsible, with right chevron)
-          return (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                tooltip={item.title}
-                isActive={isActive}
-              >
-                <Link href={item.href}>
-                  <span className="text-xl">{item.icon}</span>
-                  <span>{item.title}</span>
-                  <ChevronRight className="ml-auto h-4 w-4" />
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+              )}
+            </ProtectedComponent>
           );
         })}
       </SidebarMenu>

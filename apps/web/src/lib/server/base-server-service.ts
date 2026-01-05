@@ -2,6 +2,7 @@ import { config } from '@/lib/config';
 import { SessionData, sessionOptions } from '@/lib/session';
 import { joinUrlPaths } from '@/lib/utils/joinUrlPaths';
 import { ApiResponse } from '@/types';
+import console from 'console';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 

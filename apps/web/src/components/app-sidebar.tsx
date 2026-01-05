@@ -12,6 +12,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar';
+import { PATHS } from '@/constants/paths';
+import { PERMISSIONS } from '@/lib/auth';
 
 const navigationData = [
   {
@@ -23,16 +25,19 @@ const navigationData = [
     title: 'Branches',
     href: PATHS.DASHBOARD.BRANCHES,
     icon: '🏢',
+    permission: PERMISSIONS.VIEW_BRANCHES,
   },
   {
     title: 'Staff Management',
     href: PATHS.DASHBOARD.STAFF,
     icon: '👥',
+    permission: PERMISSIONS.VIEW_STAFF,
   },
   {
     title: 'Schedules',
     href: PATHS.DASHBOARD.SCHEDULES.BASE,
     icon: '📅',
+    permission: PERMISSIONS.VIEW_SCHEDULES,
     items: [
       {
         title: 'Cleaning Schedule',
@@ -60,7 +65,6 @@ const navigationData = [
   },
 ];
 
-import { PATHS } from '@/constants/paths';
 import { User } from '@/lib/services/auth-service';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {

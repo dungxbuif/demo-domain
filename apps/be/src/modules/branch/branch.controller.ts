@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@src/common/constants/user.constants';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
 import { AppPaginationDto } from '@src/common/dtos/paginate.dto';
@@ -18,6 +19,7 @@ import { BranchEntity } from '@src/modules/branch/branch.entity';
 import { BranchService } from './branch.service';
 
 @Controller('branches')
+@ApiTags('Branches')
 export class BranchController {
   constructor(private readonly branchService: BranchService) {}
 

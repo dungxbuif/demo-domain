@@ -1,11 +1,24 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@src/common/constants/user.constants';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
 import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
+import CreateStaffDto from '@src/modules/staff/dtos/create-staff.dto';
+import UpdateStaffUserIdDto from '@src/modules/staff/dtos/update-staff-userid.dto';
 import { StaffService } from '@src/modules/staff/staff.service';
 
 @Controller('staffs')
+@ApiTags('Staffs')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
@@ -14,5 +27,22 @@ export class StaffController {
   @Roles([UserRole.HR, UserRole.GDVP])
   getStaffs(@Query() queries: AppPaginateOptionsDto): any {
     return this.staffService.getStaffs(queries);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.HR, UserRole.GDVP])
+  async createStaff(@Body() body: CreateStaffDto) {
+    return this.staffService.createStaff(body);
+  }
+
+  @Put(':id/mezon-id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.HR, UserRole.GDVP])
+  async updateStaffUserId(
+    @Param('id') id: number,
+    @Body() body: UpdateStaffUserIdDto,
+  ) {
+    return this.staffService.updateStaffUserId(id, body.userId || null);
   }
 }

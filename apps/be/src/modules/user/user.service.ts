@@ -77,6 +77,12 @@ export class UserService {
     return this.userRepository.findOne({ where: { mezonId } });
   }
 
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({
+      where: { email },
+    });
+  }
+
   async findByMezonId(mezonId: string): Promise<UserEntity | null> {
     return this.userRepository.findOne({
       where: { mezonId },

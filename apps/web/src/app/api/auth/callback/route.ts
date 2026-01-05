@@ -83,7 +83,6 @@ export async function GET(request: NextRequest) {
       session.refreshToken = refreshToken;
       session.expiresAt = Date.now() + (expiresIn || 3600) * 1000;
 
-      // Store user info - map from backend format to session format
       session.user = {
         id: user.id,
         username: user.name || user.username || user.email,
@@ -93,9 +92,6 @@ export async function GET(request: NextRequest) {
       };
 
       await session.save();
-      console.log('[Callback] Session saved successfully');
-
-      // Redirect to dashboard on successful authentication
       return Response.redirect(new URL('/dashboard', request.url));
     } else {
       console.error('[Callback] Missing access token or user in response:', {
