@@ -8,15 +8,28 @@ import { Reflector } from '@nestjs/core';
 import { HttpExceptionFilter } from '@src/common/filters/http-exception.filter';
 import { TransformInterceptor } from '@src/common/interceptors/transform.interceptor';
 import loggingMiddleware from '@src/common/middlewares/logger.middleware';
+import { AppConfigService } from '@src/common/shared/services/app-config.service';
+import { SharedModule } from '@src/common/shared/shared.module';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import * as httpContext from 'express-http-context';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { swaggerConfig } from './swagger.config';
 
 export default async function bootstrapConfig(app: INestApplication) {
-  // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  //   app.enable('trust proxy');
+  const configService = app.select(SharedModule).get(AppConfigService);
+
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: configService.frontendUrl,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
+  });
+
   app.use(httpContext.middleware);
   app.use(loggingMiddleware);
   app.use(helmet());

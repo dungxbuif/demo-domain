@@ -4,17 +4,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AppEventEnum } from '@src/common/constants';
 import { isEmpty } from 'lodash';
 import { In, Repository } from 'typeorm';
-import { User } from './user.entity';
+import UserEntity from './user.entity';
+
+type UpsertUserMeta = {
+  name?: string;
+  email?: string;
+  avatar?: string;
+};
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
-  private async create(user: Partial<User>) {
+  private async create(user: Partial<UserEntity>) {
     const newUser = this.userRepository.create(user);
     return this.userRepository.save(newUser);
   }
@@ -48,17 +54,18 @@ export class UserService {
 
   async getManyByIdsAndUsernames({
     ids,
-    mezonUserIds,
+    mezonIds,
   }: {
     ids?: string[];
-    mezonUserIds?: string[];
+    mezonIds?: string[];
   }) {
-    const orConditions: Array<import('typeorm').FindOptionsWhere<User>> = [];
+    const orConditions: Array<import('typeorm').FindOptionsWhere<UserEntity>> =
+      [];
     if (ids?.length) {
-      orConditions.push({ id: In(ids.map((id) => parseInt(id))) });
+      orConditions.push({ mezonId: In(ids.map((id) => parseInt(id))) });
     }
-    if (mezonUserIds?.length) {
-      orConditions.push({ mezon_user_id: In(mezonUserIds) });
+    if (mezonIds?.length) {
+      orConditions.push({ mezonId: In(mezonIds) });
     }
     if (orConditions.length === 0) {
       return [];
@@ -66,21 +73,42 @@ export class UserService {
     return this.userRepository.find({ where: orConditions });
   }
 
+  async findById(mezonId: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({ where: { mezonId } });
+  }
+
+  async findByMezonId(mezonId: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({
+      where: { mezonId },
+    });
+  }
+
+  async upsertByMezonId(
+    mezonId: string,
+    meta?: UpsertUserMeta,
+  ): Promise<UserEntity> {
+    const existingUser = await this.findByMezonId(mezonId);
+
+    if (existingUser) {
+      return this.userRepository.save(existingUser);
+    }
+
+    return this.create({ ...meta, mezonId });
+  }
+
   @OnEvent(AppEventEnum.CREATE_USER)
-  async handleUserCreatedEvent(payload: { id: string } & Partial<User>) {
+  async handleUserCreatedEvent(payload: { id: string } & Partial<UserEntity>) {
     const existingUser = await this.userRepository.findOneBy({
-      id: parseInt(payload.id),
+      mezonId: payload.id,
     });
     if (existingUser) {
-      // Update existing user with new data
       Object.assign(existingUser, payload);
-      existingUser.id = parseInt(payload.id);
+      existingUser.mezonId = payload.id;
       await this.userRepository.save(existingUser);
       return;
     }
-    // Create new user
-    const newUserData = { ...payload };
-    delete newUserData.id; // Let the database auto-generate the ID
+    const newUserData: Partial<UserEntity> = { ...payload };
+    delete newUserData.mezonId;
     await this.create(newUserData);
   }
 }

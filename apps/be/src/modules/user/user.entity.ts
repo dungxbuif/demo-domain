@@ -1,17 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Branch } from '../branch/branch.entity';
-import { CleaningSchedule } from '../cleaning-schedule/cleaning-schedule.entity';
-import { OpenTalkSchedule } from '../open-talk-schedule/open-talk-schedule.entity';
-import { Penalty } from '../penalty/penalty.entity';
+import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {
   STAFF = 0,
@@ -25,18 +12,18 @@ export enum UserStatus {
 }
 
 @Entity('users')
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+export default class UserEntity {
+  @Column({ primary: true, unique: true })
+  mezonId: string;
 
-  @Column({ unique: true })
-  mezon_user_id: string;
+  @Column({ nullable: true })
+  name?: string;
 
-  @Column()
-  name: string;
+  @Column({ unique: true, nullable: true })
+  email?: string;
 
-  @Column()
-  email: string;
+  @Column({ nullable: true })
+  avatar?: string;
 
   @Column({
     type: 'enum',
@@ -51,28 +38,6 @@ export class User {
     default: UserStatus.ACTIVE,
   })
   status: UserStatus;
-
-  @ManyToOne(() => Branch, (branch) => branch.users)
-  @JoinColumn({ name: 'branch_id' })
-  branch: Branch;
-
-  @Column()
-  branch_id: number;
-
-  @Column({ type: 'json', nullable: true })
-  remote_schedule: any; // JSON for remote work schedule
-
-  @OneToMany(() => CleaningSchedule, (schedule) => schedule.user1)
-  cleaningSchedules1: CleaningSchedule[];
-
-  @OneToMany(() => CleaningSchedule, (schedule) => schedule.user2)
-  cleaningSchedules2: CleaningSchedule[];
-
-  @OneToMany(() => OpenTalkSchedule, (schedule) => schedule.user)
-  openTalkSchedules: OpenTalkSchedule[];
-
-  @OneToMany(() => Penalty, (penalty) => penalty.user)
-  penalties: Penalty[];
 
   @CreateDateColumn()
   created_at: Date;

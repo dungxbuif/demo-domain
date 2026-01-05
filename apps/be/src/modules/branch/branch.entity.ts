@@ -2,11 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/user.entity';
 
 @Entity('branches')
 export class Branch {
@@ -19,8 +17,8 @@ export class Branch {
   @Column({ nullable: true })
   address: string;
 
-  @OneToMany(() => User, (user) => user.branch)
-  users: User[];
+  // @OneToMany(() => UserEntity, (user) => user.branch)
+  // users: UserEntity[];
 
   @CreateDateColumn()
   created_at: Date;

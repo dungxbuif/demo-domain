@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { Campaign } from '../campaign/campaign.entity';
 import { PenaltyType } from '../penalty-type/penalty-type.entity';
-import { User } from '../user/user.entity';
 
 export enum PenaltyStatus {
   UNPAID = 0,
@@ -20,10 +19,6 @@ export enum PenaltyStatus {
 export class Penalty {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => User, (user) => user.penalties)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 
   @Column()
   user_id: number;

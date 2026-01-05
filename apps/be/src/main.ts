@@ -15,8 +15,8 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
-    { cors: true },
   );
+
   await bootstrapConfig(app);
   const configService = app.select(SharedModule).get(AppConfigService);
   const port = configService.appConfig.port;

@@ -2,12 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/user.entity';
 
 export enum OpenTalkStatus {
   SCHEDULED,
@@ -30,11 +27,11 @@ export class OpenTalkSchedule {
   @Column({ type: 'date' })
   date: Date;
 
-  @ManyToOne(() => User, (user) => user.openTalkSchedules)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  // @ManyToOne(() => UserEntity, (user) => user.openTalkSchedules)
+  // @JoinColumn({ name: 'user_id' })
+  // user: UserEntity;
 
-  @Column()
+  // @Column()
   user_id: number;
 
   @Column({ nullable: true })

@@ -2,12 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../user/user.entity';
 
 export enum ScheduleStatus {
   SCHEDULED = 0,
@@ -23,16 +20,16 @@ export class CleaningSchedule {
   @Column({ type: 'date' })
   date: Date;
 
-  @ManyToOne(() => User, (user) => user.cleaningSchedules1)
-  @JoinColumn({ name: 'user_id_1' })
-  user1: User;
+  // @ManyToOne(() => UserEntity, (user) => user.cleaningSchedules1)
+  // @JoinColumn({ name: 'user_id_1' })
+  // user1: UserEntity;
 
-  @Column()
-  user_id_1: number;
+  // @Column()
+  // user_id_1: number;
 
-  @ManyToOne(() => User, (user) => user.cleaningSchedules2)
-  @JoinColumn({ name: 'user_id_2' })
-  user2: User;
+  // @ManyToOne(() => UserEntity, (user) => user.cleaningSchedules2)
+  // @JoinColumn({ name: 'user_id_2' })
+  // user2: UserEntity;
 
   @Column()
   user_id_2: number;

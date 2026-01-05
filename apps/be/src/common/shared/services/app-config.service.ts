@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { type TypeOrmModuleOptions } from '@nestjs/typeorm';
 import entities from '@src/common/database/entities';
 import { SnakeNamingStrategy } from '@src/common/database/snake-naming.strategy';
+import joinUrlPaths from '@src/common/utils/joinUrlPaths';
 import { isNil } from 'lodash';
 
 @Injectable()
@@ -80,7 +81,7 @@ export class AppConfigService {
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
       namingStrategy: new SnakeNamingStrategy(),
-      synchronize: !Boolean(this.isProduction),
+      synchronize: true,
       entities,
       logging: true,
     };
@@ -93,5 +94,34 @@ export class AppConfigService {
 
   get botToken(): string {
     return this.getString('BOT_TOKEN');
+  }
+
+  get jwtConfig() {
+    return {
+      secret: this.getString('JWT_SECRET'),
+      refreshSecret: this.getString('JWT_REFRESH_SECRET'),
+    };
+  }
+
+  get oauthConfig() {
+    return {
+      baseUri: this.getString('OAUTH_URL'),
+      clientId: this.getString('CLIENT_ID'),
+      clientSecret: this.getString('CLIENT_SECRET'),
+      redirectUri: joinUrlPaths(this.frontendUrl, 'auth/callback'),
+    };
+  }
+
+  get frontendUrl(): string {
+    return this.getString('FRONTEND_URL');
+  }
+
+  get cookieConfig() {
+    return {
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: 'lax' as const,
+      path: '/',
+    };
   }
 }
