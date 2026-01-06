@@ -22,6 +22,8 @@ export const PERMISSIONS = {
   CREATE_BRANCHES: { roles: [UserRole.GDVP] },
   VIEW_SCHEDULES: { roles: ALL_ROLES },
   MANAGE_SCHEDULES: { roles: [UserRole.HR, UserRole.GDVP] },
+  VIEW_HOLIDAYS: { roles: ALL_ROLES },
+  MANAGE_HOLIDAYS: { roles: [UserRole.HR, UserRole.GDVP] },
 } as const;
 
 export function hasPermission(

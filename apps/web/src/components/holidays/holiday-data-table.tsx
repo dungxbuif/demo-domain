@@ -1,0 +1,134 @@
+'use client';
+
+import { EditHolidayModal } from '@/components/holidays/edit-holiday-modal';
+import { Badge } from '@/components/ui/badge';
+import { BaseDataTable } from '@/components/ui/base-data-table';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { usePagination } from '@/shared/hooks/use-pagination';
+import { PERMISSIONS, ProtectedComponent } from '@/shared/lib/auth';
+import { Holiday } from '@/shared/types/holiday';
+import { PaginationState } from '@/shared/types/pagination';
+import { ColumnDef } from '@tanstack/react-table';
+import { format } from 'date-fns';
+import { Calendar, MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
+
+interface HolidayDataTableProps {
+  initialData: Holiday[];
+  initialPagination: PaginationState;
+  onHolidayUpdated?: () => void;
+}
+
+export function HolidayDataTable({
+  initialData,
+  initialPagination,
+}: HolidayDataTableProps) {
+  const [selectedHoliday, setSelectedHoliday] = useState<Holiday | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const pagination = usePagination({
+    defaultPage: 1,
+    defaultPageSize: 10,
+    defaultOrder: 'DESC',
+  });
+
+  const isPastDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
+  const handleEdit = (holiday: Holiday) => {
+    setSelectedHoliday(holiday);
+    setEditModalOpen(true);
+  };
+
+  const handleHolidayUpdated = () => {
+    window.location.reload();
+  };
+
+  const columns: ColumnDef<Holiday>[] = [
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      cell: ({ row }) => {
+        const date = new Date(row.original.date);
+        const isPast = isPastDate(row.original.date);
+        return (
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className={isPast ? 'text-muted-foreground' : ''}>
+              {format(date, 'MMM dd, yyyy')}
+            </span>
+            {isPast && (
+              <Badge variant="secondary" className="ml-2">
+                Past
+              </Badge>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'name',
+      header: 'Holiday Name',
+      cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const holiday = row.original;
+        const isPast = isPastDate(holiday.date);
+
+        return (
+          <ProtectedComponent permission={PERMISSIONS.MANAGE_HOLIDAYS}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => handleEdit(holiday)}
+                  disabled={isPast}
+                >
+                  {isPast ? 'Cannot Edit (Past Date)' : 'Edit'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ProtectedComponent>
+        );
+      },
+    },
+  ];
+
+  return (
+    <>
+      <BaseDataTable<Holiday>
+        columns={columns}
+        initialData={initialData}
+        initialPagination={initialPagination}
+        pagination={pagination}
+        searchPlaceholder="Search holidays..."
+        showSearch={false}
+      />
+      <EditHolidayModal
+        holiday={selectedHoliday}
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        onSuccess={handleHolidayUpdated}
+      />
+    </>
+  );
+}

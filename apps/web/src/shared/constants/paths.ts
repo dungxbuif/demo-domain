@@ -20,13 +20,11 @@ export const PATHS = {
     CALENDAR: '/dashboard/calendar',
     SCHEDULES: {
       BASE: '/dashboard/schedules',
-      EVENTS: '/dashboard/schedules/events',
-      SWAP_REQUESTS: '/dashboard/schedules/swap-requests',
       CLEANING: '/dashboard/schedules/cleaning',
       OPEN_TALK: '/dashboard/schedules/open-talk',
       HOLIDAY: '/dashboard/schedules/holiday',
     },
-    REPORTS: '/dashboard/reports',
+    HOLIDAYS: '/dashboard/holidays',
     SETTINGS: '/dashboard/settings',
   },
 
@@ -105,16 +103,6 @@ export const NAVIGATION = {
           href: PATHS.DASHBOARD.SCHEDULES.HOLIDAY,
         },
       ],
-    },
-    {
-      title: 'Reports',
-      href: PATHS.DASHBOARD.REPORTS,
-      icon: 'chart',
-    },
-    {
-      title: 'Settings',
-      href: PATHS.DASHBOARD.SETTINGS,
-      icon: 'settings',
     },
   ],
 } as const;

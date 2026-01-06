@@ -21,9 +21,6 @@ interface BaseDataTableProps<TData> {
   maxHeight?: string;
 }
 
-/**
- * Base reusable data table component with built-in pagination and search
- */
 export function BaseDataTable<TData>({
   columns,
   initialData,
@@ -33,23 +30,19 @@ export function BaseDataTable<TData>({
   searchPlaceholder = 'Search...',
   showSearch = true,
   showColumnFilter = false,
-  onRowAction,
   maxHeight = '500px',
 }: BaseDataTableProps<TData>) {
   const [data, setData] = useState<TData[]>(initialData);
 
-  // Update data when initialData changes (new page data arrives)
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
 
-  // Handle search input changes with debouncing
   useEffect(() => {
     if (!showSearch) return;
 
     const timeoutId = setTimeout(() => {
       const searchValue = pagination.currentQuery;
-      // The search is handled by the pagination hook
     }, 300);
 
     return () => clearTimeout(timeoutId);

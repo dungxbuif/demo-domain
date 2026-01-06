@@ -45,31 +45,12 @@ const navigationData = [
         icon: '📅',
       },
       {
-        title: 'Schedule Types',
-        href: PATHS.DASHBOARD.SCHEDULES.BASE,
-        icon: '⚙️',
-      },
-      {
-        title: 'Events',
-        href: PATHS.DASHBOARD.SCHEDULES.EVENTS,
-        icon: '📅',
-      },
-      {
-        title: 'Swap Requests',
-        href: PATHS.DASHBOARD.SCHEDULES.SWAP_REQUESTS,
-        icon: '🔄',
+        title: 'Holidays',
+        href: PATHS.DASHBOARD.HOLIDAYS,
+        icon: '🎉',
+        permission: PERMISSIONS.VIEW_HOLIDAYS,
       },
     ],
-  },
-  {
-    title: 'Reports',
-    href: PATHS.DASHBOARD.REPORTS,
-    icon: '📄',
-  },
-  {
-    title: 'Settings',
-    href: PATHS.DASHBOARD.SETTINGS,
-    icon: '⚙️',
   },
 ];
 
