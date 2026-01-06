@@ -26,8 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { UserRole } from '@/shared/lib/auth/permissions';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { UserRole } from '@qnoffice/shared';
 import { Loader2, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';

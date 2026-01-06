@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '@src/common/constants/user.constants';
+import { UserRole } from '@qnoffice/shared';
 
 export const ROLES_KEY = 'roles';
 export const Roles = (roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);

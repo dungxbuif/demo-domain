@@ -1,8 +1,7 @@
-export enum UserRole {
-  GDVP = 0,
-  HR = 1,
-  STAFF = 2,
-}
+import { UserRole } from '@qnoffice/shared';
+
+// Re-export UserRole for convenience
+export { UserRole } from '@qnoffice/shared';
 
 const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
   [UserRole.STAFF]: [UserRole.STAFF],

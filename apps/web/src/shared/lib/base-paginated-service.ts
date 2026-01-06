@@ -5,6 +5,10 @@ import {
   parseSearchParams,
 } from '@/shared/types/pagination';
 
+// Re-export for convenience
+export { parseSearchParams } from '@/shared/types/pagination';
+export type { SearchParams } from '@/shared/types/pagination';
+
 /**
  * Base service class for handling paginated API requests
  */

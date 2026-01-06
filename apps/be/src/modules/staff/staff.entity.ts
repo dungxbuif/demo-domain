@@ -1,4 +1,4 @@
-import { UserRole } from '@src/common/constants/user.constants';
+import { UserRole } from '@qnoffice/shared';
 import { AbstractEntity } from '@src/common/database/abstract.entity';
 import { BranchEntity } from '@src/modules/branch/branch.entity';
 import UserEntity from '@src/modules/user/user.entity';

@@ -28,7 +28,8 @@
       "@/providers/*": ["./src/shared/providers/*"],
       "@/hooks/*": ["./src/shared/hooks/*"],
       "@/types/*": ["./src/shared/types/*"],
-      "@/utils/*": ["./src/utils/*"]
+      "@/utils/*": ["./src/utils/*"],
+      "@qnoffice/shared": ["../../libs/src/index.ts"]
     }
   },
   "include": [

@@ -1,8 +1,8 @@
 'use client';
 
 import { PATHS } from '@/shared/constants';
-import { UserRole } from '@/shared/lib/auth/permissions';
 import { authService, User } from '@/shared/lib/services/auth-service';
+import { UserRole } from '@qnoffice/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';

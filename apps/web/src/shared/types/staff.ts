@@ -1,4 +1,4 @@
-import { UserRole } from '@/shared/lib/auth';
+import { UserRole } from '@qnoffice/shared';
 
 export enum StaffStatus {
   ACTIVE = 0,

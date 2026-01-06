@@ -55,8 +55,8 @@ export class HolidayServerService extends BaseServerService {
     return this.put<Holiday>(`${this.baseUrl}/${id}`, data);
   }
 
-  async delete(id: number): Promise<ApiResponse<void>> {
-    return this.delete<void>(`${this.baseUrl}/${id}`);
+  async deleteHoliday(id: number): Promise<ApiResponse<void>> {
+    return super.delete<void>(`${this.baseUrl}/${id}`);
   }
 }
 

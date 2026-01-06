@@ -1,5 +1,5 @@
 import { PATHS } from '@/shared/constants';
-import { UserRole } from '@/shared/lib/auth/permissions';
+import { UserRole } from '@qnoffice/shared';
 import { BaseService } from './base-service';
 
 export interface User {

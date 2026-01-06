@@ -1,4 +1,4 @@
-import { UserRole } from '@src/common/constants/user.constants';
+import { UserRole } from '@qnoffice/shared';
 import { AbstractAuditEntity } from '@src/common/database/abstract.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import { AfterInsert, Column, Entity, EntityManager, IsNull } from 'typeorm';

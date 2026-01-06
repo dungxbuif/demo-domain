@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@qnoffice/shared-types": ["libs/src/index.ts"],
-      "libs": ["libs/src/index.ts"]
+      "libs": ["libs/src/index.ts"],
+      "@qnoffice/shared": ["libs/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
