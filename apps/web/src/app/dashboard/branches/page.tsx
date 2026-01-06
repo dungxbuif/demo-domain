@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   branchServerService,
   GetBranchesParams,
-} from '@/lib/server/branch-server-service';
+} from '@/shared/lib/server/branch-server-service';
 
 interface BranchesPageProps {
   searchParams?: {

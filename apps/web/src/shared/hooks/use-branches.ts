@@ -1,7 +1,7 @@
-import { CreateBranchDto, UpdateBranchDto } from '@/types/branch';
+import { CreateBranchDto, UpdateBranchDto } from '@/shared/types/branch';
 
-import { branchService } from '@/lib/services/branch-service';
-import { PaginationOptions } from '@/types';
+import { branchService } from '@/shared/lib/services/branch-service';
+import { PaginationOptions } from '@/shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const BRANCH_KEYS = {

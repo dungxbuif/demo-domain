@@ -1,5 +1,9 @@
-import { config } from '@/lib/config';
-import { SessionData, isSessionExpired, sessionOptions } from '@/lib/session';
+import { config } from '@/shared/lib/config';
+import {
+  SessionData,
+  isSessionExpired,
+  sessionOptions,
+} from '@/shared/lib/session';
 import { getIronSession } from 'iron-session';
 import { NextRequest, NextResponse } from 'next/server';
 

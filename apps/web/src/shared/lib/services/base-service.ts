@@ -26,7 +26,7 @@ export class ApiError extends Error {
   }
 }
 
-import { PATHS } from '@/constants/paths';
+import { PATHS } from '@/shared/constants/paths';
 
 export abstract class BaseService {
   protected baseURL = PATHS.API.BASE;

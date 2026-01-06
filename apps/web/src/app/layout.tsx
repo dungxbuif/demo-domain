@@ -1,6 +1,10 @@
-import { AuthProvider } from '@/lib/auth/auth-context';
-import { SessionData, isSessionExpired, sessionOptions } from '@/lib/session';
-import ReactQueryProvider from '@/providers/query-provider';
+import { AuthProvider } from '@/shared/contexts/auth-context';
+import {
+  SessionData,
+  isSessionExpired,
+  sessionOptions,
+} from '@/shared/lib/session';
+import ReactQueryProvider from '@/shared/providers/query-provider';
 import { getIronSession } from 'iron-session';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';

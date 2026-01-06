@@ -28,17 +28,9 @@ export interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, initialState }: AuthProviderProps) {
-  // For now, provide a mock user for testing
-  const mockUser: User = {
-    id: '1',
-    name: 'Test User',
-    email: 'test@ncc.asia',
-    role: UserRole.GDVP,
-  };
-
   const value: AuthContextType = {
-    user: mockUser, // Always provide mock user for testing
-    isAuthenticated: true, // Always authenticated for testing
+    user: initialState?.user ?? null,
+    isAuthenticated: initialState?.isAuthenticated ?? false,
     isLoading: false,
   };
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { PATHS } from '@/constants/paths';
-import { cn } from '@/lib/utils';
+import { PATHS } from '@/shared/constants/paths';
+import { cn } from '@/shared/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

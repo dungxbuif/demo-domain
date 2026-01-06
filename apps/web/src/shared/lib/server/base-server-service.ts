@@ -1,7 +1,7 @@
-import { config } from '@/lib/config';
-import { SessionData, sessionOptions } from '@/lib/session';
-import { joinUrlPaths } from '@/lib/utils/joinUrlPaths';
-import { ApiResponse } from '@/types';
+import { config } from '@/shared/lib/config';
+import { SessionData, sessionOptions } from '@/shared/lib/session';
+import { joinUrlPaths } from '@/shared/lib/utils/joinUrlPaths';
+import { ApiResponse } from '@/shared/types';
 import console from 'console';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
@@ -130,7 +130,10 @@ export abstract class BaseServerService {
   /**
    * Make PATCH request through BFF proxy
    */
-  protected async patch<T>(endpoint: string, data?: any): Promise<T> {
+  protected async patch<T>(
+    endpoint: string,
+    data?: any,
+  ): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,

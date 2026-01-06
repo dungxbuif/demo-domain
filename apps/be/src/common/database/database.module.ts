@@ -11,7 +11,7 @@ import { DataSource } from 'typeorm';
       useFactory: (configService: AppConfigService) =>
         configService.postgresConfig,
       inject: [AppConfigService],
-      dataSourceFactory: (options) => {
+      dataSourceFactory: (options: any) => {
         if (!options) {
           throw new Error('Invalid options passed');
         }

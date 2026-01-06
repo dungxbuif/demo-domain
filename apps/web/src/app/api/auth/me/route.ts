@@ -1,4 +1,4 @@
-import { SessionData, sessionOptions } from '@/lib/session';
+import { SessionData, sessionOptions } from '@/shared/lib/session';
 import { getIronSession } from 'iron-session';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -19,7 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { Permission, ProtectedComponent } from '@/lib/auth';
+import { Permission, ProtectedComponent } from '@/shared/lib/auth';
 
 export function NavMain({
   items,

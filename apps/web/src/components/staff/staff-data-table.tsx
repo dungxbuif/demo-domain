@@ -11,8 +11,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getRoleLabel, PERMISSIONS, ProtectedComponent } from '@/lib/auth';
-import { Staff, StaffStatus } from '@/types/staff';
+import {
+  getRoleLabel,
+  PERMISSIONS,
+  ProtectedComponent,
+} from '@/shared/lib/auth';
+import { Staff, StaffStatus } from '@/shared/types/staff';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';

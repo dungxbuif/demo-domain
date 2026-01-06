@@ -12,8 +12,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { PATHS } from '@/constants/paths';
-import { PERMISSIONS } from '@/lib/auth';
+import { PATHS } from '@/shared/constants/paths';
+import { PERMISSIONS } from '@/shared/lib/auth';
 
 const navigationData = [
   {
@@ -65,7 +65,7 @@ const navigationData = [
   },
 ];
 
-import { User } from '@/lib/services/auth-service';
+import { User } from '@/shared/lib/services/auth-service';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user?: User | null;

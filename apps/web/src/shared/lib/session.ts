@@ -1,4 +1,5 @@
 import { SessionOptions } from 'iron-session';
+import { UserRole } from './auth/permissions';
 import { config } from './config';
 
 export interface SessionData {
@@ -11,6 +12,7 @@ export interface SessionData {
     firstName?: string;
     lastName?: string;
     email?: string;
+    role?: UserRole;
   };
 }
 

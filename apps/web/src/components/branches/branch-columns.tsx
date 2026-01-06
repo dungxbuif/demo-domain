@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Branch } from '@/types';
+import { Branch } from '@/shared/types';
 
 interface BranchActionsProps {
   branch: Branch;

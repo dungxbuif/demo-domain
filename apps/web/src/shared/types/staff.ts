@@ -1,4 +1,4 @@
-import { UserRole } from '@/lib/auth';
+import { UserRole } from '@/shared/lib/auth';
 
 export enum StaffStatus {
   ACTIVE = 0,
@@ -44,7 +44,7 @@ export interface StaffCreateData {
   branchId: number;
 }
 
-export interface StaffUpdateData extends Partial<StaffCreateData> {}
+export type StaffUpdateData = Partial<StaffCreateData>;
 
 export interface GetStaffParams {
   page?: number;

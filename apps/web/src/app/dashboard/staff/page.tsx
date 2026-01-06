@@ -1,9 +1,9 @@
 import { StaffDataTable } from '@/components/staff/staff-data-table';
 import { StaffPageActions } from '@/components/staff/staff-page-actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { branchServerService } from '@/lib/server/branch-server-service';
-import { staffServerService } from '@/lib/server/staff-server-service';
-import { GetStaffParams } from '@/types/staff';
+import { branchServerService } from '@/shared/lib/server/branch-server-service';
+import { staffServerService } from '@/shared/lib/server/staff-server-service';
+import { GetStaffParams } from '@/shared/types/staff';
 
 interface StaffPageProps {
   searchParams?: {

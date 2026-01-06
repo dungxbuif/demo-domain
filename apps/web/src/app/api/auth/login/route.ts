@@ -1,4 +1,4 @@
-import { config } from '@/lib/config';
+import { config } from '@/shared/lib/config';
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {

@@ -26,7 +26,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-import { User } from '@/lib/services/auth-service';
+import { User } from '@/shared/lib/services/auth-service';
 
 export function NavUser({ user }: { user?: User | null }) {
   const { isMobile } = useSidebar();

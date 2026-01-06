@@ -1,7 +1,8 @@
 'use client';
 
-import { PATHS } from '@/constants';
-import { authService, User } from '@/lib/services/auth-service';
+import { PATHS } from '@/shared/constants';
+import { UserRole } from '@/shared/lib/auth/permissions';
+import { authService, User } from '@/shared/lib/services/auth-service';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -84,7 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const value = {
     user,
-    isLoading: false, // No loading since we get data server-side
+    isLoading: false,
     isAuthenticated,
     login,
     logout,
@@ -101,3 +102,8 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export function useUserRole(): UserRole | null {
+  const { user } = useAuth();
+  return user?.role ?? null;
+}

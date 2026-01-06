@@ -1,9 +1,9 @@
-import { PathUtils } from '@/constants/paths';
+import { PathUtils } from '@/shared/constants/paths';
 import {
   SessionData,
   isSessionExpired,
   middlewareSessionOptions,
-} from '@/lib/session';
+} from '@/shared/lib/session';
 import { getIronSession } from 'iron-session';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -21,10 +21,13 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/components/*": ["./src/components/*"],
-      "@/contexts/*": ["./src/contexts/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/providers/*": ["./src/providers/*"],
-      "@/hooks/*": ["./src/hooks/*"],
+      "@/constants/*": ["./src/shared/constants/*"],
+      "@/constants": ["./src/shared/constants"],
+      "@/contexts/*": ["./src/shared/contexts/*"],
+      "@/lib/*": ["./src/shared/lib/*"],
+      "@/providers/*": ["./src/shared/providers/*"],
+      "@/hooks/*": ["./src/shared/hooks/*"],
+      "@/types/*": ["./src/shared/types/*"],
       "@/utils/*": ["./src/utils/*"]
     }
   },

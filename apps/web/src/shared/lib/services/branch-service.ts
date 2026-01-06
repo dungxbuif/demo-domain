@@ -1,6 +1,10 @@
-import { PATHS } from '@/constants/paths';
-import { PaginationOptions } from '../../types/api';
-import { Branch, CreateBranchDto, UpdateBranchDto } from '../../types/branch';
+import { PATHS } from '@/shared/constants/paths';
+import { PaginationOptions } from '@/shared/types/api';
+import {
+  Branch,
+  CreateBranchDto,
+  UpdateBranchDto,
+} from '@/shared/types/branch';
 import { BaseService, PaginatedResponse } from './base-service';
 
 export class BranchService extends BaseService {

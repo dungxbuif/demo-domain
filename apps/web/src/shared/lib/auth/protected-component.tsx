@@ -1,7 +1,7 @@
 'use client';
 
+import { useUserRole } from '@/shared/contexts/auth-context';
 import { ReactNode } from 'react';
-import { useUserRole } from './auth-context';
 import { hasPermission, Permission, UserRole } from './permissions';
 
 interface ProtectedComponentProps {
@@ -12,9 +12,6 @@ interface ProtectedComponentProps {
   requireAll?: boolean;
 }
 
-/**
- * Component that conditionally renders children based on user permissions
- */
 export function ProtectedComponent({
   children,
   permission,
@@ -24,12 +21,10 @@ export function ProtectedComponent({
 }: ProtectedComponentProps) {
   const userRole = useUserRole();
 
-  // Create permission object if roles array is provided
   const permissionToCheck =
     permission || (roles ? { roles, requireAll } : null);
 
   if (!permissionToCheck) {
-    // No permission specified, render children
     return <>{children}</>;
   }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { CreateStaffModal } from '@/components/staff/create-staff-modal';
-import { PERMISSIONS, ProtectedComponent } from '@/lib/auth';
+import { PERMISSIONS, ProtectedComponent } from '@/shared/lib/auth';
 import { useRouter } from 'next/navigation';
 
 interface StaffPageActionsProps {

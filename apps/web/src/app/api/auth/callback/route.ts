@@ -1,5 +1,5 @@
-import { config } from '@/lib/config';
-import { SessionData, sessionOptions } from '@/lib/session';
+import { config } from '@/shared/lib/config';
+import { SessionData, sessionOptions } from '@/shared/lib/session';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
@@ -89,6 +89,7 @@ export async function GET(request: NextRequest) {
         firstName: user.name?.split(' ')[0],
         lastName: user.name?.split(' ').slice(1).join(' '),
         email: user.email,
+        role: user.role,
       };
 
       await session.save();

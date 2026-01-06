@@ -1,5 +1,9 @@
-import { PATHS } from '@/constants';
-import { SessionData, clearSession, sessionOptions } from '@/lib/session';
+import { PATHS } from '@/shared/constants';
+import {
+  SessionData,
+  clearSession,
+  sessionOptions,
+} from '@/shared/lib/session';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';

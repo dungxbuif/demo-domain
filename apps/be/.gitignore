@@ -88,3 +88,4 @@ db-data
 
 # Mezon cache
 /mezon-cache
+package-lock.json

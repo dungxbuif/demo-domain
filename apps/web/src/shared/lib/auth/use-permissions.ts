@@ -1,4 +1,4 @@
-import { useUserRole } from './auth-context';
+import { useUserRole } from '@/shared/contexts/auth-context';
 import {
   hasAllRoles,
   hasAnyRole,

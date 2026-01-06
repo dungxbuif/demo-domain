@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useAuth } from '@/lib/auth/auth-context';
+import { useAuth } from '@/shared/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -28,10 +28,6 @@ export default function LoginPage() {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     );
-  }
-
-  if (isAuthenticated) {
-    return null;
   }
 
   return (

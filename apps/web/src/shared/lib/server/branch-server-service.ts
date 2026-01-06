@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/shared/types';
 import { BaseServerService } from './base-server-service';
 
 export interface AppPagination<T> {
@@ -66,19 +67,22 @@ export class BranchServerService extends BaseServerService {
     }
   }
 
-  async getById(id: number): Promise<Branch> {
+  async getById(id: number): Promise<ApiResponse<Branch>> {
     return this.get<Branch>(`${this.baseUrl}/${id}`);
   }
 
-  async create(data: BranchCreateData): Promise<Branch> {
+  async create(data: BranchCreateData): Promise<ApiResponse<Branch>> {
     return this.post<Branch>(this.baseUrl, data);
   }
 
-  async update(id: number, data: BranchUpdateData): Promise<Branch> {
+  async update(
+    id: number,
+    data: BranchUpdateData,
+  ): Promise<ApiResponse<Branch>> {
     return this.put<Branch>(`${this.baseUrl}/${id}`, data);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<ApiResponse<void>> {
     return this.delete(`${this.baseUrl}/${id}`);
   }
 }

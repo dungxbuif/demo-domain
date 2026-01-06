@@ -1,9 +1,10 @@
+import { ApiResponse } from '@/shared/types';
 import {
   GetStaffParams,
   Staff,
   StaffCreateData,
   StaffUpdateData,
-} from '@/types/staff';
+} from '@/shared/types/staff';
 import { BaseServerService } from './base-server-service';
 import { AppPagination } from './branch-server-service';
 
@@ -36,19 +37,19 @@ export class StaffServerService extends BaseServerService {
     }
   }
 
-  async getById(id: number): Promise<Staff> {
+  async getById(id: number): Promise<ApiResponse<Staff>> {
     return this.get<Staff>(`${this.baseUrl}/${id}`);
   }
 
-  async create(data: StaffCreateData): Promise<Staff> {
+  async create(data: StaffCreateData): Promise<ApiResponse<Staff>> {
     return this.post<Staff>(this.baseUrl, data);
   }
 
-  async update(id: number, data: StaffUpdateData): Promise<Staff> {
+  async update(id: number, data: StaffUpdateData): Promise<ApiResponse<Staff>> {
     return this.put<Staff>(`${this.baseUrl}/${id}`, data);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<ApiResponse<void>> {
     return this.delete(`${this.baseUrl}/${id}`);
   }
 }

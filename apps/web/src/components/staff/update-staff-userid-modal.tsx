@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Staff } from '@/types/staff';
+import { Staff } from '@/shared/types/staff';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Edit, Loader2 } from 'lucide-react';
 import { useState } from 'react';
