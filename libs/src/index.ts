@@ -1,2 +1,3 @@
-// Export UserRole enum - the only shared type between BE and FE
+// Export all shared types and enums
 export * from './enums';
+export * from './types';

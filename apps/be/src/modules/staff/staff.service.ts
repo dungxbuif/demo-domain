@@ -15,6 +15,13 @@ export class StaffService {
     private readonly userService: UserService,
   ) {}
 
+  async findByUserId(userId: string): Promise<StaffEntity | null> {
+    return this.staffRepository.findOne({
+      where: { userId },
+      relations: ['user', 'branch'],
+    });
+  }
+
   async getStaffs(
     queries: AppPaginateOptionsDto,
   ): Promise<AppPaginationDto<StaffEntity>> {

@@ -83,7 +83,6 @@ export class AppConfigService {
       namingStrategy: new SnakeNamingStrategy(),
       synchronize: true,
       entities,
-      logging: true,
     };
   }
   get appConfig() {

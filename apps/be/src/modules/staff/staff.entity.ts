@@ -1,5 +1,5 @@
-import { UserRole } from '@qnoffice/shared';
 import { AbstractEntity } from '@src/common/database/abstract.entity';
+import { UserRole } from '@src/common/enums/user-role.enum';
 import { BranchEntity } from '@src/modules/branch/branch.entity';
 import UserEntity from '@src/modules/user/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';

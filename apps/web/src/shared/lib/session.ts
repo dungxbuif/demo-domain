@@ -13,6 +13,14 @@ export interface SessionData {
     lastName?: string;
     email?: string;
     role?: UserRole;
+    staff?: {
+      id: number;
+      email: string;
+      status: number;
+      role: UserRole;
+      branchId: number;
+      branch?: any;
+    };
   };
 }
 

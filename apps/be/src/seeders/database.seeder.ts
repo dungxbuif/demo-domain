@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { StaffSeeder } from '@src/seeders/staff.seeder';
 import { BranchSeeder } from './branch.seeder';
+import { OpentalkSeeder } from './opentalk.seeder';
 
 @Injectable()
 export class DatabaseSeeder {
   constructor(
     private readonly branchSeeder: BranchSeeder,
     private readonly staffSeeder: StaffSeeder,
+    private readonly opentalkSeeder: OpentalkSeeder,
   ) {}
 
   async seed(): Promise<void> {
@@ -15,6 +17,7 @@ export class DatabaseSeeder {
     try {
       await this.branchSeeder.seed();
       await this.staffSeeder.seed();
+      await this.opentalkSeeder.seed();
       console.log('Database seeding completed successfully!');
     } catch (error) {
       console.error('Error during database seeding:', error);

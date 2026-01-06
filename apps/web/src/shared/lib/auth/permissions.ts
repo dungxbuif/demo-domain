@@ -23,6 +23,13 @@ export const PERMISSIONS = {
   MANAGE_SCHEDULES: { roles: [UserRole.HR, UserRole.GDVP] },
   VIEW_HOLIDAYS: { roles: ALL_ROLES },
   MANAGE_HOLIDAYS: { roles: [UserRole.HR, UserRole.GDVP] },
+  VIEW_OPENTALK: { roles: ALL_ROLES },
+  MANAGE_OPENTALK: { roles: [UserRole.HR, UserRole.GDVP] },
+  CREATE_OPENTALK_SWAP_REQUEST: { roles: ALL_ROLES },
+  MANAGE_OPENTALK_SWAP_REQUESTS: { roles: [UserRole.HR, UserRole.GDVP] },
+  APPROVE_OPENTALK_SWAP_REQUESTS: { roles: [UserRole.GDVP] },
+  EDIT_OPENTALK_TOPIC: { roles: [UserRole.HR, UserRole.GDVP] },
+  EDIT_OWN_OPENTALK_TOPIC: { roles: ALL_ROLES },
 } as const;
 
 export function hasPermission(
@@ -94,4 +101,30 @@ export function hasMinimumRole(
 
   const role = typeof userRole === 'number' ? (userRole as UserRole) : userRole;
   return role >= minimumRole;
+}
+
+/**
+ * Check if user can edit their own opentalk content
+ */
+export function canEditOwnContent(
+  userRole: UserRole | number | null | undefined,
+  contentOwnerId: number | null | undefined,
+  currentUserId: number | null | undefined,
+): boolean {
+  if (!currentUserId || !contentOwnerId) return false;
+
+  // GDVP and HR can edit any content
+  if (hasPermission(userRole, PERMISSIONS.EDIT_OPENTALK_TOPIC)) {
+    return true;
+  }
+
+  // Staff can edit their own content
+  if (
+    hasPermission(userRole, PERMISSIONS.EDIT_OWN_OPENTALK_TOPIC) &&
+    contentOwnerId === currentUserId
+  ) {
+    return true;
+  }
+
+  return false;
 }

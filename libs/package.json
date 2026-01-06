@@ -2,14 +2,12 @@
   "name": "@qnoffice/shared",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
-  "main": "./build/index.js",
-  "types": "./build/index.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "require": "./build/index.js",
-      "types": "./build/index.d.ts"
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
     }
   },
   "dependencies": {

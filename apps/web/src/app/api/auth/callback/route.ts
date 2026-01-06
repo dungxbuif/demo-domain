@@ -56,9 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     const tokenData = await exchangeResponse.json();
-    console.log({ tokenData });
-
-    // Handle backend response format: { statusCode, data: { user, tokens } }
+    console.log('[Callback] Token exchange data:', tokenData);
     const responseData = tokenData.data || tokenData;
     const accessToken =
       responseData.tokens?.access_token || tokenData.access_token;
@@ -73,6 +71,8 @@ export async function GET(request: NextRequest) {
       session.refreshToken = refreshToken;
       session.expiresAt = Date.now() + (expiresIn || 3600) * 1000;
 
+      const staffData = responseData.staff || tokenData.staff;
+
       session.user = {
         id: user.id,
         username: user.name || user.username || user.email,
@@ -80,8 +80,9 @@ export async function GET(request: NextRequest) {
         lastName: user.name?.split(' ').slice(1).join(' '),
         email: user.email,
         role: user.role,
+        staff: staffData, // Include staff data from exchange response
       };
-
+      console.log({ sessionUser: JSON.stringify(session.user) });
       await session.save();
       return Response.redirect(new URL('/dashboard', request.url));
     } else {

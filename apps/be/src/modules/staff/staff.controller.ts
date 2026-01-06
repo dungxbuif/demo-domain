@@ -1,16 +1,16 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Post,
-    Put,
-    Query,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { UserRole } from '@qnoffice/shared';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
+import { UserRole } from '@src/common/enums/user-role.enum';
 import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import CreateStaffDto from '@src/modules/staff/dtos/create-staff.dto';
@@ -21,6 +21,12 @@ import { StaffService } from '@src/modules/staff/staff.service';
 @ApiTags('Staffs')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
+
+  @Get('by-user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getStaffByUserId(@Param('userId') userId: string) {
+    return this.staffService.findByUserId(userId);
+  }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)

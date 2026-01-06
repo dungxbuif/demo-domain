@@ -25,6 +25,7 @@ export const PATHS = {
       HOLIDAY: '/dashboard/schedules/holiday',
     },
     HOLIDAYS: '/dashboard/holidays',
+    OPENTALK: '/dashboard/opentalk',
     SETTINGS: '/dashboard/settings',
   },
 

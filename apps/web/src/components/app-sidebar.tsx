@@ -50,6 +50,12 @@ const navigationData = [
         icon: '🎉',
         permission: PERMISSIONS.VIEW_HOLIDAYS,
       },
+      {
+        title: 'OpenTalk',
+        href: PATHS.DASHBOARD.OPENTALK,
+        icon: '🎤',
+        permission: PERMISSIONS.VIEW_OPENTALK,
+      },
     ],
   },
 ];

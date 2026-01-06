@@ -2,8 +2,12 @@ import { BranchEntity } from '@src/modules/branch/branch.entity';
 import { Campaign } from '@src/modules/campaign/campaign.entity';
 import { Channel } from '@src/modules/channel/channel.entity';
 import HolidayEntity from '@src/modules/holiday/holiday.entity';
+import SwapRequestEntity from '@src/modules/opentalk/swap-request.entity';
 import { PenaltyType } from '@src/modules/penalty-type/penalty-type.entity';
 import { Penalty } from '@src/modules/penalty/penalty.entity';
+import ScheduleCycleEntity from '@src/modules/schedule/schedule-cycle.entity';
+import ScheduleEventParticipantEntity from '@src/modules/schedule/schedule-event-participant.entity';
+import ScheduleEventEntity from '@src/modules/schedule/schedule-event.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import UserEntity from '@src/modules/user/user.entity';
 
@@ -13,8 +17,12 @@ const entities = [
   StaffEntity,
   Channel,
   HolidayEntity,
+  SwapRequestEntity,
   Penalty,
   PenaltyType,
   Campaign,
+  ScheduleCycleEntity,
+  ScheduleEventEntity,
+  ScheduleEventParticipantEntity,
 ];
 export default entities;

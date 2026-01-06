@@ -16,8 +16,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@src/*": ["src/*"],
-      "@qnoffice/shared": ["../../libs/src/index.ts"]
+      "@src/*": ["src/*"]
     },
     "incremental": true,
     "strictNullChecks": true,

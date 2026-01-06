@@ -1,0 +1,47 @@
+import { AbstractEntity } from '@src/common/database/abstract.entity';
+import ScheduleEventEntity from '@src/modules/schedule/schedule-event.entity';
+import StaffEntity from '@src/modules/staff/staff.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
+export enum SwapRequestStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+@Entity('swap_requests')
+export default class SwapRequestEntity extends AbstractEntity {
+  @Column()
+  fromEventId: number;
+
+  @Column()
+  toEventId: number;
+
+  @Column()
+  requesterId: number;
+
+  @Column()
+  reason: string;
+
+  @Column({
+    type: 'enum',
+    enum: SwapRequestStatus,
+    default: SwapRequestStatus.PENDING,
+  })
+  status: SwapRequestStatus;
+
+  @Column({ nullable: true })
+  reviewNote?: string;
+
+  @ManyToOne(() => ScheduleEventEntity)
+  @JoinColumn({ name: 'from_event_id' })
+  fromEvent: ScheduleEventEntity;
+
+  @ManyToOne(() => ScheduleEventEntity)
+  @JoinColumn({ name: 'to_event_id' })
+  toEvent: ScheduleEventEntity;
+
+  @ManyToOne(() => StaffEntity)
+  @JoinColumn({ name: 'requester_id' })
+  requester: StaffEntity;
+}

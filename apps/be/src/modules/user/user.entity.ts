@@ -1,5 +1,5 @@
-import { UserRole } from '@qnoffice/shared';
 import { AbstractAuditEntity } from '@src/common/database/abstract.entity';
+import { UserRole } from '@src/common/enums/user-role.enum';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import { AfterInsert, Column, Entity, EntityManager, IsNull } from 'typeorm';
 

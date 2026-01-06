@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppConfigService } from '@src/common/shared/services/app-config.service';
 import { AccessTokenPayload } from '@src/common/types';
+import { StaffService } from '@src/modules/staff/staff.service';
 import UserEntity from '@src/modules/user/user.entity';
 import { UserService } from '../user/user.service';
 
@@ -30,6 +31,7 @@ export class AuthService {
     private jwtService: JwtService,
     private appConfigService: AppConfigService,
     private userService: UserService,
+    private staffService: StaffService,
   ) {}
 
   async exchangeCode(code: string, state: string): Promise<ExchangeCodeData> {
@@ -65,8 +67,18 @@ export class AuthService {
       email?: string;
       avatar?: string;
     },
-  ): Promise<{ user: UserEntity; tokens: AuthTokens }> {
+  ): Promise<{ user: UserEntity; staff?: any; tokens: AuthTokens }> {
     const user = await this.userService.upsertByMezonId(mezonId, meta);
+    let staff: any = null;
+    try {
+      staff = await this.staffService.findByUserId(user.mezonId);
+      Logger.log(`Staff data found for user ${user.mezonId}:`, staff);
+    } catch (error) {
+      Logger.warn(
+        `No staff data found for user ${user.mezonId}:`,
+        error.message,
+      );
+    }
 
     const payload: AccessTokenPayload = {
       mezonId: user.mezonId,
@@ -84,6 +96,7 @@ export class AuthService {
 
     return {
       user,
+      staff,
       tokens: {
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -165,10 +178,9 @@ export class AuthService {
   async handleOAuthExchange(
     code: string,
     state: string,
-  ): Promise<{ user: UserEntity; tokens: AuthTokens }> {
+  ): Promise<{ user: UserEntity; tokens: AuthTokens; staff?: any }> {
     const tokenData = await this.exchangeCode(code, state);
     const userInfo = await this.userInfo(tokenData.access_token);
-    Logger.log('User Info:', userInfo);
     return this.signIn(userInfo.user_id, {
       name: userInfo.display_name,
       email: userInfo.email,

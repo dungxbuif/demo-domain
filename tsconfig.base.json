@@ -13,12 +13,7 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@qnoffice/shared-types": ["libs/src/index.ts"],
-      "libs": ["libs/src/index.ts"],
-      "@qnoffice/shared": ["libs/src/index.ts"]
-    }
+    "baseUrl": "."
   },
   "exclude": ["node_modules", "tmp"]
 }
