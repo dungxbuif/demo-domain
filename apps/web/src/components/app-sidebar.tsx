@@ -36,20 +36,28 @@ const navigationData = [
   {
     title: 'Schedules',
     href: PATHS.DASHBOARD.SCHEDULES.BASE,
-    icon: '📅',
+    icon: '📋',
     permission: PERMISSIONS.VIEW_SCHEDULES,
     items: [
       {
-        title: 'Cleaning Schedule',
-        href: PATHS.DASHBOARD.SCHEDULES.CLEANING,
+        title: 'Calendar',
+        href: PATHS.DASHBOARD.CALENDAR,
+        icon: '📅',
       },
       {
-        title: 'Open Talk Schedule',
-        href: PATHS.DASHBOARD.SCHEDULES.OPEN_TALK,
+        title: 'Schedule Types',
+        href: PATHS.DASHBOARD.SCHEDULES.BASE,
+        icon: '⚙️',
       },
       {
-        title: 'Holiday Schedule',
-        href: PATHS.DASHBOARD.SCHEDULES.HOLIDAY,
+        title: 'Events',
+        href: PATHS.DASHBOARD.SCHEDULES.EVENTS,
+        icon: '📅',
+      },
+      {
+        title: 'Swap Requests',
+        href: PATHS.DASHBOARD.SCHEDULES.SWAP_REQUESTS,
+        icon: '🔄',
       },
     ],
   },

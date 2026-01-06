@@ -17,8 +17,11 @@ export const PATHS = {
     BASE: '/dashboard',
     BRANCHES: '/dashboard/branches',
     STAFF: '/dashboard/staff',
+    CALENDAR: '/dashboard/calendar',
     SCHEDULES: {
       BASE: '/dashboard/schedules',
+      EVENTS: '/dashboard/schedules/events',
+      SWAP_REQUESTS: '/dashboard/schedules/swap-requests',
       CLEANING: '/dashboard/schedules/cleaning',
       OPEN_TALK: '/dashboard/schedules/open-talk',
       HOLIDAY: '/dashboard/schedules/holiday',

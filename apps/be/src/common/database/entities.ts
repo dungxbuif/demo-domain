@@ -1,24 +1,28 @@
 import { BranchEntity } from '@src/modules/branch/branch.entity';
+import { Campaign } from '@src/modules/campaign/campaign.entity';
+import { Channel } from '@src/modules/channel/channel.entity';
+import HolidayEntity from '@src/modules/holiday/holiday.entity';
+import { PenaltyType } from '@src/modules/penalty-type/penalty-type.entity';
+import { Penalty } from '@src/modules/penalty/penalty.entity';
+import { ScheduleAssignment } from '@src/modules/schedule/entities/schedule-assignment.entity';
+import { ScheduleDefinition } from '@src/modules/schedule/entities/schedule-definition.entity';
+import { ScheduleEvent } from '@src/modules/schedule/entities/schedule-event.entity';
+import { ScheduleSwapRequest } from '@src/modules/schedule/entities/schedule-swap-request.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import UserEntity from '@src/modules/user/user.entity';
-import { Campaign } from '../../modules/campaign/campaign.entity';
-import { Channel } from '../../modules/channel/channel.entity';
-import { CleaningSchedule } from '../../modules/cleaning-schedule/cleaning-schedule.entity';
-import { Holiday } from '../../modules/holiday/holiday.entity';
-import { OpenTalkSchedule } from '../../modules/open-talk-schedule/open-talk-schedule.entity';
-import { PenaltyType } from '../../modules/penalty-type/penalty-type.entity';
-import { Penalty } from '../../modules/penalty/penalty.entity';
 
 const entities = [
   UserEntity,
   BranchEntity,
   StaffEntity,
   Channel,
-  Holiday,
-  CleaningSchedule,
-  OpenTalkSchedule,
+  HolidayEntity,
   Penalty,
   PenaltyType,
   Campaign,
+  ScheduleDefinition,
+  ScheduleEvent,
+  ScheduleAssignment,
+  ScheduleSwapRequest,
 ];
 export default entities;

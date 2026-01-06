@@ -13,14 +13,14 @@ export interface Permission {
   readonly roles: readonly UserRole[];
   requireAll?: boolean;
 }
-
+const ALL_ROLES = [UserRole.GDVP, UserRole.HR, UserRole.STAFF];
 export const PERMISSIONS = {
-  VIEW_STAFF: { roles: [UserRole.HR, UserRole.GDVP, UserRole.STAFF] },
+  VIEW_STAFF: { roles: ALL_ROLES },
   CREATE_STAFF: { roles: [UserRole.HR, UserRole.GDVP] },
   EDIT_STAFF: { roles: [UserRole.HR, UserRole.GDVP] },
-  VIEW_BRANCHES: { roles: [UserRole.HR, UserRole.GDVP, UserRole.STAFF] },
+  VIEW_BRANCHES: { roles: ALL_ROLES },
   CREATE_BRANCHES: { roles: [UserRole.GDVP] },
-  VIEW_SCHEDULES: { roles: [UserRole.HR, UserRole.GDVP] },
+  VIEW_SCHEDULES: { roles: ALL_ROLES },
   MANAGE_SCHEDULES: { roles: [UserRole.HR, UserRole.GDVP] },
 } as const;
 

@@ -5,7 +5,7 @@ import { SharedModule } from '@src/common/shared/shared.module';
 import { StaffModule } from '@src/modules/staff/staff.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BranchModule } from './modules/branch/branch.module';
-import { CleaningScheduleModule } from './modules/cleaning-schedule/cleaning-schedule.module';
+import { ScheduleModule } from './modules/schedule/schedule.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -15,9 +15,9 @@ import { UserModule } from './modules/user/user.module';
     EventEmitterModule.forRoot(),
     UserModule,
     BranchModule,
-    CleaningScheduleModule,
     AuthModule,
     StaffModule,
+    ScheduleModule,
   ],
 })
 export class AppModule {}

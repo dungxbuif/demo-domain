@@ -58,4 +58,15 @@ export class StaffService {
     staff.userId = userId;
     return this.staffRepository.save(staff);
   }
+
+  async getAllActiveStaff(): Promise<StaffEntity[]> {
+    return this.staffRepository.find({
+      where: { status: 'active' },
+      order: { email: 'ASC' },
+    });
+  }
+
+  async findById(id: number): Promise<StaffEntity | null> {
+    return this.staffRepository.findOneBy({ id });
+  }
 }

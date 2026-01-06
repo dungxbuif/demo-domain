@@ -1,12 +1,12 @@
 import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
+    Body,
+    Controller,
+    Get,
+    Param,
+    Post,
+    Put,
+    Query,
+    UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@src/common/constants/user.constants';
@@ -26,6 +26,18 @@ export class StaffController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   getStaffs(@Query() queries: AppPaginateOptionsDto): any {
     return this.staffService.getStaffs(queries);
+  }
+
+  @Get('active')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getAllActiveStaff() {
+    return this.staffService.getAllActiveStaff();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getStaffById(@Param('id') id: number) {
+    return this.staffService.findById(id);
   }
 
   @Post()
