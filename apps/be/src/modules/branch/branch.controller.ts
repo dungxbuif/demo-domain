@@ -10,10 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { UserRole } from '@src/common/constants/user.constants';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
 import { AppPaginationDto } from '@src/common/dtos/paginate.dto';
-import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
+import { RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { BranchEntity } from '@src/modules/branch/branch.entity';
 import { BranchService } from './branch.service';
@@ -25,7 +24,6 @@ export class BranchController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.HR, UserRole.GDVP])
   findAll(
     @Query() queries: AppPaginateOptionsDto,
   ): Promise<AppPaginationDto<BranchEntity>> {

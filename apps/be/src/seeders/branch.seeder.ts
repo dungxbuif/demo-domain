@@ -11,14 +11,12 @@ export class BranchSeeder {
   ) {}
 
   async seed(): Promise<void> {
-    // Check if branches already exist
     const existingBranches = await this.branchRepository.count();
     if (existingBranches > 0) {
       console.log('Branches already exist, skipping seeding...');
       return;
     }
 
-    // Seed initial branches
     const branches = [
       {
         name: 'Quy Nhơn',

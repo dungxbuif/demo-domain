@@ -1,7 +1,7 @@
 export enum UserRole {
-  STAFF = 0,
+  GDVP = 0,
   HR = 1,
-  GDVP = 2,
+  STAFF = 2,
 }
 
 const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
@@ -9,19 +9,16 @@ const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
   [UserRole.HR]: [UserRole.STAFF, UserRole.HR],
   [UserRole.GDVP]: [UserRole.STAFF, UserRole.HR, UserRole.GDVP],
 };
-
-// Permission definitions
 export interface Permission {
   readonly roles: readonly UserRole[];
   requireAll?: boolean;
 }
 
-// Common permission sets
 export const PERMISSIONS = {
-  VIEW_STAFF: { roles: [UserRole.HR, UserRole.GDVP] },
+  VIEW_STAFF: { roles: [UserRole.HR, UserRole.GDVP, UserRole.STAFF] },
   CREATE_STAFF: { roles: [UserRole.HR, UserRole.GDVP] },
   EDIT_STAFF: { roles: [UserRole.HR, UserRole.GDVP] },
-  VIEW_BRANCHES: { roles: [UserRole.HR, UserRole.GDVP] },
+  VIEW_BRANCHES: { roles: [UserRole.HR, UserRole.GDVP, UserRole.STAFF] },
   CREATE_BRANCHES: { roles: [UserRole.GDVP] },
   VIEW_SCHEDULES: { roles: [UserRole.HR, UserRole.GDVP] },
   MANAGE_SCHEDULES: { roles: [UserRole.HR, UserRole.GDVP] },

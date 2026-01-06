@@ -1,17 +1,16 @@
 import { BranchesDataTable } from '@/components/branches/branches-data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  getServerPaginationParams,
+  SearchParams,
+} from '@/shared/lib/base-paginated-service';
+import {
   branchServerService,
   GetBranchesParams,
 } from '@/shared/lib/server/branch-server-service';
 
 interface BranchesPageProps {
-  searchParams?: {
-    page?: string;
-    take?: string;
-    order?: 'ASC' | 'DESC';
-    q?: string;
-  };
+  searchParams?: SearchParams;
 }
 
 export default async function BranchesPage({
@@ -19,12 +18,10 @@ export default async function BranchesPage({
 }: BranchesPageProps) {
   const resolvedSearchParams = await searchParams;
 
-  const params: GetBranchesParams = {
-    page: resolvedSearchParams?.page ? parseInt(resolvedSearchParams.page) : 1,
-    take: resolvedSearchParams?.take ? parseInt(resolvedSearchParams.take) : 10,
-    order: (resolvedSearchParams?.order as 'ASC' | 'DESC') || 'DESC',
-    q: resolvedSearchParams?.q,
-  };
+  const params: GetBranchesParams = getServerPaginationParams(
+    resolvedSearchParams || {},
+    { defaultPage: 1, defaultPageSize: 10, defaultOrder: 'DESC' },
+  );
 
   const branchesResponse = await branchServerService.getAll(params);
   const branches = branchesResponse?.result || [];

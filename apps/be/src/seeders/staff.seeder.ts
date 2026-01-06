@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from '@src/common/constants/user.constants';
 import { BranchEntity } from '@src/modules/branch/branch.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
-import { Repository } from 'typeorm';
-import { logger } from './../../../../node_modules/handlebars/types/index.d';
+import { In, Repository } from 'typeorm';
 
 const mails = [
   'dung.buihuu@ncc.asia',
@@ -49,28 +48,32 @@ export class StaffSeeder {
     @InjectRepository(StaffEntity)
     private readonly staffRepository: Repository<StaffEntity>,
     @InjectRepository(BranchEntity)
-      private readonly branchRepository: Repository<BranchEntity>,
+    private readonly branchRepository: Repository<BranchEntity>,
   ) {}
 
   async seed(): Promise<void> {
-    const repositories = [];
+    const repositories: StaffEntity[] = [];
     const existingStaff = await this.staffRepository.find({
-      where: { email: mails },
+      where: { email: In(mails) },
     });
 
-    const branch  = await this.branchRepository.findOneBy({ code: 'QN' });
+    const branch = await this.branchRepository.findOneBy({ code: 'QN' });
     if (!branch) {
-         logger.error('Branch with code QN not found. Staff seeding aborted.');
-         return;}
-    const    existingEmails = existingStaff.map((staff) => staff.email);
+      Logger.error('Branch with code QN not found. Staff seeding aborted.');
+      return;
+    }
+    const existingEmails = existingStaff.map((staff) => staff.email);
     for (const email of mails) {
       if (existingEmails.includes(email)) {
         continue;
       }
       const staff = this.staffRepository.create({
         email,
-        role: roleMapping[email] || UserRole.STAFF,
-        isActive: true,
+        role:
+          typeof roleMapping[email] === 'number'
+            ? roleMapping[email]
+            : UserRole.STAFF,
+        branchId: branch.id,
       });
       repositories.push(staff);
     }

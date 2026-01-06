@@ -2,8 +2,8 @@
 
 import { UpdateMezonIdModal } from '@/components/staff/update-mezon-id-modal';
 import { Badge } from '@/components/ui/badge';
+import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
-import { DataTable } from '@/components/ui/data-table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,11 +11,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { usePagination } from '@/shared/hooks/use-pagination';
 import {
   getRoleLabel,
   PERMISSIONS,
   ProtectedComponent,
 } from '@/shared/lib/auth';
+import { PaginationState } from '@/shared/types/pagination';
 import { Staff, StaffStatus } from '@/shared/types/staff';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
@@ -23,11 +25,7 @@ import { useState } from 'react';
 
 interface StaffDataTableProps {
   initialData: Staff[];
-  initialPagination: {
-    page: number;
-    pageSize: number;
-    total: number;
-  };
+  initialPagination: PaginationState;
   onStaffUpdated?: () => void;
 }
 
@@ -48,9 +46,15 @@ export function StaffDataTable({
   initialData,
   initialPagination,
 }: StaffDataTableProps) {
-  const [data] = useState<Staff[]>(initialData);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [updateMezonIdModalOpen, setUpdateMezonIdModalOpen] = useState(false);
+
+  // Use the base pagination hook
+  const pagination = usePagination({
+    defaultPage: 1,
+    defaultPageSize: 10,
+    defaultOrder: 'DESC',
+  });
 
   const handleUpdateMezonId = (staff: Staff) => {
     setSelectedStaff(staff);
@@ -129,7 +133,14 @@ export function StaffDataTable({
   ];
   return (
     <>
-      <DataTable columns={columns} data={data} pagination={initialPagination} />
+      <BaseDataTable
+        columns={columns}
+        initialData={initialData}
+        initialPagination={initialPagination}
+        pagination={pagination}
+        searchPlaceholder="Search staff by email..."
+        showSearch={false} // We'll handle search differently for now
+      />
       {selectedStaff && (
         <UpdateMezonIdModal
           staff={selectedStaff}

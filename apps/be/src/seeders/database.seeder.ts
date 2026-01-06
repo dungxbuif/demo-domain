@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StaffSeeder } from '@src/common/database/seeders/staff.seeder';
+import { StaffSeeder } from '@src/seeders/staff.seeder';
 import { BranchSeeder } from './branch.seeder';
 
 @Injectable()

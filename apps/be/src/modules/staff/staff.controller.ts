@@ -24,7 +24,6 @@ export class StaffController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.HR, UserRole.GDVP])
   getStaffs(@Query() queries: AppPaginateOptionsDto): any {
     return this.staffService.getStaffs(queries);
   }

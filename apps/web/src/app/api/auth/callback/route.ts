@@ -31,17 +31,7 @@ export async function GET(request: NextRequest) {
       cookieStore,
       sessionOptions,
     );
-
-    // Exchange authorization code for tokens directly with backend
     const exchangeUrl = `${config.backendBaseUrl}/auth/exchange`;
-
-    console.log(
-      '[Callback] Exchanging code with backend:',
-      exchangeUrl,
-      'Code:',
-      code.substring(0, 20) + '...',
-    );
-
     const exchangeResponse = await fetch(exchangeUrl, {
       method: 'POST',
       headers: {
