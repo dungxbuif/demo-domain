@@ -9,6 +9,7 @@ import ScheduleEventParticipantEntity from '@src/modules/schedule/enties/schedul
 import ScheduleEventEntity from '@src/modules/schedule/enties/schedule-event.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import { BranchSeeder } from '@src/seeders/branch.seeder';
+import { CleaningSeeder } from '@src/seeders/cleaning.seeder';
 import { DatabaseSeeder } from '@src/seeders/database.seeder';
 import { HolidaySeeder } from '@src/seeders/holiday.seeder';
 import { OpentalkSeeder } from '@src/seeders/opentalk.seeder';
@@ -31,6 +32,7 @@ import { StaffSeeder } from '@src/seeders/staff.seeder';
     StaffSeeder,
     HolidaySeeder,
     OpentalkSeeder,
+    CleaningSeeder,
     DatabaseSeeder,
   ],
   exports: [DatabaseSeeder],

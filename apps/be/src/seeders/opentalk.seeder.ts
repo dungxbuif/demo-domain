@@ -67,7 +67,13 @@ export class OpentalkSeeder {
       console.log('No active staff found. Skipping OpenTalk seeding.');
       return;
     }
-
+    const isHaveCycle = await this.cycleRepository.count({
+      where: { type: ScheduleType.OPENTALK },
+    });
+    if (isHaveCycle) {
+      console.log('OpenTalk cycles already exist. Skipping seeding.');
+      return;
+    }
     const createdCycles: ScheduleCycleEntity[] = [];
     for (const cycleData of cycles) {
       const existingCycle = await this.cycleRepository.findOne({
@@ -182,7 +188,7 @@ export class OpentalkSeeder {
       if (!existingEvent) {
         const event = this.eventRepository.create({
           title: eventData.title,
-          type: eventData.type,
+          type: eventData.type as any,
           notes: eventData.notes,
           eventDate: eventData.eventDate,
           status: eventData.status,
@@ -261,7 +267,7 @@ export class OpentalkSeeder {
 
       const event = this.eventRepository.create({
         title: eventTitle,
-        type: 'OPENTALK',
+        type: 'OPENTALK' as any,
         notes: `Weekly team discussion and knowledge sharing - Presenter: ${presenterInfo}`,
         eventDate: scheduleEvent.date.toISOString().split('T')[0],
         status: EventStatus.PENDING,

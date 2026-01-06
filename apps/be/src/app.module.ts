@@ -6,6 +6,7 @@ import { HolidayModule } from '@src/modules/holiday/holiday.module';
 import { StaffModule } from '@src/modules/staff/staff.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BranchModule } from './modules/branch/branch.module';
+import { CleaningModule } from './modules/cleaning/cleaning.module';
 import { OpentalkModule } from './modules/opentalk/opentalk.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -20,6 +21,7 @@ import { UserModule } from './modules/user/user.module';
     StaffModule,
     HolidayModule,
     OpentalkModule,
+    CleaningModule,
   ],
 })
 export class AppModule {}

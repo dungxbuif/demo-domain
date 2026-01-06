@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CleaningSeeder } from '@src/seeders/cleaning.seeder';
 import { HolidaySeeder } from '@src/seeders/holiday.seeder';
 import { OpentalkSeeder } from '@src/seeders/opentalk.seeder';
 import { StaffSeeder } from '@src/seeders/staff.seeder';
@@ -10,6 +11,7 @@ export class DatabaseSeeder {
     private readonly branchSeeder: BranchSeeder,
     private readonly staffSeeder: StaffSeeder,
     private readonly opentalkSeeder: OpentalkSeeder,
+    private readonly cleaningSeeder: CleaningSeeder,
     private readonly holidaySeeder: HolidaySeeder,
   ) {}
 
@@ -21,6 +23,7 @@ export class DatabaseSeeder {
       await this.branchSeeder.seed();
       await this.staffSeeder.seed();
       await this.opentalkSeeder.seed();
+      await this.cleaningSeeder.seed();
       console.log('Database seeding completed successfully!');
     } catch (error) {
       console.error('Error during database seeding:', error);

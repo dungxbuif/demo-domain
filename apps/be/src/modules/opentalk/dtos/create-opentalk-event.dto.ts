@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ScheduleType } from '@src/modules/schedule/schedule.algorith';
 import {
   IsArray,
   IsDate,
@@ -18,8 +19,8 @@ export class CreateOpentalkEventDto {
 
   @ApiProperty({ description: 'Type of event', default: 'OPENTALK' })
   @IsOptional()
-  @IsString()
-  type?: string = 'OPENTALK';
+  @IsEnum(ScheduleType)
+  type = ScheduleType.OPENTALK;
 
   @ApiProperty({ description: 'Cycle ID this event belongs to' })
   @IsNumber()

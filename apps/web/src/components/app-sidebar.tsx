@@ -56,6 +56,12 @@ const navigationData = [
         icon: '🎤',
         permission: PERMISSIONS.VIEW_OPENTALK,
       },
+      {
+        title: 'Cleaning',
+        href: PATHS.DASHBOARD.SCHEDULES.CLEANING,
+        icon: '🧹',
+        permission: PERMISSIONS.VIEW_SCHEDULES,
+      },
     ],
   },
 ];

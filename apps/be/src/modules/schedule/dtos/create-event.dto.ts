@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ScheduleType } from '@src/modules/schedule/schedule.algorith';
 import {
   IsArray,
   IsDateString,
@@ -7,10 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-export enum ScheduleType {
-  OPENTALK = 'OPENTALK',
-  CLEANING = 'CLEANING',
-}
+
 export class CreateEventDto {
   @ApiProperty()
   @IsString()

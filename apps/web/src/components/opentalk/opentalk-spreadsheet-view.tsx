@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/shared/contexts/auth-context';
 import { hasPermission, PERMISSIONS } from '@/shared/lib/auth/permissions';
 import { opentalkClientService } from '@/shared/lib/client/opentalk-client-service';
+import { getStatusBadgeProps } from '@/shared/lib/utils';
 import { ArrowRightLeft, Calendar, Check, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -420,17 +421,7 @@ export function OpentalkSpreadsheetView({
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              variant={
-                                event.status === 'COMPLETED'
-                                  ? 'default'
-                                  : event.status === 'PENDING'
-                                    ? 'secondary'
-                                    : 'outline'
-                              }
-                            >
-                              {event.status}
-                            </Badge>
+                            <Badge {...getStatusBadgeProps(event.status)} />
                           </TableCell>
                         </TableRow>
                       ))}

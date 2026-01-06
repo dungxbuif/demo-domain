@@ -55,8 +55,9 @@ export class ScheduleService {
   async createEvent(
     createEventDto: CreateEventDto,
   ): Promise<ScheduleEventEntity> {
+    const { participantIds, ...entityData } = createEventDto;
     const event = this.eventRepository.create({
-      ...createEventDto,
+      ...entityData,
       eventDate: createEventDto.eventDate,
       status: EventStatus.PENDING,
     });
@@ -110,11 +111,12 @@ export class ScheduleService {
     id: number,
     updateData: Partial<CreateEventDto>,
   ): Promise<ScheduleEventEntity> {
-    if (updateData.eventDate) {
-      updateData.eventDate = new Date(updateData.eventDate) as any;
+    const { participantIds, ...entityData } = updateData;
+    if (entityData.eventDate) {
+      entityData.eventDate = new Date(entityData.eventDate) as any;
     }
 
-    await this.eventRepository.update(id, updateData);
+    await this.eventRepository.update(id, entityData);
     const updatedEvent = await this.getEventById(id);
     if (!updatedEvent) {
       throw new Error('Event not found after update');
