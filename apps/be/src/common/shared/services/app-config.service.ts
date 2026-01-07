@@ -93,8 +93,11 @@ export class AppConfigService {
     };
   }
 
-  get botToken(): string {
-    return this.getString('BOT_TOKEN');
+  get botConfig(): { botId: string; token: string } {
+    return {
+      botId: this.getString('MEZON_BOT_ID'),
+      token: this.getString('MEZON_BOT_TOKEN'),
+    };
   }
 
   get jwtConfig() {
