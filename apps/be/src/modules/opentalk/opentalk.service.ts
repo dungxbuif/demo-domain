@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CycleStatus, EventStatus, ScheduleType } from '@qnoffice/shared';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
@@ -236,23 +241,27 @@ export class OpentalkService {
       this.getEventById(swapDto.event1Id),
       this.getEventById(swapDto.event2Id),
     ]);
+
     if (!event1 || !event2) {
       throw new NotFoundException('One or both events not found');
     }
+
     if (event1.cycleId !== event2.cycleId) {
-      throw new NotFoundException(
+      throw new BadRequestException(
         'Events must belong to the same cycle to swap',
       );
     }
+
     if (
       event1.status === EventStatus.COMPLETED ||
       event2.status === EventStatus.COMPLETED
     ) {
-      throw new NotFoundException('Cannot swap completed events');
+      throw new ConflictException('Cannot swap completed events');
     }
-    const even1Date = event1.eventDate;
+
+    const tempDate = event1.eventDate;
     event1.eventDate = event2.eventDate;
-    event2.eventDate = even1Date;
+    event2.eventDate = tempDate;
 
     await this.eventRepository.save([event1, event2]);
   }

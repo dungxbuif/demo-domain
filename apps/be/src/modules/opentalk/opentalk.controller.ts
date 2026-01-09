@@ -152,6 +152,11 @@ export class OpentalkController {
   }
 
   @Post('swap')
+  @ApiOperation({ summary: 'Create a new swap' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Swapped successfully',
+  })
   async swapOpentalk(@Body() swapDto: SwapOpentalkDto): Promise<void> {
     return this.opentalkService.swapOpentalk(swapDto);
   }
