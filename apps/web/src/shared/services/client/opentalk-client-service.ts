@@ -46,7 +46,7 @@ export interface SwapEventsDto {
 }
 
 class OpentalkClientService {
-  private readonly baseUrl = '/api/opentalk';
+  private readonly baseUrl = '/opentalk';
 
   async updateEvent(eventId: number, data: UpdateEventDto) {
     return baseApi.put<ApiResponse<OpentalkEvent>>(
@@ -55,10 +55,10 @@ class OpentalkClientService {
     );
   }
 
-  async swapEvents(eventId1: number, eventId2: number) {
-    return baseApi.post<ApiResponse<void>>(`${this.baseUrl}/events/swap`, {
-      eventId1,
-      eventId2,
+  async swapEvents(event1Id: number, event2Id: number) {
+    return baseApi.post<ApiResponse<void>>(`${this.baseUrl}/swap`, {
+      event1Id,
+      event2Id,
     });
   }
 

@@ -83,7 +83,7 @@ export function SwapRequestManagement({
 
       // Load all swap requests for everyone (no filtering by requester)
       const response = await opentalkClientService.getSwapRequests({});
-      setSwapRequests(response?.data || []);
+      setSwapRequests(response?.data?.data || []);
 
       // Load user's schedules in user mode
       if (mode === 'user' && userStaffId) {
