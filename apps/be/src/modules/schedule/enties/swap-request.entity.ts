@@ -1,4 +1,4 @@
-import { SwapRequestStatus } from '@qnoffice/shared';
+import { ScheduleType, SwapRequestStatus } from '@qnoffice/shared';
 import { AbstractEntity } from '@src/common/database/abstract.entity';
 import ScheduleEventEntity from '@src/modules/schedule/enties/schedule-event.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
@@ -12,8 +12,8 @@ export default class SwapRequestEntity extends AbstractEntity {
   @Column()
   toEventId: number;
 
-  @Column()
-  requesterId: number;
+  @Column({ type: 'int', nullable: true })
+  requesterId: number | null;
 
   @Column()
   reason: string;
@@ -25,8 +25,14 @@ export default class SwapRequestEntity extends AbstractEntity {
   })
   status: SwapRequestStatus;
 
-  @Column({ nullable: true })
-  reviewNote?: string;
+  @Column({
+    type: 'enum',
+    enum: ScheduleType,
+  })
+  type: ScheduleType;
+
+  @Column({ type: 'varchar', nullable: true })
+  reviewNote?: string | null;
 
   @ManyToOne(() => ScheduleEventEntity)
   @JoinColumn({ name: 'from_event_id' })

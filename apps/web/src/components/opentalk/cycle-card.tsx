@@ -10,32 +10,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ScheduleCycle } from '@qnoffice/shared';
+import {
+  IOpentalEventMetadata,
+  ScheduleCycle,
+  ScheduleEvent,
+} from '@qnoffice/shared';
 
 interface CycleCardProps {
   cycle: ScheduleCycle;
-  selectedEvents: number[];
   editingTopic: number | null;
   editedTopicValue: string;
-  canEditTopic: (event: any) => boolean;
-  canEditSlide: (event: any) => boolean;
-  onEventSelect: (eventId: number, currentlySelected: boolean) => void;
+  canEditTopic: (event: ScheduleEvent<IOpentalEventMetadata>) => boolean;
+  canEditSlide: (event: ScheduleEvent<IOpentalEventMetadata>) => boolean;
   onTopicEdit: (eventId: number, currentTopic: string) => void;
   onTopicSave: (eventId: number) => void;
   onTopicCancel: () => void;
   onTopicChange: (value: string) => void;
-  onSlideClick: (event: any) => void;
+  onSlideClick: (event: ScheduleEvent<IOpentalEventMetadata>) => void;
   formatDate: (date: string) => string;
 }
 
 export function CycleCard({
   cycle,
-  selectedEvents,
   editingTopic,
   editedTopicValue,
   canEditTopic,
   canEditSlide,
-  onEventSelect,
   onTopicEdit,
   onTopicSave,
   onTopicCancel,
@@ -79,7 +79,6 @@ export function CycleCard({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[60px]">Select</TableHead>
                 <TableHead className="w-[140px]">Date</TableHead>
                 <TableHead className="w-[250px]">Topic</TableHead>
                 <TableHead className="w-[200px]">Presenter</TableHead>
@@ -92,14 +91,10 @@ export function CycleCard({
                 <EventTableRow
                   key={event.id}
                   event={event}
-                  isSelected={selectedEvents.includes(event.id)}
                   isEditingTopic={editingTopic === event.id}
                   editedTopicValue={editedTopicValue}
                   canEditTopic={canEditTopic(event)}
                   canEditSlide={canEditSlide(event)}
-                  onSelect={() =>
-                    onEventSelect(event.id, selectedEvents.includes(event.id))
-                  }
                   onTopicEdit={(topic) => onTopicEdit(event.id, topic)}
                   onTopicSave={() => onTopicSave(event.id)}
                   onTopicCancel={onTopicCancel}

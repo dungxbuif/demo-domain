@@ -62,12 +62,6 @@ export interface IUpdateSlideSubmissionDto {
   notes?: string;
 }
 
-export interface ICreateSwapRequestDto {
-  scheduleId: number;
-  targetStaffId?: number;
-  reason: string;
-}
-
 export interface ICreateOpentalkScheduleDto {
   date: string;
   staffId: number;

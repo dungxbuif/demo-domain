@@ -21,8 +21,17 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { hasPermission, PERMISSIONS } from '@/shared/auth/permissions';
 import { useAuth } from '@/shared/contexts/auth-context';
-import { opentalkClientService } from '@/shared/services/client/opentalk-client-service';
-import { UserAuth } from '@qnoffice/shared';
+import {
+  opentalkClientService,
+  OpentalkEvent,
+} from '@/shared/services/client/opentalk-client-service';
+import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
+import {
+  ScheduleType,
+  SwapRequest,
+  SwapRequestStatus,
+  UserAuth,
+} from '@qnoffice/shared';
 import {
   ArrowRightLeft,
   Calendar,
@@ -30,24 +39,9 @@ import {
   Plus,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { CreateSwapRequestModal } from './create-swap-request-modal';
-
-interface SwapRequest {
-  id: number;
-  fromEventId: number;
-  toEventId: number;
-  requesterId: number;
-  reason: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  reviewNote?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  fromEvent?: any;
-  toEvent?: any;
-  requester?: any;
-}
 
 interface SwapRequestManagementProps {
   mode: 'user' | 'hr';
@@ -71,29 +65,24 @@ export function SwapRequestManagement({
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   );
-  const [userSchedules, setUserSchedules] = useState<any[]>([]);
+  const [userSchedules, setUserSchedules] = useState<OpentalkEvent[]>([]);
 
-  // Get staff data from auth context
-  const [hasStaffAccess, setHasStaffAccess] = useState<boolean>(false);
   const userStaffId = user?.staffId;
 
-  const loadSwapRequests = async () => {
+  const loadSwapRequests = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      // Load all swap requests for everyone (no filtering by requester)
-      const response = await opentalkClientService.getSwapRequests({});
+      const response = await swapRequestClientService.getSwapRequests({
+        type: ScheduleType.OPENTALK,
+      });
       setSwapRequests(response?.data?.data || []);
 
-      // Load user's schedules in user mode
       if (mode === 'user' && userStaffId) {
         try {
-          const schedulesResponse =
-            await opentalkClientService.getUserSchedules(userStaffId);
-          console.log('Schedules response:', schedulesResponse);
           const schedules =
-            schedulesResponse?.data?.data || schedulesResponse?.data || [];
-          console.log('Extracted schedules:', schedules);
+            await opentalkClientService.getUserSchedules(userStaffId);
+          console.log('Loaded schedules:', schedules);
           setUserSchedules(schedules);
         } catch (error) {
           console.error('Failed to load user schedules:', error);
@@ -105,15 +94,13 @@ export function SwapRequestManagement({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [mode, userStaffId]);
 
   useEffect(() => {
-    // Set staff access based on auth context
-    setHasStaffAccess(!!user?.staffId);
     if (user?.staffId) {
       loadSwapRequests();
     }
-  }, [mode, user?.staffId]);
+  }, [user?.staffId, loadSwapRequests]);
   // Early return if no user
   if (!user) {
     return (
@@ -142,7 +129,7 @@ export function SwapRequestManagement({
   if (isUserMode && !canCreateRequests && !canManageRequests) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        You don't have permission to access swap requests.
+        You don&apos;t have permission to access swap requests.
       </div>
     );
   }
@@ -150,14 +137,14 @@ export function SwapRequestManagement({
   if (isHRMode && !canApproveRequests) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        You don't have permission to approve swap requests.
+        You don&apos;t have permission to approve swap requests.
       </div>
     );
   }
 
   const handleReviewRequest = async (
     requestId: number,
-    action: 'APPROVED' | 'REJECTED',
+    action: SwapRequestStatus,
   ) => {
     if (!canApproveRequests) {
       toast.error("You don't have permission to approve requests");
@@ -165,9 +152,9 @@ export function SwapRequestManagement({
     }
 
     try {
-      await opentalkClientService.reviewSwapRequest(requestId, {
-        approve: action === 'APPROVED',
-        note: reviewNote,
+      await swapRequestClientService.reviewSwapRequest(requestId, {
+        status: action,
+        reviewNote: reviewNote,
       });
 
       toast.success(`Request ${action.toLowerCase()} successfully`);
@@ -249,8 +236,8 @@ export function SwapRequestManagement({
                         key={schedule.id}
                         value={schedule.id.toString()}
                       >
-                        {schedule.topic || 'OpenTalk'} -{' '}
-                        {new Date(schedule.date).toLocaleDateString()}
+                        {schedule.title || 'OpenTalk'} -{' '}
+                        {new Date(schedule.eventDate).toLocaleDateString()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -309,7 +296,7 @@ export function SwapRequestManagement({
                         {request.status}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {request.createdAt.toLocaleDateString()}
+                        {new Date(request.createdAt).toLocaleDateString()}
                       </span>
                     </div>
 
@@ -322,7 +309,7 @@ export function SwapRequestManagement({
                           </span>
                         </div>
                         <p className="text-sm text-red-800">
-                          Event ID: {request.fromEventId}
+                          Event Date: {request?.fromEvent?.eventDate}
                         </p>
                       </div>
 
@@ -334,7 +321,7 @@ export function SwapRequestManagement({
                           </span>
                         </div>
                         <p className="text-sm text-green-800">
-                          Event ID: {request.toEventId}
+                          Event Date: {request?.toEvent?.eventDate}
                         </p>
                       </div>
                     </div>
@@ -417,7 +404,10 @@ export function SwapRequestManagement({
               variant="destructive"
               onClick={() =>
                 selectedRequest &&
-                handleReviewRequest(selectedRequest.id, 'REJECTED')
+                handleReviewRequest(
+                  selectedRequest.id,
+                  SwapRequestStatus.REJECTED,
+                )
               }
             >
               <XCircle className="h-4 w-4 mr-2" />
@@ -426,7 +416,10 @@ export function SwapRequestManagement({
             <Button
               onClick={() =>
                 selectedRequest &&
-                handleReviewRequest(selectedRequest.id, 'APPROVED')
+                handleReviewRequest(
+                  selectedRequest.id,
+                  SwapRequestStatus.APPROVED,
+                )
               }
             >
               <CheckCircle className="h-4 w-4 mr-2" />

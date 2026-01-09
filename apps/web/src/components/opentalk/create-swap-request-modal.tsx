@@ -18,8 +18,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ICreateSwapRequestDto } from '@qnoffice/shared';
-import { useEffect, useState } from 'react';
+import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
+import {
+  ICreateSwapRequestDto,
+  ScheduleEvent,
+  ScheduleType,
+} from '@qnoffice/shared';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface CreateSwapRequestModalProps {
@@ -36,59 +41,61 @@ export function CreateSwapRequestModal({
   onSuccess,
 }: CreateSwapRequestModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [staffList, setStaffList] = useState<any[]>([]);
-  const [formData, setFormData] = useState<ICreateSwapRequestDto>({
-    scheduleId,
-    targetStaffId: undefined,
-    reason: '',
-  });
+  const [availableEvents, setAvailableEvents] = useState<ScheduleEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
+  const [reason, setReason] = useState('');
 
-  useEffect(() => {
-    if (open) {
-      fetchStaff();
-    }
-  }, [open]);
-
-  const fetchStaff = async () => {
+  const fetchAvailableEvents = useCallback(async () => {
     try {
-      // Get staff from the same cycle as the selected schedule
       const response = await fetch(
-        `/api/opentalk/schedules/${scheduleId}/available-swaps`,
+        `/api/opentalk/events/${scheduleId}/cycle-events`,
       );
       if (response.ok) {
         const data = await response.json();
-        setStaffList(data);
+        setAvailableEvents(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching available staff for swap:', error);
-      toast.error('Failed to load available staff for swap');
+      console.error('Error fetching available events for swap:', error);
+      toast.error('Failed to load available events');
     }
-  };
+  }, [scheduleId]);
+
+  useEffect(() => {
+    if (open) {
+      fetchAvailableEvents();
+      setReason('');
+      setSelectedEvent(null);
+    }
+  }, [open, fetchAvailableEvents]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!selectedEvent) {
+      toast.error('Please select an event to swap to');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/opentalk/swap-requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const requestData: ICreateSwapRequestDto = {
+        fromEventId: scheduleId,
+        toEventId: selectedEvent,
+        reason: reason,
+        type: ScheduleType.OPENTALK,
+      };
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create swap request');
-      }
+      await swapRequestClientService.createSwapRequest(requestData);
 
       toast.success('Swap request created successfully');
-      setFormData({ scheduleId, targetStaffId: undefined, reason: '' });
+      setReason('');
+      setSelectedEvent(null);
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create swap request');
+    } catch (error) {
+      console.error('Error creating swap request:', error);
+      toast.error('Failed to create swap request');
     } finally {
       setIsLoading(false);
     }
@@ -100,41 +107,38 @@ export function CreateSwapRequestModal({
         <DialogHeader>
           <DialogTitle>Request Schedule Swap</DialogTitle>
           <DialogDescription>
-            Request to swap your OpenTalk schedule with another staff member
+            Select which OpenTalk event you&apos;d like to swap your schedule
+            with
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="targetStaff">
-                Swap with Staff (Optional - Leave empty to swap with next
-                available in cycle)
-              </Label>
+              <Label htmlFor="targetEvent">Swap with Event</Label>
               <Select
-                value={formData.targetStaffId?.toString() || 'none'}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    targetStaffId:
-                      value === 'none' ? undefined : parseInt(value),
-                  })
-                }
+                value={selectedEvent?.toString() || ''}
+                onValueChange={(value) => setSelectedEvent(parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select staff member in same cycle (optional)" />
+                  <SelectValue placeholder="Select event to swap with" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">
-                    None (Auto-assign from cycle)
-                  </SelectItem>
-                  {staffList.map((staff) => (
-                    <SelectItem key={staff.id} value={staff.id.toString()}>
-                      {staff.user?.name || staff.email}
-                      {staff.scheduleDate && (
-                        <span className="text-muted-foreground ml-2">
-                          ({new Date(staff.scheduleDate).toLocaleDateString()})
-                        </span>
-                      )}
+                  {availableEvents.map((event) => (
+                    <SelectItem key={event.id} value={event.id.toString()}>
+                      {event.title || 'OpenTalk'} -{' '}
+                      {new Date(event.eventDate).toLocaleDateString()}
+                      {event.eventParticipants &&
+                        event.eventParticipants.length > 0 && (
+                          <span className="text-muted-foreground ml-2">
+                            (
+                            {event.eventParticipants
+                              .map(
+                                (ep) => ep.staff?.user?.name || ep.staff?.email,
+                              )
+                              .join(', ')}
+                            )
+                          </span>
+                        )}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -144,11 +148,9 @@ export function CreateSwapRequestModal({
               <Label htmlFor="reason">Reason</Label>
               <Textarea
                 id="reason"
-                value={formData.reason}
-                onChange={(e) =>
-                  setFormData({ ...formData, reason: e.target.value })
-                }
-                placeholder="Explain why you need to swap your schedule within this cycle..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Explain why you need to swap your schedule..."
                 rows={4}
                 required
               />
@@ -162,7 +164,7 @@ export function CreateSwapRequestModal({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !selectedEvent}>
               {isLoading ? 'Submitting...' : 'Submit Request'}
             </Button>
           </DialogFooter>

@@ -3,19 +3,17 @@
 import { TopicEditControls } from '@/components/opentalk/topic-edit-controls';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { getStatusBadgeProps } from '@/shared/utils';
+import { IOpentalEventMetadata, ScheduleEvent } from '@qnoffice/shared';
 import { Calendar, FileText, User } from 'lucide-react';
 
 interface EventTableRowProps {
-  event: any;
-  isSelected: boolean;
+  event: ScheduleEvent<IOpentalEventMetadata>;
   isEditingTopic: boolean;
   editedTopicValue: string;
   canEditTopic: boolean;
   canEditSlide: boolean;
-  onSelect: () => void;
   onTopicEdit: (topic: string) => void;
   onTopicSave: () => void;
   onTopicCancel: () => void;
@@ -26,12 +24,10 @@ interface EventTableRowProps {
 
 export function EventTableRow({
   event,
-  isSelected,
   isEditingTopic,
   editedTopicValue,
   canEditTopic,
   canEditSlide,
-  onSelect,
   onTopicEdit,
   onTopicSave,
   onTopicCancel,
@@ -42,7 +38,7 @@ export function EventTableRow({
   const renderPresenter = () => {
     if (event.eventParticipants && event.eventParticipants.length > 0) {
       const presenters = event.eventParticipants
-        .map((ep: any) => {
+        .map((ep) => {
           if (ep.staff?.email) return ep.staff.email;
           if (ep.staff?.user?.email) return ep.staff.user.email;
           if (ep.staff?.id) return `Staff ${ep.staff.id}`;
@@ -56,37 +52,11 @@ export function EventTableRow({
       }
     }
 
-    if (event.participants && event.participants.length > 0) {
-      const presenters = event.participants
-        .map((p: any) => {
-          if (p.email) return p.email;
-          if (p.user?.email) return p.user.email;
-          if (p.id) return `Staff ${p.id}`;
-          return 'Unknown Staff';
-        })
-        .filter(Boolean);
-
-      if (presenters.length > 0) {
-        return presenters.join(', ');
-      }
-    }
-
-    if (event.participantIds && event.participantIds.length > 0) {
-      return `Staff ${event.participantIds[0]}`;
-    }
-
     return 'Unassigned';
   };
 
   return (
-    <TableRow
-      className={`hover:bg-muted/50 ${
-        isSelected ? 'bg-blue-50 border-blue-200' : ''
-      }`}
-    >
-      <TableCell>
-        <Checkbox checked={isSelected} onCheckedChange={onSelect} />
-      </TableCell>
+    <TableRow className="hover:bg-muted/50">
       <TableCell>
         <div className="flex items-center space-x-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />

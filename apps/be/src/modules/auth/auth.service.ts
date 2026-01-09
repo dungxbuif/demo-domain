@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthProfile, AuthTokens } from '@qnoffice/shared';
+import { AuthProfile, AuthTokens, UserAuth } from '@qnoffice/shared';
 import { AppConfigService } from '@src/common/shared/services/app-config.service';
-import { AccessTokenPayload } from '@src/common/types';
+import StaffEntity from '@src/modules/staff/staff.entity';
 import { StaffService } from '@src/modules/staff/staff.service';
 import UserEntity from '@src/modules/user/user.entity';
 import { UserService } from '../user/user.service';
@@ -64,7 +64,7 @@ export class AuthService {
     },
   ): Promise<AuthProfile> {
     const user = await this.userService.upsertByMezonId(mezonId, meta);
-    let staff: any = null;
+    let staff: StaffEntity | null = null;
     try {
       staff = await this.staffService.findByUserId(user.mezonId);
       Logger.log(`Staff data found for user ${user.mezonId}:`, staff);
@@ -75,9 +75,12 @@ export class AuthService {
       );
     }
 
-    const payload: AccessTokenPayload = {
+    const payload: UserAuth = {
       mezonId: user.mezonId,
+      name: user?.name || '',
+      email: user?.email || '',
       role: typeof staff?.role === 'number' ? staff.role : null,
+      staffId: staff?.id,
     };
 
     const jwtConfig = this.appConfigService.jwtConfig;

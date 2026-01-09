@@ -28,8 +28,6 @@ export function OpentalkPageClient({ cycles, error }: OpentalkPageClientProps) {
     }
   }, [error]);
 
-  const events = cycles.flatMap((cycle) => cycle.events || []);
-
   return (
     <div className="space-y-6">
       <Tabs defaultValue="schedules" className="space-y-4">
@@ -42,7 +40,7 @@ export function OpentalkPageClient({ cycles, error }: OpentalkPageClientProps) {
         </TabsList>
 
         <TabsContent value="schedules" className="space-y-4">
-          <OpentalkSpreadsheetView cycles={cycles} user={user || undefined} />
+          <OpentalkSpreadsheetView cycles={cycles} />
         </TabsContent>
 
         <TabsContent value="requests" className="space-y-4">

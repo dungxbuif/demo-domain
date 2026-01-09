@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
-import { AccessTokenPayload } from './access-token-payload.type';
+import { UserAuth } from '@qnoffice/shared';
 
 export type AppRequest = {
-  user: AccessTokenPayload;
+  user: UserAuth;
 } & Request;

@@ -22,7 +22,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { hasPermission, PERMISSIONS } from '@/shared/auth/permissions';
 import { useAuth } from '@/shared/contexts/auth-context';
 import { cleaningClientService } from '@/shared/services/client/cleaning-client-service';
-import { UserAuth } from '@qnoffice/shared';
+import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
+import {
+  ScheduleType,
+  SwapRequest,
+  SwapRequestStatus,
+  UserAuth,
+} from '@qnoffice/shared';
 import {
   ArrowRightLeft,
   Calendar,
@@ -33,21 +39,6 @@ import {
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { CreateSwapRequestModal } from './create-swap-request-modal';
-
-interface SwapRequest {
-  id: number;
-  fromEventId: number;
-  toEventId: number;
-  requesterId: number;
-  reason: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  reviewNote?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  fromEvent?: any;
-  toEvent?: any;
-  requester?: any;
-}
 
 interface SwapRequestManagementProps {
   mode: 'user' | 'hr';
@@ -82,7 +73,9 @@ export function SwapRequestManagement({
       setIsLoading(true);
 
       // Load all swap requests for everyone (no filtering by requester)
-      const response = await cleaningClientService.getSwapRequests({});
+      const response = await swapRequestClientService.getSwapRequests({
+        type: ScheduleType.CLEANING,
+      });
       setSwapRequests(response?.data?.data || []);
 
       // Load user's schedules in user mode
@@ -157,7 +150,7 @@ export function SwapRequestManagement({
 
   const handleReviewRequest = async (
     requestId: number,
-    action: 'APPROVED' | 'REJECTED',
+    action: SwapRequestStatus,
   ) => {
     if (!canApproveRequests) {
       toast.error("You don't have permission to approve requests");
@@ -165,7 +158,7 @@ export function SwapRequestManagement({
     }
 
     try {
-      await cleaningClientService.reviewSwapRequest(requestId, {
+      await swapRequestClientService.reviewSwapRequest(requestId, {
         status: action,
         reviewNote: reviewNote,
       });
@@ -309,7 +302,7 @@ export function SwapRequestManagement({
                         {request.status}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {request.createdAt.toLocaleDateString()}
+                        {new Date(request.createdAt).toLocaleDateString()}
                       </span>
                     </div>
 
@@ -322,7 +315,7 @@ export function SwapRequestManagement({
                           </span>
                         </div>
                         <p className="text-sm text-red-800">
-                          Event ID: {request.fromEventId}
+                          Event Date: {request?.fromEvent?.eventDate}
                         </p>
                       </div>
 
@@ -334,7 +327,7 @@ export function SwapRequestManagement({
                           </span>
                         </div>
                         <p className="text-sm text-green-800">
-                          Event ID: {request.toEventId}
+                          Event Date: {request?.toEvent?.eventDate}
                         </p>
                       </div>
                     </div>
@@ -417,7 +410,10 @@ export function SwapRequestManagement({
               variant="destructive"
               onClick={() =>
                 selectedRequest &&
-                handleReviewRequest(selectedRequest.id, 'REJECTED')
+                handleReviewRequest(
+                  selectedRequest.id,
+                  SwapRequestStatus.REJECTED,
+                )
               }
             >
               <XCircle className="h-4 w-4 mr-2" />
@@ -426,7 +422,10 @@ export function SwapRequestManagement({
             <Button
               onClick={() =>
                 selectedRequest &&
-                handleReviewRequest(selectedRequest.id, 'APPROVED')
+                handleReviewRequest(
+                  selectedRequest.id,
+                  SwapRequestStatus.APPROVED,
+                )
               }
             >
               <CheckCircle className="h-4 w-4 mr-2" />

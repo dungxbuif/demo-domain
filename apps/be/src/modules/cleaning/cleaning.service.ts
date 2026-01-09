@@ -209,6 +209,21 @@ export class CleaningService {
       .getMany();
   }
 
+  async getCycleEventsByEventId(
+    eventId: number,
+  ): Promise<ScheduleEventEntity[]> {
+    const event = await this.eventRepository.findOne({
+      where: { id: eventId },
+      select: ['cycleId'],
+    });
+
+    if (!event) {
+      throw new Error('Event not found');
+    }
+
+    return this.getEventsByCycle(event.cycleId);
+  }
+
   async getEventById(id: number): Promise<ScheduleEventEntity | null> {
     return this.eventRepository.findOne({
       where: { id, type: ScheduleType.CLEANING },

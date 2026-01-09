@@ -40,11 +40,6 @@ export interface IUpdateEventDto {
   notes?: string;
 }
 
-export interface ISwapEventsDto {
-  eventId1: number;
-  eventId2: number;
-}
-
 class OpentalkClientService {
   private readonly baseUrl = '/opentalk';
 
@@ -53,13 +48,6 @@ class OpentalkClientService {
       `${this.baseUrl}/events/${eventId}`,
       data,
     );
-  }
-
-  async swapEvents(event1Id: number, event2Id: number) {
-    return baseApi.post<ApiResponse<void>>(`${this.baseUrl}/swap`, {
-      event1Id,
-      event2Id,
-    });
   }
 
   async updateSlide(
@@ -72,19 +60,11 @@ class OpentalkClientService {
     );
   }
 
-  async getSwapRequests(params?: any) {
-    return baseApi.get<any>(`${this.baseUrl}/swap-requests`, { params });
-  }
-
-  async createSwapRequest(data: any) {
-    return baseApi.post<any>(`${this.baseUrl}/swap-requests`, data);
-  }
-
-  async reviewSwapRequest(
-    id: number,
-    data: { approve: boolean; note?: string },
-  ) {
-    return baseApi.put<any>(`${this.baseUrl}/swap-requests/${id}/review`, data);
+  async getUserSchedules(staffId: number): Promise<OpentalkEvent[]> {
+    const response = await baseApi.get<ApiResponse<OpentalkEvent[]>>(
+      `${this.baseUrl}/events?participantId=${staffId}`,
+    );
+    return response.data.data || [];
   }
 }
 

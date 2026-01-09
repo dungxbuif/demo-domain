@@ -7,3 +7,4 @@ export * from './pagination.types';
 export * from './penalty.types';
 export * from './schedule.types';
 export * from './staff.types';
+export * from './swap-request.types';

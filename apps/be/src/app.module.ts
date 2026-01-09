@@ -17,6 +17,7 @@ import { OpentalkModule } from './modules/opentalk/opentalk.module';
 import { PenaltyTypeModule } from './modules/penalty-type/penalty-type.module';
 import { PenaltyModule } from './modules/penalty/penalty.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
+import { SwapRequestModule } from './modules/swap-request/swap-request.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -35,6 +36,7 @@ import { UserModule } from './modules/user/user.module';
     CleaningModule,
     CalendarModule,
     ScheduleModule,
+    SwapRequestModule,
     PenaltyModule,
     PenaltyTypeModule,
     UploadModule,

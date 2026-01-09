@@ -1,6 +1,5 @@
+import { UserAuth } from '@qnoffice/shared';
 import { ClsServiceManager } from 'nestjs-cls';
-
-import { AccessTokenPayload } from 'src/common/types';
 
 export class ContextProvider {
   private static readonly nameSpace = 'request';
@@ -26,7 +25,7 @@ export class ContextProvider {
     return `${ContextProvider.nameSpace}.${key}`;
   }
 
-  static setAuthUser(user: AccessTokenPayload): void {
+  static setAuthUser(user: UserAuth): void {
     ContextProvider.set(ContextProvider.authUserKey, user);
   }
 

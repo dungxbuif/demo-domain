@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ScheduleCycle } from '@qnoffice/shared';
+import { ScheduleCycle, ScheduleEvent } from '@qnoffice/shared';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { SubmitSlideDto } from '@src/modules/opentalk/dtos/submit-slide.dto';
+import { OpentalkQueryDto } from './dtos/opentalk-query.dto';
 import { OpentalkService } from './opentalk.service';
 
 @ApiTags('Opentalk Management')
@@ -47,11 +57,17 @@ export class OpentalkController {
   //   return this.opentalkService.deleteCycle(id);
   // }
 
-  // @Get('events')
-  // @ApiOperation({ summary: 'Get opentalk events with filters' })
-  // async getEvents(@Query() query: OpentalkQueryDto): Promise<ScheduleEvent[]> {
-  //   return this.opentalkService.getEvents(query) as any;
-  // }
+  @Get('events')
+  async getEvents(@Query() query: OpentalkQueryDto): Promise<ScheduleEvent[]> {
+    return this.opentalkService.getEvents(query) as any;
+  }
+
+  @Get('events/:id/cycle-events')
+  async getCycleEvents(
+    @Param('id', ParseIntPipe) eventId: number,
+  ): Promise<ScheduleEvent[]> {
+    return this.opentalkService.getCycleEventsByEventId(eventId) as any;
+  }
 
   // @Get('events/:id')
   // @ApiOperation({ summary: 'Get opentalk event by ID' })

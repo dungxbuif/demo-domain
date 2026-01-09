@@ -13,6 +13,7 @@ import {
   SearchOrder,
 } from '@qnoffice/shared';
 import { SubmitSlideDto } from '@src/modules/opentalk/dtos/submit-slide.dto';
+import { CreateSwapRequestDto } from '@src/modules/swap-request/dtos/create-swap-request.dto';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import ScheduleCycleEntity from '../schedule/enties/schedule-cycle.entity';
 import ScheduleEventParticipantEntity from '../schedule/enties/schedule-event-participant.entity';
@@ -20,7 +21,6 @@ import ScheduleEventEntity from '../schedule/enties/schedule-event.entity';
 import SwapRequestEntity from '../schedule/enties/swap-request.entity';
 import { CreateOpentalkCycleDto } from './dtos/create-opentalk-cycle.dto';
 import { CreateOpentalkEventDto } from './dtos/create-opentalk-event.dto';
-import CreateSwapRequestDto from './dtos/create-swap-request.dto';
 import { OpentalkQueryDto } from './dtos/opentalk-query.dto';
 import { SwapOpentalkDto } from './dtos/swap-opentalk.dto';
 
@@ -53,10 +53,10 @@ export class OpentalkService {
         'events.eventParticipants.staff.user',
       ],
       order: {
-        createdAt: SearchOrder.ASC,
         events: {
           eventDate: SearchOrder.ASC,
         },
+        // createdAt: SearchOrder.ASC,
       },
     });
   }
@@ -138,6 +138,33 @@ export class OpentalkService {
     return this.eventRepository.find({
       where: {
         cycleId,
+        type: ScheduleType.OPENTALK,
+      },
+      relations: [
+        'cycle',
+        'eventParticipants',
+        'eventParticipants.staff',
+        'eventParticipants.staff.user',
+      ],
+      order: { eventDate: 'ASC' },
+    });
+  }
+
+  async getCycleEventsByEventId(
+    eventId: number,
+  ): Promise<ScheduleEventEntity[]> {
+    const event = await this.eventRepository.findOne({
+      where: { id: eventId },
+      select: ['cycleId'],
+    });
+
+    if (!event) {
+      throw new Error('Event not found');
+    }
+
+    return this.eventRepository.find({
+      where: {
+        cycleId: event.cycleId,
         type: ScheduleType.OPENTALK,
       },
       relations: [

@@ -8,7 +8,6 @@ import ScheduleCycleEntity from '@src/modules/schedule/enties/schedule-cycle.ent
 import ScheduleEventParticipantEntity from '@src/modules/schedule/enties/schedule-event-participant.entity';
 import ScheduleEventEntity from '@src/modules/schedule/enties/schedule-event.entity';
 import SwapRequestEntity from '@src/modules/schedule/enties/swap-request.entity';
-import { ScheduleEventQueueEntity } from '@src/modules/schedule/entities/schedule-event-queue.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import UserEntity from '@src/modules/user/user.entity';
 
@@ -24,7 +23,6 @@ const entities = [
   ScheduleCycleEntity,
   ScheduleEventEntity,
   ScheduleEventParticipantEntity,
-  ScheduleEventQueueEntity,
   AuditLogEntity,
 ];
 export default entities;

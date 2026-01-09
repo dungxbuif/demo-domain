@@ -7,7 +7,7 @@ export class TokenService {
   // decodeJwtToken<T>(token: string): T {
   //   return this.jwtService.decode<T>(token);
   // }
-  // generateAccessToken(payload: AccessTokenPayload): string {
+  // generateAccessToken(payload: UserAuth): string {
   //   return this.jwtService.sign(payload, {
   //     secret: this.configService.authConfig.accessTokenSecret,
   //     expiresIn: this.configService.authConfig.jwtExpirationTime,
@@ -28,7 +28,7 @@ export class TokenService {
   //   });
   // }
 
-  // verifyAccessToken(token: string): AccessTokenPayload {
+  // verifyAccessToken(token: string): UserAuth {
   //   return this.jwtService.verify(token, {
   //     secret: this.configService.authConfig.accessTokenSecret,
   //   });

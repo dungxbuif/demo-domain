@@ -121,6 +121,17 @@ export class CleaningController {
     return this.cleaningService.getEventById(id);
   }
 
+  @Get('events/:id/cycle-events')
+  @ApiOperation({
+    summary: 'Get all events from the same cycle as the specified event',
+  })
+  @ApiParam({ name: 'id', description: 'Event ID' })
+  async getCycleEvents(
+    @Param('id', ParseIntPipe) eventId: number,
+  ): Promise<ScheduleEventEntity[]> {
+    return this.cleaningService.getCycleEventsByEventId(eventId);
+  }
+
   @Put('events/:id')
   @ApiOperation({ summary: 'Update cleaning event' })
   @ApiParam({ name: 'id', description: 'Event ID' })
