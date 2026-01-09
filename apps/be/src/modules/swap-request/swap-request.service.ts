@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { ScheduleType, SwapRequestStatus } from '@qnoffice/shared';
+import ScheduleEventParticipantEntity from '@src/modules/schedule/enties/schedule-event-participant.entity';
 import ScheduleEventEntity from '@src/modules/schedule/enties/schedule-event.entity';
-import SwapRequestEntity from '@src/modules/schedule/enties/swap-request.entity';
+import SwapRequestEntity from '@src/modules/swap-request/swap-request.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateSwapRequestDto } from './dtos/create-swap-request.dto';
 import { ReviewSwapRequestDto } from './dtos/review-swap-request.dto';
@@ -90,7 +91,13 @@ export class SwapRequestService {
   async review(id: number, dto: ReviewSwapRequestDto) {
     const swapRequest = await this.swapRequestRepository.findOne({
       where: { id },
-      relations: ['fromEvent', 'toEvent'],
+      relations: [
+        'fromEvent',
+        'toEvent',
+        'fromEvent.eventParticipants',
+        'toEvent.eventParticipants',
+        'requester',
+      ],
     });
 
     if (!swapRequest) {
@@ -99,6 +106,8 @@ export class SwapRequestService {
 
     if (swapRequest.type === ScheduleType.OPENTALK) {
       await this.handleReviewOpentalkSwap(swapRequest, dto);
+    } else if (swapRequest.type === ScheduleType.CLEANING) {
+      await this.handleReviewCleaningSwap(swapRequest, dto);
     }
   }
 
@@ -122,6 +131,68 @@ export class SwapRequestService {
         });
         await manager.update(ScheduleEventEntity, swapRequest.toEvent.id, {
           eventDate: fromDate,
+        });
+      }
+
+      await manager.update(SwapRequestEntity, swapRequest.id, dto);
+    });
+  }
+
+  async handleReviewCleaningSwap(
+    swapRequest: SwapRequestEntity,
+    dto: ReviewSwapRequestDto,
+  ): Promise<void> {
+    if (
+      swapRequest.type !== ScheduleType.CLEANING ||
+      !swapRequest.fromEvent ||
+      !swapRequest.toEvent ||
+      !swapRequest.requesterId
+    ) {
+      return;
+    }
+
+    const requesterId = swapRequest.requesterId;
+
+    await this.entityManager.transaction(async (manager) => {
+      if (dto.status === SwapRequestStatus.APPROVED) {
+        const fromEventId = swapRequest.fromEvent.id;
+        const toEventId = swapRequest.toEvent.id;
+
+        let targetStaffId: number;
+
+        if (swapRequest.targetStaffId) {
+          targetStaffId = swapRequest.targetStaffId;
+        } else {
+          const toParticipants = swapRequest.toEvent.eventParticipants || [];
+          const targetParticipant = toParticipants.find(
+            (p) => p.staffId !== requesterId,
+          );
+
+          if (!targetParticipant) {
+            throw new NotFoundException(
+              'No other participant found in target event to swap with',
+            );
+          }
+
+          targetStaffId = targetParticipant.staffId;
+        }
+
+        await manager.delete(ScheduleEventParticipantEntity, {
+          eventId: fromEventId,
+          staffId: requesterId,
+        });
+        await manager.delete(ScheduleEventParticipantEntity, {
+          eventId: toEventId,
+          staffId: targetStaffId,
+        });
+
+        await manager.save(ScheduleEventParticipantEntity, {
+          eventId: toEventId,
+          staffId: requesterId,
+        });
+        await manager.save(ScheduleEventParticipantEntity, {
+          eventId: fromEventId,
+          staffId: targetStaffId,
         });
       }
 

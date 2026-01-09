@@ -23,6 +23,7 @@ export interface ICreateSwapRequestDto {
   toEventId: number;
   reason: string;
   type: ScheduleType;
+  targetStaffId?: number;
 }
 
 export interface IReviewSwapRequestDto {

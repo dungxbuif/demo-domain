@@ -18,7 +18,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import ScheduleCycleEntity from '../schedule/enties/schedule-cycle.entity';
 import ScheduleEventParticipantEntity from '../schedule/enties/schedule-event-participant.entity';
 import ScheduleEventEntity from '../schedule/enties/schedule-event.entity';
-import SwapRequestEntity from '../schedule/enties/swap-request.entity';
+import SwapRequestEntity from '../swap-request/swap-request.entity';
 import { CreateOpentalkCycleDto } from './dtos/create-opentalk-cycle.dto';
 import { CreateOpentalkEventDto } from './dtos/create-opentalk-event.dto';
 import { OpentalkQueryDto } from './dtos/opentalk-query.dto';

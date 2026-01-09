@@ -17,45 +17,111 @@ export class CronService {
     private readonly appLogService: AppLogService,
   ) {}
 
-  @Cron('0 0 * * *', {
-    name: 'mark-past-events-completed',
+  @Cron('0 0 * * 2-6', {
+    name: 'mark-cleaning-events-completed',
     timeZone: 'Asia/Bangkok',
   })
-  async markPastEventsCompleted(): Promise<void> {
+  async markCleaningEventsCompleted(): Promise<void> {
     const journeyId = uuidv4();
-    this.logger.log('=== CRON: Mark Past Events Completed (00:00 UTC+7) ===');
+    const executionTime = new Date();
+    
+    this.logger.log(
+      '=== CRON: Mark Cleaning Events Completed (00:00 Tue-Sat UTC+7) ===',
+    );
 
     this.appLogService.journeyLog(
       journeyId,
-      'Starting mark past events completed cron job',
+      'Starting cleaning events completion cron job (Tuesday-Saturday)',
       'CronService',
-      { cronJob: 'mark-past-events-completed' },
+      {
+        cronJob: 'mark-cleaning-events-completed',
+        dayOfWeek: executionTime.getDay(),
+        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
+        executionTime: executionTime.toISOString(),
+        timezone: 'Asia/Bangkok',
+        localTime: executionTime.toLocaleString('en-US', {
+          timeZone: 'Asia/Bangkok',
+        }),
+      },
     );
 
     try {
       this.appLogService.stepLog(
         1,
-        'Executing parallel cleanup for cleaning and opentalk events',
+        'Executing cleaning events cleanup',
         'CronService',
         journeyId,
       );
 
-      await Promise.all([
-        this.cleaningCronService.markPastEventsCompleted(),
-        this.opentalkCronService.markPastEventsCompleted(),
-      ]);
+      await this.cleaningCronService.markPastEventsCompleted(journeyId);
 
-      this.logger.log('✅ Successfully marked past events as completed');
+      this.logger.log('✅ Successfully marked past cleaning events as completed');
       this.appLogService.journeyLog(
         journeyId,
-        '✅ Successfully marked past events as completed',
+        '✅ Successfully marked past cleaning events as completed',
         'CronService',
       );
     } catch (error) {
-      this.logger.error('❌ Error marking past events completed', error);
+      this.logger.error('❌ Error marking past cleaning events completed', error);
       this.appLogService.journeyError(
         journeyId,
-        '❌ Error marking past events completed',
+        '❌ Error marking past cleaning events completed',
+        error.stack,
+        'CronService',
+        { error: error.message },
+      );
+    }
+  }
+
+  @Cron('0 0 * * 0', {
+    name: 'mark-opentalk-events-completed',
+    timeZone: 'Asia/Bangkok',
+  })
+  async markOpentalkEventsCompleted(): Promise<void> {
+    const journeyId = uuidv4();
+    const executionTime = new Date();
+    
+    this.logger.log(
+      '=== CRON: Mark Opentalk Events Completed (00:00 Sunday UTC+7) ===',
+    );
+
+    this.appLogService.journeyLog(
+      journeyId,
+      'Starting opentalk events completion cron job (Sunday)',
+      'CronService',
+      {
+        cronJob: 'mark-opentalk-events-completed',
+        dayOfWeek: executionTime.getDay(),
+        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
+        executionTime: executionTime.toISOString(),
+        timezone: 'Asia/Bangkok',
+        localTime: executionTime.toLocaleString('en-US', {
+          timeZone: 'Asia/Bangkok',
+        }),
+      },
+    );
+
+    try {
+      this.appLogService.stepLog(
+        1,
+        'Executing opentalk events cleanup and activation',
+        'CronService',
+        journeyId,
+      );
+
+      await this.opentalkCronService.markPastEventsCompleted(journeyId);
+
+      this.logger.log('✅ Successfully marked past opentalk events as completed');
+      this.appLogService.journeyLog(
+        journeyId,
+        '✅ Successfully marked past opentalk events as completed',
+        'CronService',
+      );
+    } catch (error) {
+      this.logger.error('❌ Error marking past opentalk events completed', error);
+      this.appLogService.journeyError(
+        journeyId,
+        '❌ Error marking past opentalk events completed',
         error.stack,
         'CronService',
         { error: error.message },

@@ -14,7 +14,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppRequest } from '@src/common/types';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
-import SwapRequestEntity from '@src/modules/schedule/enties/swap-request.entity';
+import SwapRequestEntity from '@src/modules/swap-request/swap-request.entity';
 import { CreateSwapRequestDto } from './dtos/create-swap-request.dto';
 import { ReviewSwapRequestDto } from './dtos/review-swap-request.dto';
 import { SwapRequestQueryDto } from './dtos/swap-request-query.dto';

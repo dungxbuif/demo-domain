@@ -42,7 +42,10 @@ export function CreateSwapRequestModal({
 }: CreateSwapRequestModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [availableEvents, setAvailableEvents] = useState<ScheduleEvent[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<{
+    eventId: number;
+    staffId: number;
+  } | null>(null);
   const [reason, setReason] = useState('');
 
   const fetchAvailableEvents = useCallback(async () => {
@@ -64,15 +67,15 @@ export function CreateSwapRequestModal({
     if (open) {
       fetchAvailableEvents();
       setReason('');
-      setSelectedEvent(null);
+      setSelectedParticipant(null);
     }
   }, [open, fetchAvailableEvents]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedEvent) {
-      toast.error('Please select an event to swap to');
+    if (!selectedParticipant) {
+      toast.error('Please select a participant to swap with');
       return;
     }
 
@@ -81,16 +84,17 @@ export function CreateSwapRequestModal({
     try {
       const requestData: ICreateSwapRequestDto = {
         fromEventId: scheduleId,
-        toEventId: selectedEvent,
+        toEventId: selectedParticipant.eventId,
         reason: reason,
         type: ScheduleType.CLEANING,
+        targetStaffId: selectedParticipant.staffId,
       };
 
       await swapRequestClientService.createSwapRequest(requestData);
 
       toast.success('Swap request created successfully');
       setReason('');
-      setSelectedEvent(null);
+      setSelectedParticipant(null);
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
@@ -105,42 +109,73 @@ export function CreateSwapRequestModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Request Schedule Swap</DialogTitle>
+          <DialogTitle>Request Participant Swap</DialogTitle>
           <DialogDescription>
-            Select which cleaning event you&apos;d like to swap your schedule
-            with
+            Select a participant from another cleaning event to swap with. You
+            will take their event date and they will take yours.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="targetEvent">Swap with Event</Label>
+              <Label htmlFor="targetEvent">
+                Select Participant to Swap With
+              </Label>
               <Select
-                value={selectedEvent?.toString() || ''}
-                onValueChange={(value) => setSelectedEvent(parseInt(value))}
+                value={
+                  selectedParticipant
+                    ? `${selectedParticipant.eventId}-${selectedParticipant.staffId}`
+                    : ''
+                }
+                onValueChange={(value) => {
+                  const [eventId, staffId] = value.split('-').map(Number);
+                  setSelectedParticipant({ eventId, staffId });
+                }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select event to swap with" />
+                  <SelectValue placeholder="Select participant's event" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableEvents.map((event) => (
-                    <SelectItem key={event.id} value={event.id.toString()}>
-                      {event.title || 'Cleaning'} -{' '}
-                      {new Date(event.eventDate).toLocaleDateString()}
-                      {event.eventParticipants &&
-                        event.eventParticipants.length > 0 && (
-                          <span className="text-muted-foreground ml-2">
-                            (
-                            {event.eventParticipants
-                              .map(
-                                (ep) => ep.staff?.user?.name || ep.staff?.email,
-                              )
-                              .join(', ')}
-                            )
+                  {availableEvents.flatMap((event) => {
+                    const participants = event.eventParticipants || [];
+
+                    if (participants.length === 0) {
+                      return (
+                        <SelectItem
+                          key={event.id}
+                          value={event.id.toString()}
+                          disabled
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground">
+                              No participants
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(event.eventDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      );
+                    }
+
+                    return participants.map((participant) => (
+                      <SelectItem
+                        key={`${event.id}-${participant.staffId}`}
+                        value={`${event.id}-${participant.staffId}`}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {participant.staff?.user?.name ||
+                              participant.staff?.email ||
+                              'Unknown'}
                           </span>
-                        )}
-                    </SelectItem>
-                  ))}
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(event.eventDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ));
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -150,10 +185,14 @@ export function CreateSwapRequestModal({
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Explain why you need to swap your schedule..."
+                placeholder="Explain why you need to swap with this participant..."
                 rows={4}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Note: You will be assigned to their cleaning date, and they will
+                be assigned to your cleaning date.
+              </p>
             </div>
           </div>
           <DialogFooter>
@@ -164,7 +203,7 @@ export function CreateSwapRequestModal({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !selectedEvent}>
+            <Button type="submit" disabled={isLoading || !selectedParticipant}>
               {isLoading ? 'Submitting...' : 'Submit Request'}
             </Button>
           </DialogFooter>

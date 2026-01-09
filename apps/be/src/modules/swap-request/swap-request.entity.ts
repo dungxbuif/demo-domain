@@ -15,6 +15,9 @@ export default class SwapRequestEntity extends AbstractEntity {
   @Column({ type: 'int', nullable: true })
   requesterId: number | null;
 
+  @Column({ type: 'int', nullable: true })
+  targetStaffId?: number | null;
+
   @Column()
   reason: string;
 

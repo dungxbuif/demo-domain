@@ -1,9 +1,7 @@
 import { ICreateSwapRequestDto, ScheduleType } from '@qnoffice/shared';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSwapRequestDto implements ICreateSwapRequestDto {
-  scheduleId: number;
-  targetStaffId?: number | undefined;
   @IsNumber()
   fromEventId: number;
 
@@ -15,4 +13,8 @@ export class CreateSwapRequestDto implements ICreateSwapRequestDto {
 
   @IsEnum(ScheduleType)
   type: ScheduleType;
+
+  @IsOptional()
+  @IsNumber()
+  targetStaffId?: number;
 }

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import SwapRequestEntity from '@src/modules/schedule/enties/swap-request.entity';
+import SwapRequestEntity from '@src/modules/swap-request/swap-request.entity';
 import { SwapRequestController } from './swap-request.controller';
 import { SwapRequestService } from './swap-request.service';
 

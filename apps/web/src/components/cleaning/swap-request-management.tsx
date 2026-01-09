@@ -21,7 +21,10 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { hasPermission, PERMISSIONS } from '@/shared/auth/permissions';
 import { useAuth } from '@/shared/contexts/auth-context';
-import { cleaningClientService } from '@/shared/services/client/cleaning-client-service';
+import {
+  cleaningClientService,
+  CleaningEvent,
+} from '@/shared/services/client/cleaning-client-service';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
 import {
   ScheduleType,
@@ -36,7 +39,7 @@ import {
   Plus,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { CreateSwapRequestModal } from './create-swap-request-modal';
 
@@ -62,13 +65,11 @@ export function SwapRequestManagement({
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   );
-  const [userSchedules, setUserSchedules] = useState<any[]>([]);
+  const [userSchedules, setUserSchedules] = useState<CleaningEvent[]>([]);
 
-  // Get staff data from auth context
-  const [hasStaffAccess, setHasStaffAccess] = useState<boolean>(false);
   const userStaffId = user?.staffId;
 
-  const loadSwapRequests = async () => {
+  const loadSwapRequests = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -98,15 +99,13 @@ export function SwapRequestManagement({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [mode, userStaffId]);
 
   useEffect(() => {
-    // Set staff access based on auth context
-    setHasStaffAccess(!!user?.staffId);
     if (user?.staffId) {
       loadSwapRequests();
     }
-  }, [mode, user?.staffId]);
+  }, [user?.staffId, loadSwapRequests]);
   // Early return if no user
   if (!user) {
     return (
@@ -135,7 +134,7 @@ export function SwapRequestManagement({
   if (isUserMode && !canCreateRequests && !canManageRequests) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        You don't have permission to access swap requests.
+        You don&apos;t have permission to access swap requests.
       </div>
     );
   }
@@ -143,7 +142,7 @@ export function SwapRequestManagement({
   if (isHRMode && !canApproveRequests) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        You don't have permission to approve swap requests.
+        You don&apos;t have permission to approve swap requests.
       </div>
     );
   }
@@ -217,7 +216,9 @@ export function SwapRequestManagement({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">
-          {mode === 'hr' ? 'HR Approval Queue' : 'All Swap Requests'}
+          {mode === 'hr'
+            ? 'Participant Swap Approval Queue'
+            : 'My Swap Requests'}
         </h2>
         {mode === 'user' && canCreateRequests && (
           <>
@@ -242,8 +243,8 @@ export function SwapRequestManagement({
                         key={schedule.id}
                         value={schedule.id.toString()}
                       >
-                        {schedule.topic || 'Cleaning'} -{' '}
-                        {new Date(schedule.date).toLocaleDateString()}
+                        {schedule.title || 'Cleaning'} -{' '}
+                        {new Date(schedule.eventDate).toLocaleDateString()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -285,8 +286,8 @@ export function SwapRequestManagement({
                 <ArrowRightLeft className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>
                   {mode === 'hr'
-                    ? 'No swap requests pending approval'
-                    : 'You have not submitted any swap requests'}
+                    ? 'No participant swap requests pending approval'
+                    : 'You have not submitted any participant swap requests'}
                 </p>
               </div>
             </CardContent>
@@ -307,27 +308,39 @@ export function SwapRequestManagement({
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="flex items-center space-x-2 mb-2">
-                          <Calendar className="h-4 w-4 text-red-600" />
-                          <span className="font-medium text-red-900">
-                            From Event
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium text-blue-900">
+                            Your Current Schedule
                           </span>
                         </div>
-                        <p className="text-sm text-red-800">
-                          Event Date: {request?.fromEvent?.eventDate}
+                        <p className="text-sm text-blue-800">
+                          Date: {request?.fromEvent?.eventDate}
+                        </p>
+                        <p className="text-sm text-blue-700 mt-1">
+                          Participants:{' '}
+                          {request?.fromEvent?.eventParticipants
+                            ?.map((p) => p.staff?.user?.name || p.staff?.email)
+                            .join(', ') || 'N/A'}
                         </p>
                       </div>
 
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                         <div className="flex items-center space-x-2 mb-2">
-                          <Calendar className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-green-900">
-                            To Event
+                          <Calendar className="h-4 w-4 text-purple-600" />
+                          <span className="font-medium text-purple-900">
+                            Swap With Schedule
                           </span>
                         </div>
-                        <p className="text-sm text-green-800">
-                          Event Date: {request?.toEvent?.eventDate}
+                        <p className="text-sm text-purple-800">
+                          Date: {request?.toEvent?.eventDate}
+                        </p>
+                        <p className="text-sm text-purple-700 mt-1">
+                          Participants:{' '}
+                          {request?.toEvent?.eventParticipants
+                            ?.map((p) => p.staff?.user?.name || p.staff?.email)
+                            .join(', ') || 'N/A'}
                         </p>
                       </div>
                     </div>
