@@ -97,10 +97,22 @@ export function SwapRequestsTable({ requests }: SwapRequestsTableProps) {
 
   const columns: ColumnDef<SwapRequest>[] = [
     {
-      accessorKey: 'schedule.date',
-      header: 'Schedule Date',
+      accessorKey: 'fromEvent.eventDate',
+      header: 'From Date',
       cell: ({ row }) => {
-        const date = new Date(row.original.schedule.date);
+        const fromEvent = row.original.fromEvent;
+        if (!fromEvent?.eventDate) return <div>N/A</div>;
+        const date = new Date(fromEvent.eventDate);
+        return <div>{format(date, 'MMM dd, yyyy')}</div>;
+      },
+    },
+    {
+      accessorKey: 'toEvent.eventDate',
+      header: 'To Date',
+      cell: ({ row }) => {
+        const toEvent = row.original.toEvent;
+        if (!toEvent?.eventDate) return <div>N/A</div>;
+        const date = new Date(toEvent.eventDate);
         return <div>{format(date, 'MMM dd, yyyy')}</div>;
       },
     },
@@ -117,15 +129,15 @@ export function SwapRequestsTable({ requests }: SwapRequestsTableProps) {
       },
     },
     {
-      accessorKey: 'targetStaff',
+      accessorKey: 'toEvent.eventParticipants',
       header: 'Target Staff',
       cell: ({ row }) => {
-        const target = row.original.targetStaff;
-        if (!target)
+        const targetStaff = row.original.toEvent?.eventParticipants?.[0]?.staff;
+        if (!targetStaff)
           return <span className="text-muted-foreground">Auto-assign</span>;
         return (
           <div className="font-medium">
-            {target?.user?.name || target?.email || 'N/A'}
+            {targetStaff?.user?.name || targetStaff?.email || 'N/A'}
           </div>
         );
       },

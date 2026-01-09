@@ -62,12 +62,12 @@ export function UpdateSlideDialog({
 
     setIsFetching(true);
     try {
-      const submission =
-        await opentalkClientService.getSlideSubmission(eventId);
-      if (submission) {
-        setSlidesUrl(submission.slidesUrl || '');
-        setTopic(submission.topic || '');
-        setNotes(submission.notes || '');
+      const response = await opentalkClientService.getEventSlide(eventId);
+      const slide = response.data.data; // response.data is the ApiResponse, response.data.data is the OpentalkSlide
+      if (slide) {
+        setSlidesUrl(slide.slideUrl || '');
+        setTopic(''); // topic may not be available in slide response
+        setNotes('');
       } else {
         setSlidesUrl('');
         setTopic('');
@@ -130,11 +130,8 @@ export function UpdateSlideDialog({
 
     setIsLoading(true);
     try {
-      await opentalkClientService.submitSlide({
-        eventId,
-        slidesUrl: finalUrl,
-        topic: topic.trim() || undefined,
-        notes: notes.trim() || undefined,
+      await opentalkClientService.updateSlide(eventId, {
+        slideUrl: finalUrl,
       });
 
       toast.success('Slide submitted successfully');

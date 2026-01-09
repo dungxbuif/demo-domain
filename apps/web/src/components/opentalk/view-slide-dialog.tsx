@@ -44,8 +44,9 @@ export function ViewSlideDialog({
 
     setIsFetching(true);
     try {
-      const data = await opentalkClientService.getSlideSubmission(eventId);
-      setSubmission(data);
+      const response = await opentalkClientService.getEventSlide(eventId);
+      const slide = response.data.data; // response.data is ApiResponse, response.data.data is OpentalkSlide
+      setSubmission(slide);
     } catch (error) {
       console.error('Failed to fetch slide submission:', error);
     } finally {

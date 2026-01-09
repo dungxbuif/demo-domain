@@ -1,9 +1,9 @@
 import {
-  CreateCycleDto,
-  CreateEventDto,
-  ScheduleCycle,
-  ScheduleEvent,
-  UpdateEventDto,
+    CreateCycleDto,
+    CreateEventDto,
+    ScheduleCycle,
+    ScheduleEvent,
+    UpdateEventDto,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
 
@@ -25,7 +25,7 @@ export class ScheduleServerService extends BaseServerService {
         ? `${this.baseUrl}/cycles?type=${type}`
         : `${this.baseUrl}/cycles`;
       const response = await this.get<ScheduleCycle[]>(url);
-      return response || [];
+      return response.data || [];
     } catch (error) {
       console.error('Failed to fetch cycles:', error);
       throw error;
@@ -37,7 +37,7 @@ export class ScheduleServerService extends BaseServerService {
       const response = await this.get<ScheduleCycle>(
         `${this.baseUrl}/cycles/${id}`,
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to fetch cycle:', error);
       throw error;
@@ -50,7 +50,7 @@ export class ScheduleServerService extends BaseServerService {
         `${this.baseUrl}/cycles`,
         data,
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to create cycle:', error);
       throw error;
@@ -76,7 +76,7 @@ export class ScheduleServerService extends BaseServerService {
         : `${this.baseUrl}/events`;
 
       const response = await this.get<ScheduleEvent[]>(url);
-      return response || [];
+      return response.data || [];
     } catch (error) {
       console.error('Failed to fetch events:', error);
       throw error;
@@ -88,7 +88,7 @@ export class ScheduleServerService extends BaseServerService {
       const response = await this.get<ScheduleEvent[]>(
         `${this.baseUrl}/cycles/${cycleId}/events`,
       );
-      return response || [];
+      return response.data || [];
     } catch (error) {
       console.error('Failed to fetch events by cycle:', error);
       throw error;
@@ -100,7 +100,7 @@ export class ScheduleServerService extends BaseServerService {
       const response = await this.get<ScheduleEvent>(
         `${this.baseUrl}/events/${id}`,
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to fetch event:', error);
       throw error;
@@ -113,7 +113,7 @@ export class ScheduleServerService extends BaseServerService {
         `${this.baseUrl}/events`,
         data,
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to create event:', error);
       throw error;
@@ -126,7 +126,7 @@ export class ScheduleServerService extends BaseServerService {
         `${this.baseUrl}/events/${id}`,
         data,
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to update event:', error);
       throw error;

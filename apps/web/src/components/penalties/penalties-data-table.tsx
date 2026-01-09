@@ -69,9 +69,9 @@ export function PenaltiesDataTable({
       cell: ({ row }) => row.original.user_id,
     },
     {
-      accessorKey: 'penaltyType',
+      accessorKey: 'penalty_type_id',
       header: 'Type',
-      cell: ({ row }) => row.original.penaltyType?.name || 'Unknown',
+      cell: ({ row }) => `Type ${row.original.penalty_type_id}`,
     },
     {
       accessorKey: 'date',
@@ -143,7 +143,7 @@ export function PenaltiesDataTable({
                 <div>
                   <p className="text-sm text-muted-foreground">Type</p>
                   <p className="font-medium">
-                    {selectedPenalty.penaltyType?.name}
+                    Type {selectedPenalty.penalty_type_id}
                   </p>
                 </div>
                 <div>
@@ -175,16 +175,6 @@ export function PenaltiesDataTable({
                   {selectedPenalty.reason}
                 </p>
               </div>
-              {selectedPenalty.penaltyType?.description && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Type Description
-                  </p>
-                  <p className="text-sm bg-muted p-3 rounded-md">
-                    {selectedPenalty.penaltyType.description}
-                  </p>
-                </div>
-              )}
               {selectedPenalty.evidence_urls &&
                 selectedPenalty.evidence_urls.length > 0 && (
                   <div>

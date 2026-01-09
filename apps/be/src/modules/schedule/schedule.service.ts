@@ -69,9 +69,10 @@ export class ScheduleService {
     const queryBuilder = this.eventRepository
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.cycle', 'cycle')
-      .leftJoinAndSelect('event.participants', 'participants')
-      .leftJoinAndSelect('participants.user', 'user')
-      .leftJoinAndSelect('participants.branch', 'branch');
+      .leftJoinAndSelect('event.eventParticipants', 'eventParticipants')
+      .leftJoinAndSelect('eventParticipants.staff', 'staff')
+      .leftJoinAndSelect('staff.user', 'user')
+      .leftJoinAndSelect('staff.branch', 'branch');
 
     if (query.type) {
       queryBuilder.andWhere('event.type = :type', { type: query.type });
@@ -100,7 +101,12 @@ export class ScheduleService {
   async getEventsByCycle(cycleId: number): Promise<ScheduleEventEntity[]> {
     return this.eventRepository.find({
       where: { cycleId },
-      relations: ['participants', 'participants.user', 'participants.branch'],
+      relations: [
+        'eventParticipants',
+        'eventParticipants.staff',
+        'eventParticipants.staff.user',
+        'eventParticipants.staff.branch',
+      ],
       order: { eventDate: 'ASC' },
     });
   }
@@ -131,9 +137,10 @@ export class ScheduleService {
       where: { id },
       relations: [
         'cycle',
-        'participants',
-        'participants.user',
-        'participants.branch',
+        'eventParticipants',
+        'eventParticipants.staff',
+        'eventParticipants.staff.user',
+        'eventParticipants.staff.branch',
       ],
     });
   }

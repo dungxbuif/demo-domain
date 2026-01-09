@@ -60,12 +60,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       const response = await authService.me();
       console.log('[AuthContext] Profile response:', response);
 
-      if (response.data?.data?.user) {
-        setUser(response.data.data.user);
+      if (response?.data?.user) {
+        setUser(response.data.user);
         setIsAuthenticated(true);
         console.log(
           '[AuthContext] User authenticated:',
-          response.data.data.user.email,
+          response.data.user.email,
         );
       } else {
         console.warn('[AuthContext] No user in response');

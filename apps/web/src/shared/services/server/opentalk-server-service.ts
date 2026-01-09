@@ -23,7 +23,7 @@ export class OpentalkServerService extends BaseServerService {
 
   async getCycles() {
     const response = await this.get<ScheduleCycle[]>(`${this.baseUrl}/cycles`);
-    return response || [];
+    return response.data || [];
   }
 
   async getCycleById(id: number) {
@@ -45,14 +45,14 @@ export class OpentalkServerService extends BaseServerService {
 
   async getEvents() {
     const response = await this.get<OpentalkEvent[]>(`${this.baseUrl}/events`);
-    return response || [];
+    return response.data || [];
   }
 
   async getEventsByCycle(cycleId: number) {
     const response = await this.get<OpentalkEvent[]>(
       `${this.baseUrl}/cycles/${cycleId}/events`,
     );
-    return response || [];
+    return response.data || [];
   }
 
   async getEventById(id: number) {
@@ -69,23 +69,26 @@ export class OpentalkServerService extends BaseServerService {
 
   // Additional operations
   async getSpreadsheetData(): Promise<OpentalkSpreadsheetData> {
-    return this.get<OpentalkSpreadsheetData>(`${this.baseUrl}/spreadsheet`);
+    const response = await this.get<OpentalkSpreadsheetData>(
+      `${this.baseUrl}/spreadsheet`,
+    );
+    return response.data;
   }
 
   async swapEvents(eventId1: number, eventId2: number): Promise<void> {
-    return this.post<void>(`${this.baseUrl}/swap`, { eventId1, eventId2 });
+    await this.post<void>(`${this.baseUrl}/swap`, { eventId1, eventId2 });
   }
 
   async bulkAssignEvents(data: {
     eventIds: number[];
     participantIds: number[];
   }): Promise<void> {
-    return this.post<void>(`${this.baseUrl}/bulk-assign`, data);
+    await this.post<void>(`${this.baseUrl}/bulk-assign`, data);
   }
 
   async getConflicts(): Promise<any[]> {
     const response = await this.get<any[]>(`${this.baseUrl}/conflicts`);
-    return response || [];
+    return response.data || [];
   }
 
   // Legacy compatibility methods

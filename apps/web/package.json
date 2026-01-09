@@ -30,6 +30,7 @@
     "@tanstack/react-query-devtools": "^5.91.2",
     "@tanstack/react-table": "^8.21.3",
     "@types/js-cookie": "^3.0.6",
+    "@types/react-big-calendar": "^1.16.3",
     "autoprefixer": "^10.4.23",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
@@ -42,6 +43,7 @@
     "next": "16.1.1",
     "postcss": "^8.5.6",
     "react": "19.2.3",
+    "react-big-calendar": "^1.19.4",
     "react-day-picker": "^9.13.0",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.70.0",
@@ -52,6 +54,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/minimatch": "^3.0.5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

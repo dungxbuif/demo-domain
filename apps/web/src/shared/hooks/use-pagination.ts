@@ -1,10 +1,10 @@
 'use client';
 
 import {
-  PaginationParams,
-  SearchOrder,
-  UsePaginationOptions,
-  UsePaginationReturn,
+    PaginationParams,
+    SearchOrder,
+    UsePaginationOptions,
+    UsePaginationReturn,
 } from '@qnoffice/shared';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -34,7 +34,7 @@ export function usePagination(
   const currentPageSize =
     parseInt(searchParams.get('take') || '') || defaultPageSize;
   const currentOrder =
-    (searchParams.get('order') as 'ASC' | 'DESC') || defaultOrder;
+    (searchParams.get('order') as SearchOrder) || defaultOrder;
   const currentQuery = searchParams.get('q') || '';
 
   // Update URL with new parameters
@@ -107,7 +107,7 @@ export function usePagination(
     updateURL({ q: query, page: 1 }); // Reset to first page on search
   };
 
-  const handleOrderChange = (order: 'ASC' | 'DESC') => {
+  const handleOrderChange = (order: SearchOrder) => {
     updateURL({ order, page: 1 }); // Reset to first page on order change
   };
 

@@ -1,19 +1,21 @@
-import { CreateBranchDto, UpdateBranchDto } from '@/shared/types/branch';
-
-import { branchService } from '@/shared/lib/services/branch-service';
-import { PaginationOptions } from '@/shared/types';
+import { branchService } from '@/shared/services/client/branch.service';
+import {
+  CreateBranchDto,
+  IPaginateOptionsDto,
+  UpdateBranchDto,
+} from '@qnoffice/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const BRANCH_KEYS = {
   all: ['branches'] as const,
   lists: () => [...BRANCH_KEYS.all, 'list'] as const,
-  list: (options: PaginationOptions) =>
+  list: (options: IPaginateOptionsDto) =>
     [...BRANCH_KEYS.lists(), options] as const,
   details: () => [...BRANCH_KEYS.all, 'detail'] as const,
   detail: (id: string) => [...BRANCH_KEYS.details(), id] as const,
 };
 
-export function useBranches(options: PaginationOptions = {}) {
+export function useBranches(options: IPaginateOptionsDto ) {
   return useQuery({
     queryKey: BRANCH_KEYS.list(options),
     queryFn: () => branchService.getAll(options),

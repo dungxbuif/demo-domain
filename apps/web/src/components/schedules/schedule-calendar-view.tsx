@@ -2,8 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { scheduleService } from '@/shared/lib/services/schedule-service';
-import { ScheduleStatus, ScheduleType } from '@qnoffice/shared';
+import { EventStatus, ScheduleType } from '@qnoffice/shared';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { Loader2 } from 'lucide-react';
@@ -30,7 +29,7 @@ interface CalendarEvent {
   end: Date;
   resource: {
     type: ScheduleType;
-    status: ScheduleStatus;
+    status: EventStatus;
     staffName: string;
     assignmentId: number;
   };
@@ -55,11 +54,12 @@ export function ScheduleCalendarView() {
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 3); // Load next 3 months
 
-      const assignments = await scheduleService.getAssignments({
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
-        status: ScheduleStatus.PENDING,
-      });
+      // Fetch assignments from API
+      const response = await fetch(
+        `/api/schedules/assignments?startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}&status=${EventStatus.PENDING}`,
+      );
+      const data = await response.json();
+      const assignments = data.result || [];
 
       if (assignments) {
         const calendarEvents: CalendarEvent[] = assignments.map(

@@ -10,6 +10,9 @@ export interface Penalty {
   evidence_urls: string[];
   status: PenaltyStatus;
   campaign_id?: number;
+  // Optional relations (populated when loaded with relations)
+  penaltyType?: PenaltyType;
+  campaign?: any; // TODO: Define Campaign interface
   created_at: string;
   updated_at: string;
 }

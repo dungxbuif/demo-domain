@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { PERMISSIONS, ProtectedComponent } from '@/shared/auth';
 import { usePagination } from '@/shared/hooks/use-pagination';
-import { PaginationState, SearchOrder } from '@qnoffice/shared';
+import { EventStatus, PaginationState, SearchOrder } from '@qnoffice/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 
@@ -26,13 +26,6 @@ enum SlideStatus {
   SUBMITTED = 'SUBMITTED',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
-}
-
-enum ScheduleStatus {
-  SCHEDULED = 'SCHEDULED',
-  COMPLETED = 'COMPLETED',
-  SWAPPED = 'SWAPPED',
-  CANCELLED = 'CANCELLED',
 }
 
 // Frontend-specific type for opentalk schedule display
@@ -47,7 +40,7 @@ interface OpentalkSchedule {
   };
   topic?: string;
   slideStatus: SlideStatus;
-  scheduleStatus: ScheduleStatus;
+  scheduleStatus: EventStatus;
   slideUrl?: string;
 }
 
@@ -186,12 +179,12 @@ export function OpentalkScheduleDataTable({
     );
   };
 
-  const getScheduleStatusBadge = (status: ScheduleStatus) => {
-    const variants: Record<ScheduleStatus, { variant: any; label: string }> = {
-      [ScheduleStatus.SCHEDULED]: { variant: 'default', label: 'Scheduled' },
-      [ScheduleStatus.COMPLETED]: { variant: 'secondary', label: 'Completed' },
-      [ScheduleStatus.SWAPPED]: { variant: 'outline', label: 'Swapped' },
-      [ScheduleStatus.CANCELLED]: {
+  const getEventStatusBadge = (status: EventStatus) => {
+    const variants: Record<EventStatus, { variant: any; label: string }> = {
+      [EventStatus.ACTIVE]: { variant: 'default', label: 'Scheduled' },
+      [EventStatus.COMPLETED]: { variant: 'secondary', label: 'Completed' },
+      [EventStatus.PENDING]: { variant: 'outline', label: 'Swapped' },
+      [EventStatus.CANCELLED]: {
         variant: 'destructive',
         label: 'Cancelled',
       },
@@ -260,7 +253,7 @@ export function OpentalkScheduleDataTable({
     {
       accessorKey: 'scheduleStatus',
       header: 'Status',
-      cell: ({ row }) => getScheduleStatusBadge(row.original.scheduleStatus),
+      cell: ({ row }) => getEventStatusBadge(row.original.scheduleStatus),
     },
     {
       accessorKey: 'slideUrl',
@@ -289,7 +282,7 @@ export function OpentalkScheduleDataTable({
           schedule.slideStatus === SlideStatus.REJECTED;
         const canApprove = schedule.slideStatus === SlideStatus.SUBMITTED;
         const canSwap =
-          schedule.scheduleStatus === ScheduleStatus.SCHEDULED && !isPast;
+          schedule.scheduleStatus === EventStatus.PENDING && !isPast;
 
         return (
           <DropdownMenu>

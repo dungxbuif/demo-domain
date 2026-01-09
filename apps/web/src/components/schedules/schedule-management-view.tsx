@@ -5,17 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { scheduleService } from '@/shared/lib/services/schedule-service';
+import { scheduleClientService } from '@/shared/services/client/schedule-client-service';
 import { cn } from '@/shared/utils';
-import { ScheduleStatus, ScheduleType } from '@qnoffice/shared';
+import { EventStatus, ScheduleType } from '@qnoffice/shared';
 import { ArrowUpDown, Loader2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -24,7 +24,7 @@ interface Assignment {
   type: ScheduleType;
   cycleId: string;
   assignedDate: string;
-  status: ScheduleStatus;
+  status: EventStatus;
   staff: {
     id: number;
     email: string;
@@ -66,9 +66,9 @@ export function ScheduleManagementView() {
   const loadAssignments = async () => {
     try {
       setLoading(true);
-      const data = await scheduleService.getAssignments({
+      const data = await scheduleClientService.getAssignments({
         type: selectedType,
-        status: ScheduleStatus.PENDING,
+        status: EventStatus.PENDING,
       });
 
       if (data) {
@@ -140,7 +140,7 @@ export function ScheduleManagementView() {
     }
 
     try {
-      await scheduleService.manualSwap(selectedIds[0], selectedIds[1]);
+      await scheduleClientService.manualSwap(selectedIds[0], selectedIds[1]);
       setSelectedAssignments(new Set());
       setSwapMode(false);
       loadAssignments(); // Reload data
@@ -151,7 +151,7 @@ export function ScheduleManagementView() {
     }
   };
 
-  const getStatusBadge = (status: ScheduleStatus, isSwapped: boolean) => {
+  const getStatusBadge = (status: EventStatus, isSwapped: boolean) => {
     if (isSwapped) {
       return (
         <Badge
@@ -164,13 +164,13 @@ export function ScheduleManagementView() {
     }
 
     switch (status) {
-      case ScheduleStatus.PENDING:
+      case EventStatus.PENDING:
         return <Badge variant="outline">Pending</Badge>;
-      case ScheduleStatus.ACTIVE:
+      case EventStatus.ACTIVE:
         return <Badge variant="default">Active</Badge>;
-      case ScheduleStatus.COMPLETED:
+      case EventStatus.COMPLETED:
         return <Badge variant="secondary">Completed</Badge>;
-      case ScheduleStatus.CANCELLED:
+      case EventStatus.CANCELLED:
         return <Badge variant="destructive">Cancelled</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;

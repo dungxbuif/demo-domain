@@ -12,7 +12,7 @@
       "dev": "nest start --debug  --watch",
       "start:bot": "nest start --entryFile bot/main",
       "dev:bot": "nest start --debug=9230 --watch --entryFile bot/main",
-      "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
+      "typeorm": "typeorm-ts-node-commonjs",
       "migrate": "npm run typeorm -- migration:run -d ormconfig.ts",
       "migration:generate": "npm run typeorm -- migration:generate ./migrations/$npm_config_name -d ormconfig.ts",
       "migration:create": "npm run typeorm -- migration:create ./migrations/$npm_config_name",

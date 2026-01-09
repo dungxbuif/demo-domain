@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getPenalties } from '@/shared/lib/penalty-api';
 import { Penalty, PenaltyStatus, SearchOrder } from '@qnoffice/shared';
 import { format } from 'date-fns';
 import { AlertCircle, CheckCircle2, Eye } from 'lucide-react';
@@ -29,11 +28,10 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
 
   const loadPenalties = async () => {
     try {
-      const data = await getPenalties({
-        page,
-        take: 10,
-        order: SearchOrder.DESC,
-      });
+      const response = await fetch(
+        `/api/penalties?page=${page}&take=10&order=${SearchOrder.DESC}`,
+      );
+      const data = await response.json();
       setPenalties(data.result || []);
       setTotal(data.total);
     } catch (error) {
@@ -103,7 +101,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
                   User #{penalty.user_id}
                 </TableCell>
               )}
-              <TableCell>{penalty.penaltyType?.name || 'Unknown'}</TableCell>
+              <TableCell>Type {penalty.penalty_type_id}</TableCell>
               <TableCell>{format(new Date(penalty.date), 'PP')}</TableCell>
               <TableCell className="max-w-xs truncate">
                 {penalty.reason}

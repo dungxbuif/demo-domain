@@ -5,19 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getRoleLabel, PERMISSIONS, ProtectedComponent } from '@/shared/auth';
 import { usePagination } from '@/shared/hooks/use-pagination';
 import {
-  PaginationState,
-  SearchOrder,
-  Staff,
-  StaffStatus,
+    PaginationState,
+    SearchOrder,
+    Staff,
+    StaffStatus,
 } from '@qnoffice/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
@@ -76,11 +76,7 @@ export function StaffDataTable({
       header: 'Role',
       cell: ({ row }) => (
         <Badge variant="outline">
-          {getRoleLabel(
-            row.original.role !== null && row.original.role !== undefined
-              ? row.original.role
-              : row?.original?.user?.role,
-          ) || 'N/A'}
+          {getRoleLabel(row.original.role) || 'N/A'}
         </Badge>
       ),
     },

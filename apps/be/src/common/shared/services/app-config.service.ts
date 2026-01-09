@@ -5,7 +5,6 @@ import entities from '@src/common/database/entities';
 import { UserSubscriber } from '@src/common/database/entity-subscribers/user-subscriber';
 import { SnakeNamingStrategy } from '@src/common/database/snake-naming.strategy';
 import joinUrlPaths from '@src/common/utils/joinUrlPaths';
-import { OpentalkSlideSubscriber } from '@src/modules/opentalk/subscribers/opentalk-slide.subscriber';
 import { isNil } from 'lodash';
 
 @Injectable()
@@ -83,8 +82,8 @@ export class AppConfigService {
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
       namingStrategy: new SnakeNamingStrategy(),
-      subscribers: [UserSubscriber, OpentalkSlideSubscriber],
-      synchronize: true,
+      subscribers: [UserSubscriber],
+      synchronize: false,
       entities,
     };
   }
@@ -100,7 +99,7 @@ export class AppConfigService {
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
       namingStrategy: new SnakeNamingStrategy(),
-      synchronize: true,
+      synchronize: false,
       entities,
     };
   }
