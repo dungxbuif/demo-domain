@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PERMISSIONS, ProtectedComponent } from '@/shared/auth';
 import { usePagination } from '@/shared/hooks/use-pagination';
@@ -38,8 +38,8 @@ export function HolidayDataTable({
     defaultOrder: SearchOrder.DESC,
   });
 
-  const isPastDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const isPastDate = (dateOrString: string | Date) => {
+    const date = new Date(dateOrString);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date < today;

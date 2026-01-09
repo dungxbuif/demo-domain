@@ -1,15 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDateString,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
+    EventStatus,
+    IScheduleQueryDto,
+} from '@qnoffice/shared';
+import {
+    IsDateString,
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsString,
 } from 'class-validator';
 
-import { EventStatus } from '@qnoffice/shared';
-
-export class ScheduleQueryDto {
+export class ScheduleQueryDto implements IScheduleQueryDto {
   @ApiProperty({ required: false, description: 'Schedule type' })
   @IsOptional()
   @IsString()

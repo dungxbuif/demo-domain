@@ -1,25 +1,17 @@
 import {
-  ApiResponse,
-  Branch,
-  CreateBranchDto,
-  IPaginationDto,
-  UpdateBranchDto,
+    ApiResponse,
+    Branch,
+    ICreateBranchDto,
+    IPaginationDto,
+    IUpdateBranchDto,
+    SearchParams,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
-
-export interface GetBranchesParams {
-  page?: number;
-  take?: number;
-  order?: 'ASC' | 'DESC';
-  q?: string;
-}
 
 export class BranchServerService extends BaseServerService {
   private readonly baseUrl = '/branches';
 
-  async getAll(
-    params: GetBranchesParams = {},
-  ): Promise<IPaginationDto<Branch>> {
+  async getAll(params: SearchParams = {}): Promise<IPaginationDto<Branch>> {
     try {
       const searchParams = new URLSearchParams();
 
@@ -48,13 +40,13 @@ export class BranchServerService extends BaseServerService {
     return this.get<Branch>(`${this.baseUrl}/${id}`);
   }
 
-  async create(data: CreateBranchDto): Promise<ApiResponse<Branch>> {
+  async create(data: ICreateBranchDto): Promise<ApiResponse<Branch>> {
     return this.post<Branch>(this.baseUrl, data);
   }
 
   async update(
     id: number,
-    data: UpdateBranchDto,
+    data: IUpdateBranchDto,
   ): Promise<ApiResponse<Branch>> {
     return this.put<Branch>(`${this.baseUrl}/${id}`, data);
   }

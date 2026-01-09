@@ -2,13 +2,13 @@ import { HolidayDataTable } from '@/components/holidays/holiday-data-table';
 import { HolidayPageActions } from '@/components/holidays/holiday-page-actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  getServerPaginationParams,
-  SearchParams,
+    getServerPaginationParams,
+    SearchParams,
 } from '@/shared/lib/base-paginated-service';
 import {
-  GetHolidaysParams,
-  holidayServerService,
+    holidayServerService,
 } from '@/shared/services/server/holiday-server-service';
+import { IHolidayQuery } from '@qnoffice/shared';
 
 interface HolidayPageProps {
   searchParams?: SearchParams;
@@ -17,7 +17,7 @@ interface HolidayPageProps {
 export default async function HolidayPage({ searchParams }: HolidayPageProps) {
   const resolvedSearchParams = await searchParams;
 
-  const params: GetHolidaysParams = getServerPaginationParams(
+  const params: IHolidayQuery = getServerPaginationParams(
     resolvedSearchParams || {},
     { defaultPage: 1, defaultPageSize: 10, defaultOrder: 'DESC' },
   );

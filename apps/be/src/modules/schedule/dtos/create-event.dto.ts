@@ -1,14 +1,14 @@
-import { ScheduleType } from '@qnoffice/shared';
+import { ICreateEventDto, ScheduleType } from '@qnoffice/shared';
 import {
-  IsArray,
-  IsDateString,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
+    IsArray,
+    IsDateString,
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsString,
 } from 'class-validator';
 
-export class CreateEventDto {
+export class CreateEventDto implements ICreateEventDto {
   @IsString()
   title: string;
 

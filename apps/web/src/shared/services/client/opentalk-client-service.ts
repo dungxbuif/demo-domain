@@ -32,7 +32,7 @@ export interface OpentalkSlide {
   updatedAt: string;
 }
 
-export interface UpdateEventDto {
+export interface IUpdateEventDto {
   title?: string;
   description?: string;
   eventDate?: string;
@@ -40,7 +40,7 @@ export interface UpdateEventDto {
   notes?: string;
 }
 
-export interface SwapEventsDto {
+export interface ISwapEventsDto {
   eventId1: number;
   eventId2: number;
 }
@@ -48,7 +48,7 @@ export interface SwapEventsDto {
 class OpentalkClientService {
   private readonly baseUrl = '/opentalk';
 
-  async updateEvent(eventId: number, data: UpdateEventDto) {
+  async updateEvent(eventId: number, data: IUpdateEventDto) {
     return baseApi.put<ApiResponse<OpentalkEvent>>(
       `${this.baseUrl}/events/${eventId}`,
       data,

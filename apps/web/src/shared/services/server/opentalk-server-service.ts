@@ -1,10 +1,12 @@
 import {
-  CreateOpentalkCycleDto,
-  CreateOpentalkEventDto,
-  OpentalkEvent,
-  ScheduleCycle,
-  UpdateOpentalkCycleDto,
-  UpdateOpentalkEventDto,
+    ICreateOpentalkCycleDto,
+    ICreateOpentalkEventDto,
+    IOpentalkQueryDto,
+    ISwapOpentalkDto,
+    IUpdateOpentalkCycleDto,
+    IUpdateOpentalkEventDto,
+    OpentalkEvent,
+    ScheduleCycle,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
 
@@ -17,7 +19,7 @@ export class OpentalkServerService extends BaseServerService {
   private readonly baseUrl = '/opentalk';
 
   // Cycle operations
-  async createCycle(data: CreateOpentalkCycleDto) {
+  async createCycle(data: ICreateOpentalkCycleDto) {
     return this.post<ScheduleCycle>(`${this.baseUrl}/cycles`, data);
   }
 
@@ -30,7 +32,7 @@ export class OpentalkServerService extends BaseServerService {
     return this.get<ScheduleCycle>(`${this.baseUrl}/cycles/${id}`);
   }
 
-  async updateCycle(id: number, data: UpdateOpentalkCycleDto) {
+  async updateCycle(id: number, data: IUpdateOpentalkCycleDto) {
     return this.put<ScheduleCycle>(`${this.baseUrl}/cycles/${id}`, data);
   }
 
@@ -39,12 +41,19 @@ export class OpentalkServerService extends BaseServerService {
   }
 
   // Event operations
-  async createEvent(data: CreateOpentalkEventDto) {
+  async createEvent(data: ICreateOpentalkEventDto) {
     return this.post<OpentalkEvent>(`${this.baseUrl}/events`, data);
   }
 
-  async getEvents() {
-    const response = await this.get<OpentalkEvent[]>(`${this.baseUrl}/events`);
+  async getEvents(query?: IOpentalkQueryDto) {
+    const searchParams = new URLSearchParams();
+    if (query?.cycleId) searchParams.set('cycleId', query.cycleId.toString());
+    if (query?.status) searchParams.set('status', query.status);
+    if (query?.participantId)
+      searchParams.set('participantId', query.participantId.toString());
+
+    const url = `${this.baseUrl}/events${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const response = await this.get<OpentalkEvent[]>(url);
     return response.data || [];
   }
 
@@ -59,7 +68,7 @@ export class OpentalkServerService extends BaseServerService {
     return this.get<OpentalkEvent>(`${this.baseUrl}/events/${id}`);
   }
 
-  async updateEvent(id: number, data: UpdateOpentalkEventDto) {
+  async updateEvent(id: number, data: IUpdateOpentalkEventDto) {
     return this.put<OpentalkEvent>(`${this.baseUrl}/events/${id}`, data);
   }
 
@@ -75,13 +84,14 @@ export class OpentalkServerService extends BaseServerService {
     return response.data;
   }
 
-  async swapEvents(eventId1: number, eventId2: number): Promise<void> {
-    await this.post<void>(`${this.baseUrl}/swap`, { eventId1, eventId2 });
+  async swapEvents(event1Id: number, event2Id: number): Promise<void> {
+    const data: ISwapOpentalkDto = { event1Id, event2Id };
+    await this.post<void>(`${this.baseUrl}/swap`, data);
   }
 
   async bulkAssignEvents(data: {
-    eventIds: number[];
-    participantIds: number[];
+    cycleId: number;
+    assignments: Array<{ eventId: number; participantIds: number[] }>;
   }): Promise<void> {
     await this.post<void>(`${this.baseUrl}/bulk-assign`, data);
   }

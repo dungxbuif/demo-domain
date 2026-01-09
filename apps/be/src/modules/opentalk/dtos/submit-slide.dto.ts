@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ISubmitSlideDto } from '@qnoffice/shared';
 import {
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUrl,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    IsUrl,
 } from 'class-validator';
 
-export default class SubmitSlideDto {
+export default class SubmitSlideDto implements ISubmitSlideDto {
   @ApiProperty({
     example: 1,
     description: 'OpenTalk event ID',

@@ -2,16 +2,16 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Holiday, UpdateHolidayDto } from '@qnoffice/shared';
+import { Holiday, IUpdateHolidayDto } from '@qnoffice/shared';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -29,7 +29,7 @@ export function EditHolidayModal({
   onSuccess,
 }: EditHolidayModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<UpdateHolidayDto>({
+  const [formData, setFormData] = useState<IUpdateHolidayDto>({
     date: '',
     name: '',
   });
@@ -37,7 +37,9 @@ export function EditHolidayModal({
   useEffect(() => {
     if (holiday) {
       setFormData({
-        date: holiday.date,
+        date: typeof holiday.date === 'string' 
+          ? holiday.date.split('T')[0] 
+          : holiday.date.toISOString().split('T')[0],
         name: holiday.name,
       });
     }

@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ICreateSwapRequestDto } from '@qnoffice/shared';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export default class CreateSwapRequestDto {
+export default class CreateSwapRequestDto implements ICreateSwapRequestDto {
   @ApiProperty({
     example: 1,
     description: 'OpenTalk schedule ID to swap',

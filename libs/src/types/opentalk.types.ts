@@ -4,6 +4,7 @@ import {
   ScheduleType,
   SwapRequestStatus,
 } from '../enums';
+import { SearchParams } from './pagination.types';
 import { ScheduleEvent, ScheduleEventParticipant } from './schedule.types';
 import { Staff } from './staff.types';
 
@@ -16,8 +17,8 @@ export interface OpentalkSlideSubmission {
   notes?: string;
   event?: ScheduleEvent;
   submitter?: Staff;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface SwapRequest {
@@ -31,8 +32,8 @@ export interface SwapRequest {
   fromEvent?: ScheduleEvent;
   toEvent?: ScheduleEvent;
   requester?: Staff;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface OpentalkEvent extends ScheduleEvent {
@@ -41,23 +42,23 @@ export interface OpentalkEvent extends ScheduleEvent {
   participants?: Staff[];
 }
 
-export interface CreateOpentalkCycleDto {
+export interface ICreateOpentalkCycleDto {
   name: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | Date;
+  endDate: string | Date;
   description?: string;
   status?: CycleStatus;
 }
 
-export interface UpdateOpentalkCycleDto {
+export interface IUpdateOpentalkCycleDto {
   name?: string;
   description?: string;
   status?: CycleStatus;
 }
 
-export interface CreateOpentalkEventDto {
+export interface ICreateOpentalkEventDto {
   title: string;
-  type?: ScheduleType.OPENTALK;
+  type?: ScheduleType;
   cycleId: number;
   eventDate: string;
   status?: EventStatus;
@@ -65,7 +66,7 @@ export interface CreateOpentalkEventDto {
   participantIds?: number[];
 }
 
-export interface UpdateOpentalkEventDto {
+export interface IUpdateOpentalkEventDto {
   title?: string;
   eventDate?: string;
   status?: EventStatus;
@@ -73,12 +74,12 @@ export interface UpdateOpentalkEventDto {
   participantIds?: number[];
 }
 
-export interface SwapOpentalkDto {
-  eventId1: number;
-  eventId2: number;
+export interface ISwapOpentalkDto {
+  event1Id: number;
+  event2Id: number;
 }
 
-export interface CreateSlideSubmissionDto {
+export interface ICreateSlideSubmissionDto {
   eventId: number;
   slidesUrl: string;
   topic?: string;
@@ -86,26 +87,40 @@ export interface CreateSlideSubmissionDto {
   notes?: string;
 }
 
-export interface UpdateSlideSubmissionDto {
+export interface IUpdateSlideSubmissionDto {
   slidesUrl?: string;
   topic?: string;
   notes?: string;
 }
 
-export interface CreateSwapRequestDto {
+export interface ICreateSwapRequestDto {
   scheduleId: number;
   targetStaffId?: number;
   reason: string;
 }
 
-export interface CreateOpentalkScheduleDto {
+export interface ICreateOpentalkScheduleDto {
   date: string;
   staffId: number;
 }
 
-export interface SubmitSlideDto {
+export interface ISubmitSlideDto {
   eventId: number;
   slidesUrl: string;
   topic?: string;
   notes?: string;
+}
+
+export interface IOpentalkQueryDto extends SearchParams {
+  type?: string;
+  status?: EventStatus;
+  cycleId?: number;
+  startDate?: string;
+  endDate?: string;
+  participantId?: number;
+}
+
+export interface IReviewSwapRequestDto {
+  status: string;
+  reviewNote?: string;
 }

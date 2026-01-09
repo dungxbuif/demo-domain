@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ScheduleType } from '@qnoffice/shared';
+import { ICreateCycleDto, ScheduleType } from '@qnoffice/shared';
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class CreateCycleDto {
+export class CreateCycleDto implements ICreateCycleDto {
   @ApiProperty()
   @IsString()
   name: string;

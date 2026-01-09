@@ -2,34 +2,34 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
 } from '@/components/ui/command';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import penaltyTypeService from '@/shared/services/client/penalty-type.service';
@@ -38,10 +38,10 @@ import staffService from '@/shared/services/client/staff.service';
 import { cn } from '@/shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  ApiResponse,
-  CreatePenaltyDto,
-  PenaltyType,
-  Staff,
+    ApiResponse,
+    ICreatePenaltyDto,
+    PenaltyType,
+    Staff,
 } from '@qnoffice/shared';
 import { Check, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -50,12 +50,12 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  user_id: z.number().min(1, 'Staff member is required'),
-  penalty_type_id: z.number().min(1, 'Penalty type is required'),
+  userId: z.number().min(1, 'Staff member is required'),
+  penaltyTypeId: z.number().min(1, 'Penalty type is required'),
   date: z.string().min(1, 'Date is required'),
   amount: z.number().optional(),
   reason: z.string().min(1, 'Reason is required'),
-  evidence_urls: z.array(z.string()).optional(),
+  evidenceUrls: z.array(z.string()).optional(),
 });
 
 interface CreatePenaltyFormProps {
@@ -91,11 +91,11 @@ export function CreatePenaltyForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      user_id: 0,
-      penalty_type_id: 0,
+      userId: 0,
+      penaltyTypeId: 0,
       date: new Date().toISOString().split('T')[0],
       reason: '',
-      evidence_urls: [],
+      evidenceUrls: [],
     },
   });
 
@@ -212,10 +212,10 @@ export function CreatePenaltyForm({
         uploadedUrls = presignedUrls.map((urlData) => urlData.fileUrl);
       }
 
-      const payload: CreatePenaltyDto = {
+      const payload: ICreatePenaltyDto = {
         ...values,
         amount: values.amount || selectedType?.amount,
-        evidence_urls: uploadedUrls,
+        evidenceUrls: uploadedUrls,
       };
 
       await penaltyService.create(payload);
@@ -274,7 +274,7 @@ export function CreatePenaltyForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="user_id"
+              name="userId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Staff Member</FormLabel>
@@ -316,7 +316,7 @@ export function CreatePenaltyForm({
                                 value={staff.user?.email || staff.email}
                                 key={staff.id}
                                 onSelect={() => {
-                                  form.setValue('user_id', staff.id);
+                                  form.setValue('userId', staff.id);
                                   setStaffOpen(false);
                                 }}
                               >
@@ -348,7 +348,7 @@ export function CreatePenaltyForm({
 
             <FormField
               control={form.control}
-              name="penalty_type_id"
+              name="penaltyTypeId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Penalty Type</FormLabel>
@@ -391,7 +391,7 @@ export function CreatePenaltyForm({
                                 value={type.name}
                                 key={type.id}
                                 onSelect={() => {
-                                  form.setValue('penalty_type_id', type.id);
+                                  form.setValue('penaltyTypeId', type.id);
                                   handleTypeChange(type.id.toString());
                                   setTypeOpen(false);
                                 }}

@@ -1,23 +1,17 @@
 import {
-  ApiResponse,
-  CreateStaffDto,
-  IPaginationDto,
-  Staff,
-  UpdateStaffUserIdDto,
+    ApiResponse,
+    ICreateStaffDto,
+    IPaginationDto,
+    IUpdateStaffUserIdDto,
+    SearchParams,
+    Staff,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
-
-export interface GetStaffParams {
-  page?: number;
-  take?: number;
-  order?: string;
-  q?: string;
-}
 
 export class StaffServerService extends BaseServerService {
   private readonly baseUrl = '/staffs';
 
-  async getAll(params: GetStaffParams = {}): Promise<IPaginationDto<Staff>> {
+  async getAll(params: SearchParams = {}): Promise<IPaginationDto<Staff>> {
     try {
       const searchParams = new URLSearchParams();
       if (params.page !== undefined)
@@ -45,13 +39,13 @@ export class StaffServerService extends BaseServerService {
     return this.get<Staff>(`${this.baseUrl}/${id}`);
   }
 
-  async create(data: CreateStaffDto): Promise<ApiResponse<Staff>> {
+  async create(data: ICreateStaffDto): Promise<ApiResponse<Staff>> {
     return this.post<Staff>(this.baseUrl, data);
   }
 
   async update(
     id: number,
-    data: UpdateStaffUserIdDto,
+    data: IUpdateStaffUserIdDto,
   ): Promise<ApiResponse<Staff>> {
     return this.put<Staff>(`${this.baseUrl}/${id}`, data);
   }

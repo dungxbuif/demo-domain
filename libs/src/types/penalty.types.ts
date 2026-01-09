@@ -2,19 +2,16 @@ import { PenaltyStatus } from '../enums/penalty.enum';
 
 export interface Penalty {
   id: number;
-  user_id: number;
-  penalty_type_id: number;
-  date: string;
+  userId: number;
+  penaltyTypeId: number;
+  date: string | Date;
   amount: number;
   reason: string;
-  evidence_urls: string[];
+  evidenceUrls: string[];
   status: PenaltyStatus;
-  campaign_id?: number;
-  // Optional relations (populated when loaded with relations)
   penaltyType?: PenaltyType;
-  campaign?: any; // TODO: Define Campaign interface
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface PenaltyType {
@@ -22,44 +19,47 @@ export interface PenaltyType {
   name: string;
   description: string;
   amount: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-export interface CreatePenaltyDto {
-  user_id: number;
-  penalty_type_id: number;
+export interface ICreatePenaltyDto {
+  userId: number;
+  penaltyTypeId: number;
   date: string;
   amount?: number;
   reason: string;
-  evidence_urls?: string[];
-  campaign_id?: number;
+  evidenceUrls?: string[];
 }
 
-export interface UpdatePenaltyDto {
-  user_id?: number;
-  penalty_type_id?: number;
+export interface IUpdatePenaltyDto {
+  userId?: number;
+  penaltyTypeId?: number;
   date?: string;
   amount?: number;
   reason?: string;
-  evidence_urls?: string[];
-  campaign_id?: number;
+  evidenceUrls?: string[];
   status?: PenaltyStatus;
 }
 
-export interface UpdatePenaltyEvidenceDto {
-  evidence_urls: string[];
+export interface IUpdatePenaltyEvidenceDto {
+  evidenceUrls: string[];
   reason?: string;
 }
 
-export interface CreatePenaltyTypeDto {
+export interface ICreatePenaltyTypeDto {
   name: string;
   description?: string;
   amount: number;
 }
 
-export interface UpdatePenaltyTypeDto {
+export interface IUpdatePenaltyTypeDto {
   name?: string;
   description?: string;
   amount?: number;
+}
+
+export interface PenaltyTotalResponse {
+  total: number;
+  unpaid: number;
 }

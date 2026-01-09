@@ -1,9 +1,10 @@
+import { IUpdatePenaltyEvidenceDto } from '@qnoffice/shared';
 import { IsArray, IsOptional, IsString } from 'class-validator';
 
-export class UpdatePenaltyEvidenceDto {
+export class UpdatePenaltyEvidenceDto implements IUpdatePenaltyEvidenceDto {
   @IsArray()
   @IsString({ each: true })
-  evidence_urls: string[];
+  evidenceUrls: string[];
 
   @IsString()
   @IsOptional()

@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ISwapOpentalkDto } from '@qnoffice/shared';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class SwapOpentalkDto {
+export class SwapOpentalkDto implements ISwapOpentalkDto {
   @ApiProperty({ description: 'First event ID' })
   @IsNotEmpty()
   @IsNumber()

@@ -1,21 +1,25 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    Query,
+    UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import {
+    Branch as IBranch,
+    IPaginationDto,
+    UserRole,
+} from '@qnoffice/shared';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
-import { AppPaginationDto } from '@src/common/dtos/paginate.dto';
-import { RolesGuard } from '@src/common/gaurds/role.gaurd';
+import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
-import { BranchEntity } from '@src/modules/branch/branch.entity';
 import { BranchService } from './branch.service';
+import { CreateBranchDto, UpdateBranchDto } from './dto/branch.dto';
 
 @Controller('branches')
 @ApiTags('Branches')
@@ -24,28 +28,32 @@ export class BranchController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findAll(
+  async findAll(
     @Query() queries: AppPaginateOptionsDto,
-  ): Promise<AppPaginationDto<BranchEntity>> {
-    return this.branchService.findAll(queries);
+  ): Promise<IPaginationDto<IBranch>> {
+    return this.branchService.findAll(queries) as any;
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<BranchEntity | null> {
-    return this.branchService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<IBranch | null> {
+    return this.branchService.findOne(+id) as any;
   }
 
   @Post()
-  create(@Body() branchData: Partial<BranchEntity>): Promise<BranchEntity> {
-    return this.branchService.create(branchData);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.HR, UserRole.GDVP])
+  async create(@Body() branchData: CreateBranchDto): Promise<IBranch> {
+    return this.branchService.create(branchData) as any;
   }
 
   @Put(':id')
-  update(
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.HR, UserRole.GDVP])
+  async update(
     @Param('id') id: string,
-    @Body() branchData: Partial<BranchEntity>,
-  ): Promise<BranchEntity | null> {
-    return this.branchService.update(+id, branchData);
+    @Body() branchData: UpdateBranchDto,
+  ): Promise<IBranch | null> {
+    return this.branchService.update(+id, branchData) as any;
   }
 
   @Delete(':id')

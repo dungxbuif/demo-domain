@@ -28,11 +28,11 @@ interface Assignment {
   staff: {
     id: number;
     email: string;
-    user: {
+    user?: {
       name: string;
       avatar?: string;
     };
-    branch: {
+    branch?: {
       name: string;
     };
   };
@@ -285,17 +285,17 @@ export function ScheduleManagementView() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            {assignment.staff.user.avatar && (
+                            {assignment.staff.user?.avatar && (
                               <img
                                 src={assignment.staff.user.avatar}
                                 alt={assignment.staff.user.name}
                                 className="h-6 w-6 rounded-full"
                               />
                             )}
-                            <span>{assignment.staff.user.name}</span>
+                            <span>{assignment.staff.user?.name || 'Unassigned'}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{assignment.staff.branch.name}</TableCell>
+                        <TableCell>{assignment.staff.branch?.name || 'N/A'}</TableCell>
                         <TableCell>
                           {getStatusBadge(
                             assignment.status,

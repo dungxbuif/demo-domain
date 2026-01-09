@@ -2,22 +2,22 @@
 
 import { Card } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/shared/utils';
 import {
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameMonth,
-  isToday,
-  startOfMonth,
-  startOfWeek,
+    eachDayOfInterval,
+    endOfMonth,
+    endOfWeek,
+    format,
+    isSameMonth,
+    isToday,
+    startOfMonth,
+    startOfWeek,
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -36,7 +36,7 @@ interface FullCalendarProps {
   events?: CalendarEvent[];
   holidays?: Array<{
     id: number;
-    date: string;
+    date: string | Date;
     name: string;
   }>;
   onEventClick?: (event: CalendarEvent) => void;

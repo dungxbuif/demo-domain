@@ -21,7 +21,7 @@ import {
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { CreateOpentalkScheduleDto } from '@qnoffice/shared';
+import { ICreateOpentalkScheduleDto } from '@qnoffice/shared';
 
 interface CreateScheduleModalProps {
   open: boolean;
@@ -36,7 +36,7 @@ export function CreateScheduleModal({
 }: CreateScheduleModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [staffList, setStaffList] = useState<any[]>([]);
-  const [formData, setFormData] = useState<CreateOpentalkScheduleDto>({
+  const [formData, setFormData] = useState<ICreateOpentalkScheduleDto>({
     date: '',
     staffId: 0,
   });

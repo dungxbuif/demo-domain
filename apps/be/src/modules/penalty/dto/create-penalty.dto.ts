@@ -1,21 +1,22 @@
+import { ICreatePenaltyDto } from '@qnoffice/shared';
 import {
-  IsArray,
-  IsDateString,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
+    IsArray,
+    IsDateString,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Min,
 } from 'class-validator';
 
-export class CreatePenaltyDto {
+export class CreatePenaltyDto implements ICreatePenaltyDto {
   @IsNumber()
   @IsNotEmpty()
-  user_id: number;
+  userId: number;
 
   @IsNumber()
   @IsNotEmpty()
-  penalty_type_id: number;
+  penaltyTypeId: number;
 
   @IsDateString()
   @IsNotEmpty()
@@ -33,9 +34,5 @@ export class CreatePenaltyDto {
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  evidence_urls?: string[];
-
-  @IsNumber()
-  @IsOptional()
-  campaign_id?: number;
+  evidenceUrls?: string[];
 }

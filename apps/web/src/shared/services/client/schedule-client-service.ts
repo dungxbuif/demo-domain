@@ -1,5 +1,5 @@
 import {
-  CreateCycleDto,
+  ICreateCycleDto,
   EventStatus,
   ScheduleCycle,
   ScheduleEvent,
@@ -10,7 +10,7 @@ import baseApi from './base-api';
 class ScheduleClientService {
   private readonly baseUrl = '/api/schedules';
 
-  async createCycle(data: CreateCycleDto) {
+  async createCycle(data: ICreateCycleDto) {
     return baseApi.post<ScheduleCycle>(`${this.baseUrl}/cycles`, data);
   }
 

@@ -162,7 +162,7 @@ export function SwapRequestsTable({ requests }: SwapRequestsTableProps) {
       accessorKey: 'createdAt',
       header: 'Requested',
       cell: ({ row }) => {
-        const date = new Date(row.original.created_at);
+        const date = new Date(row.original.createdAt);
         return <div className="text-sm">{format(date, 'MMM dd, HH:mm')}</div>;
       },
     },

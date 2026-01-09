@@ -2,15 +2,15 @@ import { API_PATHS } from '@/shared/constants';
 import baseApi from '@/shared/services/client/base-api';
 import {
   ApiResponse,
-  CreatePenaltyTypeDto,
+  ICreatePenaltyTypeDto,
   IPaginateOptionsDto,
   IPaginationDto,
   PenaltyType,
-  UpdatePenaltyTypeDto,
+  IUpdatePenaltyTypeDto,
 } from '@qnoffice/shared';
 
 class PenaltyTypeService {
-  async create(dto: CreatePenaltyTypeDto) {
+  async create(dto: ICreatePenaltyTypeDto) {
     return baseApi.post<ApiResponse<PenaltyType>>(
       API_PATHS.PENALTY_TYPES.CREATE,
       dto,
@@ -30,7 +30,7 @@ class PenaltyTypeService {
     );
   }
 
-  async update(id: number, dto: UpdatePenaltyTypeDto) {
+  async update(id: number, dto: IUpdatePenaltyTypeDto) {
     return baseApi.put<ApiResponse<PenaltyType>>(
       API_PATHS.PENALTY_TYPES.UPDATE(id),
       dto,

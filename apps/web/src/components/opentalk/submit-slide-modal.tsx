@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SubmitSlideDto } from '@qnoffice/shared';
+import { ISubmitSlideDto } from '@qnoffice/shared';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -29,7 +29,7 @@ export function SubmitSlideModal({
   onSuccess,
 }: SubmitSlideModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<Omit<SubmitSlideDto, 'eventId'>>({
+  const [formData, setFormData] = useState<Omit<ISubmitSlideDto, 'eventId'>>({
     topic: '',
     slidesUrl: '',
   });

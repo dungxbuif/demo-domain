@@ -3,17 +3,17 @@ export interface Branch {
   name: string;
   code: string;
   address?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-export interface CreateBranchDto {
+export interface ICreateBranchDto {
   name: string;
   code: string;
   address?: string;
 }
 
-export interface UpdateBranchDto {
+export interface IUpdateBranchDto {
   name?: string;
   code?: string;
   address?: string;

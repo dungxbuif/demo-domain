@@ -1,6 +1,5 @@
 import AuditLogEntity from '@src/modules/audit-log/audit-log.entity';
 import { BranchEntity } from '@src/modules/branch/branch.entity';
-import { Campaign } from '@src/modules/campaign/campaign.entity';
 import ChannelConfigEntity from '@src/modules/channel/channel-config.entity';
 import HolidayEntity from '@src/modules/holiday/holiday.entity';
 import SwapRequestEntity from '@src/modules/opentalk/swap-request.entity';
@@ -22,7 +21,6 @@ const entities = [
   SwapRequestEntity,
   Penalty,
   PenaltyType,
-  Campaign,
   ScheduleCycleEntity,
   ScheduleEventEntity,
   ScheduleEventParticipantEntity,

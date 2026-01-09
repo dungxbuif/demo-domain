@@ -1,18 +1,13 @@
+import { AbstractEntity } from '@src/common/database/abstract.entity';
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    Column,
+    Entity,
+    OneToMany,
 } from 'typeorm';
 import { Penalty } from '../penalty/penalty.entity';
 
 @Entity('penalty_types')
-export class PenaltyType {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class PenaltyType extends AbstractEntity {
   @Column()
   name: string;
 
@@ -24,10 +19,4 @@ export class PenaltyType {
 
   @OneToMany(() => Penalty, (penalty) => penalty.penaltyType)
   penalties: Penalty[];
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 }

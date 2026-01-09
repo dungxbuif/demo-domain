@@ -1,33 +1,28 @@
 import {
-  ApiResponse,
-  CreateHolidayDto,
-  Holiday,
-  IPaginationDto,
-  UpdateHolidayDto,
+    ApiResponse,
+    Holiday,
+    ICreateHolidayDto,
+    IHolidayQuery,
+    IPaginationDto,
+    IUpdateHolidayDto,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
-
-export interface GetHolidaysParams {
-  page?: number;
-  take?: number;
-  order?: string;
-  startDate?: string;
-  endDate?: string;
-}
 
 export class HolidayServerService extends BaseServerService {
   private readonly baseUrl = '/holidays';
 
   async getAll(
-    params: GetHolidaysParams = {},
+    params: IHolidayQuery = {},
   ): Promise<IPaginationDto<Holiday>> {
     try {
       const searchParams = new URLSearchParams();
-      if (params.page !== undefined)
-        searchParams.set('page', params.page.toString());
-      if (params.take !== undefined)
-        searchParams.set('take', params.take.toString());
-      if (params.order) searchParams.set('order', params.order);
+      // Since IHolidayQuery includes IPaginateOptionsDto fields
+      const p = params as any;
+      if (p.page !== undefined)
+        searchParams.set('page', p.page.toString());
+      if (p.take !== undefined)
+        searchParams.set('take', p.take.toString());
+      if (p.order) searchParams.set('order', p.order);
       if (params.startDate) searchParams.set('startDate', params.startDate);
       if (params.endDate) searchParams.set('endDate', params.endDate);
 
@@ -49,13 +44,13 @@ export class HolidayServerService extends BaseServerService {
     return this.get<Holiday>(`${this.baseUrl}/${id}`);
   }
 
-  async create(data: CreateHolidayDto): Promise<ApiResponse<Holiday>> {
+  async create(data: ICreateHolidayDto): Promise<ApiResponse<Holiday>> {
     return this.post<Holiday>(this.baseUrl, data);
   }
 
   async update(
     id: number,
-    data: UpdateHolidayDto,
+    data: IUpdateHolidayDto,
   ): Promise<ApiResponse<Holiday>> {
     return this.put<Holiday>(`${this.baseUrl}/${id}`, data);
   }

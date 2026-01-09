@@ -1,11 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IReviewSwapRequestDto, SwapRequestStatus } from '@qnoffice/shared';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export enum SwapRequestStatus {
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-}
-export default class ReviewSwapRequestDto {
+export default class ReviewSwapRequestDto implements IReviewSwapRequestDto {
   @ApiProperty({
     enum: SwapRequestStatus,
     description: 'Approval status',

@@ -32,7 +32,7 @@
       "start": {
          "executor": "nx:run-commands",
          "options": {
-            "command": "npm run start:prod",
+            "command": "npm run start",
             "cwd": "apps/be"
          },
          "dependsOn": [

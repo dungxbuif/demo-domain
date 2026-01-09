@@ -20,7 +20,7 @@ export class PenaltyService {
 
   async create(createPenaltyDto: CreatePenaltyDto): Promise<Penalty> {
     const penaltyType = await this.penaltyTypeService.findOne(
-      createPenaltyDto.penalty_type_id,
+      createPenaltyDto.penaltyTypeId,
     );
 
     const penalty = this.penaltyRepository.create({
@@ -37,7 +37,7 @@ export class PenaltyService {
     const [data, total] = await this.penaltyRepository.findAndCount({
       skip: queries.skip,
       take: queries.take,
-      relations: ['penaltyType', 'campaign'],
+      relations: ['penaltyType'],
       order: { createdAt: SearchOrder.DESC },
     });
     return {
@@ -51,7 +51,7 @@ export class PenaltyService {
   async findOne(id: number): Promise<Penalty> {
     const penalty = await this.penaltyRepository.findOne({
       where: { id },
-      relations: ['penaltyType', 'campaign'],
+      relations: ['penaltyType'],
     });
 
     if (!penalty) {
@@ -63,8 +63,8 @@ export class PenaltyService {
 
   async findByUser(userId: number): Promise<Penalty[]> {
     return this.penaltyRepository.find({
-      where: { user_id: userId },
-      relations: ['penaltyType', 'campaign'],
+      where: { userId },
+      relations: ['penaltyType'],
       order: { createdAt: SearchOrder.DESC },
     });
   }
@@ -84,7 +84,7 @@ export class PenaltyService {
   ): Promise<Penalty> {
     const penalty = await this.findOne(id);
 
-    penalty.evidence_urls = updateEvidenceDto.evidence_urls;
+    penalty.evidenceUrls = updateEvidenceDto.evidenceUrls;
 
     if (updateEvidenceDto.reason) {
       penalty.reason = updateEvidenceDto.reason;
@@ -102,7 +102,7 @@ export class PenaltyService {
     userId: number,
   ): Promise<{ total: number; unpaid: number }> {
     const penalties = await this.penaltyRepository.find({
-      where: { user_id: userId },
+      where: { userId },
     });
 
     const total = penalties.reduce((sum, p) => sum + Number(p.amount), 0);

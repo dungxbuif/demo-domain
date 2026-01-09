@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IUpdateHolidayDto } from '@qnoffice/shared';
 import { IsDateString, IsOptional, IsString } from 'class-validator';
 
-export default class UpdateHolidayDto {
+export default class UpdateHolidayDto implements IUpdateHolidayDto {
   @ApiProperty({
     example: '2026-01-01',
     description: 'Holiday date in YYYY-MM-DD format',

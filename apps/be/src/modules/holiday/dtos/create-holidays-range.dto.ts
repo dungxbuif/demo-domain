@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ICreateHolidaysRangeDto } from '@qnoffice/shared';
 import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
-export default class CreateHolidaysRangeDto {
+export default class CreateHolidaysRangeDto implements ICreateHolidaysRangeDto {
   @ApiProperty({
     example: '2026-01-01',
     description: 'Start date of holiday range in YYYY-MM-DD format',

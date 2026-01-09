@@ -1,23 +1,31 @@
 export interface Holiday {
   id: number;
-  date: string;
+  date: string | Date;
   name: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-export interface CreateHolidayDto {
+export interface ICreateHolidayDto {
   date: string;
   name: string;
 }
 
-export interface UpdateHolidayDto {
+export interface IUpdateHolidayDto {
   date?: string;
   name?: string;
 }
 
-export interface CreateHolidaysRangeDto {
+export interface ICreateHolidaysRangeDto {
   startDate: string;
   endDate: string;
   name: string;
+}
+
+import { SearchParams } from './pagination.types';
+
+export interface IHolidayQuery extends SearchParams {
+  startDate?: string;
+  endDate?: string;
+  name?: string;
 }

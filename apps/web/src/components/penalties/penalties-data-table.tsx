@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { usePagination } from '@/shared/hooks/use-pagination';
 import { PaginationState, Penalty, PenaltyStatus } from '@qnoffice/shared';
@@ -64,14 +64,14 @@ export function PenaltiesDataTable({
 
   const columns: ColumnDef<Penalty>[] = [
     {
-      accessorKey: 'user_id',
+      accessorKey: 'userId',
       header: 'User ID',
-      cell: ({ row }) => row.original.user_id,
+      cell: ({ row }) => row.original.userId,
     },
     {
-      accessorKey: 'penalty_type_id',
+      accessorKey: 'penaltyTypeId',
       header: 'Type',
-      cell: ({ row }) => `Type ${row.original.penalty_type_id}`,
+      cell: ({ row }) => `Type ${row.original.penaltyTypeId}`,
     },
     {
       accessorKey: 'date',
@@ -138,12 +138,12 @@ export function PenaltiesDataTable({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">User ID</p>
-                  <p className="font-medium">{selectedPenalty.user_id}</p>
+                  <p className="font-medium">{selectedPenalty.userId}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Type</p>
                   <p className="font-medium">
-                    Type {selectedPenalty.penalty_type_id}
+                    Type {selectedPenalty.penaltyTypeId}
                   </p>
                 </div>
                 <div>
@@ -162,12 +162,6 @@ export function PenaltiesDataTable({
                   <p className="text-sm text-muted-foreground">Status</p>
                   <div>{getStatusBadge(selectedPenalty.status)}</div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Campaign ID</p>
-                  <p className="font-medium">
-                    {selectedPenalty.campaign_id || 'N/A'}
-                  </p>
-                </div>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Reason</p>
@@ -175,14 +169,14 @@ export function PenaltiesDataTable({
                   {selectedPenalty.reason}
                 </p>
               </div>
-              {selectedPenalty.evidence_urls &&
-                selectedPenalty.evidence_urls.length > 0 && (
+              {selectedPenalty.evidenceUrls &&
+                selectedPenalty.evidenceUrls.length > 0 && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">
                       Evidence
                     </p>
                     <div className="grid grid-cols-2 gap-2">
-                      {selectedPenalty.evidence_urls.map((url, index) => (
+                      {selectedPenalty.evidenceUrls.map((url, index) => (
                         <img
                           key={index}
                           src={url}

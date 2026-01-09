@@ -3,10 +3,10 @@ import baseApi from '@/shared/services/client/base-api';
 import {
     ApiResponse,
     Branch,
-    CreateBranchDto,
+    ICreateBranchDto,
     IPaginateOptionsDto,
     IPaginationDto,
-    UpdateBranchDto,
+    IUpdateBranchDto,
 } from '@qnoffice/shared';
 
 class BranchService {
@@ -25,7 +25,7 @@ class BranchService {
     return response.data;
   }
 
-  async create(data: CreateBranchDto) {
+  async create(data: ICreateBranchDto) {
     const response = await baseApi.post<ApiResponse<Branch>>(
       API_PATHS.BRANCHES.CREATE,
       data,
@@ -33,7 +33,7 @@ class BranchService {
     return response.data;
   }
 
-  async update(id: number | string, data: UpdateBranchDto) {
+  async update(id: number | string, data: IUpdateBranchDto) {
     const response = await baseApi.put<ApiResponse<Branch>>(
       API_PATHS.BRANCHES.UPDATE(id),
       data,

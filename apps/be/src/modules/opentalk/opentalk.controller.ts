@@ -1,38 +1,40 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
-  Req,
-  UseGuards,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
 import {
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
+    ApiOperation,
+    ApiParam,
+    ApiQuery,
+    ApiResponse,
+    ApiTags,
 } from '@nestjs/swagger';
+import {
+    OpentalkSlideSubmission,
+    ScheduleCycle,
+    ScheduleEvent,
+    SwapRequest,
+} from '@qnoffice/shared';
 import { CreateOpentalkCycleDto } from '@src/modules/opentalk/dtos/create-opentalk-cycle.dto';
 import { CreateOpentalkEventDto } from '@src/modules/opentalk/dtos/create-opentalk-event.dto';
 import CreateSwapRequestDto from '@src/modules/opentalk/dtos/create-swap-request.dto';
 import { OpentalkQueryDto } from '@src/modules/opentalk/dtos/opentalk-query.dto';
 import ReviewSwapRequestDto from '@src/modules/opentalk/dtos/review-swap-request.dto';
 import { SwapOpentalkDto } from '@src/modules/opentalk/dtos/swap-opentalk.dto';
-import ScheduleCycleEntity from '@src/modules/schedule/enties/schedule-cycle.entity';
-import ScheduleEventEntity from '@src/modules/schedule/enties/schedule-event.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import SubmitSlideDto from './dtos/submit-slide.dto';
-import OpentalkSlideSubmissionEntity from './entities/opentalk-slide-submission.entity';
 import { OpentalkService } from './opentalk.service';
 import { OpentalkSlideService } from './services/opentalk-slide.service';
-import SwapRequestEntity from './swap-request.entity';
 
 @ApiTags('Opentalk Management')
 @Controller('opentalk')
@@ -50,8 +52,8 @@ export class OpentalkController {
   })
   async createCycle(
     @Body() createCycleDto: CreateOpentalkCycleDto,
-  ): Promise<ScheduleCycleEntity> {
-    return this.opentalkService.createCycle(createCycleDto);
+  ): Promise<ScheduleCycle> {
+    return this.opentalkService.createCycle(createCycleDto) as any;
   }
 
   @Get('cycles')
@@ -65,8 +67,8 @@ export class OpentalkController {
   })
   async getCycles(
     @Query('status') status?: string,
-  ): Promise<ScheduleCycleEntity[]> {
-    return this.opentalkService.getCyclesWithEvents(status);
+  ): Promise<ScheduleCycle[]> {
+    return this.opentalkService.getCyclesWithEvents(status) as any;
   }
 
   @Get('cycles/:id')
@@ -74,8 +76,8 @@ export class OpentalkController {
   @ApiParam({ name: 'id', description: 'Cycle ID' })
   async getCycleById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ScheduleCycleEntity | null> {
-    return this.opentalkService.getCycleById(id);
+  ): Promise<ScheduleCycle | null> {
+    return this.opentalkService.getCycleById(id) as any;
   }
 
   @Put('cycles/:id')
@@ -84,8 +86,8 @@ export class OpentalkController {
   async updateCycle(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: Partial<CreateOpentalkCycleDto>,
-  ): Promise<ScheduleCycleEntity> {
-    return this.opentalkService.updateCycle(id, updateData);
+  ): Promise<ScheduleCycle> {
+    return this.opentalkService.updateCycle(id, updateData) as any;
   }
 
   @Delete('cycles/:id')
@@ -104,16 +106,16 @@ export class OpentalkController {
   })
   async createEvent(
     @Body() createEventDto: CreateOpentalkEventDto,
-  ): Promise<ScheduleEventEntity> {
-    return this.opentalkService.createEvent(createEventDto);
+  ): Promise<ScheduleEvent> {
+    return this.opentalkService.createEvent(createEventDto) as any;
   }
 
   @Get('events')
   @ApiOperation({ summary: 'Get opentalk events with filters' })
   async getEvents(
     @Query() query: OpentalkQueryDto,
-  ): Promise<ScheduleEventEntity[]> {
-    return this.opentalkService.getEvents(query);
+  ): Promise<ScheduleEvent[]> {
+    return this.opentalkService.getEvents(query) as any;
   }
 
   @Get('cycles/:cycleId/events')
@@ -121,8 +123,8 @@ export class OpentalkController {
   @ApiParam({ name: 'cycleId', description: 'Cycle ID' })
   async getEventsByCycle(
     @Param('cycleId', ParseIntPipe) cycleId: number,
-  ): Promise<ScheduleEventEntity[]> {
-    return this.opentalkService.getEventsByCycle(cycleId);
+  ): Promise<ScheduleEvent[]> {
+    return this.opentalkService.getEventsByCycle(cycleId) as any;
   }
 
   @Get('events/:id')
@@ -130,8 +132,8 @@ export class OpentalkController {
   @ApiParam({ name: 'id', description: 'Event ID' })
   async getEventById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ScheduleEventEntity | null> {
-    return this.opentalkService.getEventById(id);
+  ): Promise<ScheduleEvent | null> {
+    return this.opentalkService.getEventById(id) as any;
   }
 
   @Put('events/:id')
@@ -140,8 +142,8 @@ export class OpentalkController {
   async updateEvent(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: Partial<CreateOpentalkEventDto>,
-  ): Promise<ScheduleEventEntity> {
-    return this.opentalkService.updateEvent(id, updateData);
+  ): Promise<ScheduleEvent> {
+    return this.opentalkService.updateEvent(id, updateData) as any;
   }
 
   @Delete('events/:id')
@@ -180,8 +182,8 @@ export class OpentalkController {
       cycleId: number;
       assignments: Array<{ eventId: number; participantIds: number[] }>;
     },
-  ): Promise<ScheduleEventEntity[]> {
-    return this.opentalkService.bulkAssignParticipants(assignmentData);
+  ): Promise<ScheduleEvent[]> {
+    return this.opentalkService.bulkAssignParticipants(assignmentData) as any;
   }
 
   @Get('conflicts')
@@ -201,11 +203,11 @@ export class OpentalkController {
   async getSwapRequests(
     @Query('requesterId') requesterId?: number,
     @Query('status') status?: string,
-  ): Promise<SwapRequestEntity[]> {
+  ): Promise<SwapRequest[]> {
     return this.opentalkService.getSwapRequests({
       requesterId,
       status,
-    });
+    }) as any;
   }
 
   @Post('swap-requests')
@@ -217,11 +219,11 @@ export class OpentalkController {
   async createSwapRequest(
     @Body() createSwapRequestDto: CreateSwapRequestDto,
     @Query('requesterId', ParseIntPipe) requesterId: number,
-  ): Promise<SwapRequestEntity> {
+  ): Promise<SwapRequest> {
     return this.opentalkService.createSwapRequest(
       createSwapRequestDto,
       requesterId,
-    );
+    ) as any;
   }
 
   @Put('swap-requests/:id/review')
@@ -230,8 +232,8 @@ export class OpentalkController {
   async reviewSwapRequest(
     @Param('id', ParseIntPipe) id: number,
     @Body() reviewDto: ReviewSwapRequestDto,
-  ): Promise<SwapRequestEntity> {
-    return this.opentalkService.reviewSwapRequest(id, reviewDto);
+  ): Promise<SwapRequest> {
+    return this.opentalkService.reviewSwapRequest(id, reviewDto) as any;
   }
 
   @Post('slides/submit')
@@ -244,9 +246,9 @@ export class OpentalkController {
   async submitSlide(
     @Body() dto: SubmitSlideDto,
     @Req() req: any,
-  ): Promise<OpentalkSlideSubmissionEntity> {
+  ): Promise<OpentalkSlideSubmission> {
     const staffId = req.user.staffId;
-    return this.slideService.submitSlide(dto, staffId);
+    return this.slideService.submitSlide(dto, staffId) as any;
   }
 
   @Get('slides/:eventId')
@@ -254,7 +256,7 @@ export class OpentalkController {
   @ApiParam({ name: 'eventId', description: 'Event ID' })
   async getSlideSubmission(
     @Param('eventId', ParseIntPipe) eventId: number,
-  ): Promise<OpentalkSlideSubmissionEntity | null> {
-    return this.slideService.getSlideSubmission(eventId);
+  ): Promise<OpentalkSlideSubmission | null> {
+    return this.slideService.getSlideSubmission(eventId) as any;
   }
 }

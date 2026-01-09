@@ -1,8 +1,8 @@
 import { branchService } from '@/shared/services/client/branch.service';
 import {
-  CreateBranchDto,
+  ICreateBranchDto,
   IPaginateOptionsDto,
-  UpdateBranchDto,
+  IUpdateBranchDto,
 } from '@qnoffice/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -37,7 +37,7 @@ export function useCreateBranch() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateBranchDto) => branchService.create(data),
+    mutationFn: (data: ICreateBranchDto) => branchService.create(data),
     onSuccess: () => {
       // Invalidate and refetch branches list
       queryClient.invalidateQueries({ queryKey: BRANCH_KEYS.lists() });
@@ -49,7 +49,7 @@ export function useUpdateBranch() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateBranchDto }) =>
+    mutationFn: ({ id, data }: { id: string; data: IUpdateBranchDto }) =>
       branchService.update(id, data),
     onSuccess: (_, variables) => {
       // Invalidate specific branch and list

@@ -2,11 +2,11 @@ import { API_PATHS } from '@/shared/constants';
 import baseApi from '@/shared/services/client/base-api';
 import {
   ApiResponse,
-  CreateStaffDto,
+  ICreateStaffDto,
   IPaginateOptionsDto,
   IPaginationDto,
   Staff,
-  UpdateStaffUserIdDto,
+  IUpdateStaffUserIdDto,
 } from '@qnoffice/shared';
 
 class StaffService {
@@ -29,11 +29,11 @@ class StaffService {
     return baseApi.get<ApiResponse<Staff>>(API_PATHS.STAFF.BY_USER(userId));
   }
 
-  async create(dto: CreateStaffDto) {
+  async create(dto: ICreateStaffDto) {
     return baseApi.post<ApiResponse<Staff>>(API_PATHS.STAFF.CREATE, dto);
   }
 
-  async updateMezonId(id: number, dto: UpdateStaffUserIdDto) {
+  async updateMezonId(id: number, dto: IUpdateStaffUserIdDto) {
     return baseApi.put<ApiResponse<Staff>>(
       API_PATHS.STAFF.UPDATE_MEZON_ID(id),
       dto,

@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CycleStatus } from '@qnoffice/shared';
+import { CycleStatus, ICreateOpentalkCycleDto } from '@qnoffice/shared';
 import { Type } from 'class-transformer';
 import {
-  IsDate,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
+    IsDate,
+    IsEnum,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
 } from 'class-validator';
 
-export class CreateOpentalkCycleDto {
+export class CreateOpentalkCycleDto implements ICreateOpentalkCycleDto {
   @ApiProperty({ description: 'Name of the opentalk cycle' })
   @IsNotEmpty()
   @IsString()

@@ -1,27 +1,29 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    Query,
 } from '@nestjs/common';
 import {
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
+    ApiOperation,
+    ApiParam,
+    ApiQuery,
+    ApiResponse,
+    ApiTags,
 } from '@nestjs/swagger';
+import {
+    ScheduleCycle,
+    ScheduleEvent,
+} from '@qnoffice/shared';
 import { CreateCycleDto } from './dtos/create-cycle.dto';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { ScheduleQueryDto } from './dtos/schedule-query.dto';
-import ScheduleCycleEntity from './enties/schedule-cycle.entity';
-import ScheduleEventEntity from './enties/schedule-event.entity';
 import { ScheduleService } from './schedule.service';
 
 @ApiTags('Schedule Management')
@@ -38,8 +40,8 @@ export class ScheduleController {
   })
   async createCycle(
     @Body() createCycleDto: CreateCycleDto,
-  ): Promise<ScheduleCycleEntity> {
-    return this.scheduleService.createCycle(createCycleDto);
+  ): Promise<ScheduleCycle> {
+    return this.scheduleService.createCycle(createCycleDto) as any;
   }
 
   @Get('cycles')
@@ -51,8 +53,8 @@ export class ScheduleController {
   })
   async getCycles(
     @Query('type') type?: string,
-  ): Promise<ScheduleCycleEntity[]> {
-    return this.scheduleService.getCycles(type);
+  ): Promise<ScheduleCycle[]> {
+    return this.scheduleService.getCycles(type) as any;
   }
 
   @Get('cycles/:id')
@@ -60,8 +62,8 @@ export class ScheduleController {
   @ApiParam({ name: 'id', description: 'Cycle ID' })
   async getCycleById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ScheduleCycleEntity | null> {
-    return this.scheduleService.getCycleById(id);
+  ): Promise<ScheduleCycle | null> {
+    return this.scheduleService.getCycleById(id) as any;
   }
 
   // Event endpoints
@@ -73,16 +75,16 @@ export class ScheduleController {
   })
   async createEvent(
     @Body() createEventDto: CreateEventDto,
-  ): Promise<ScheduleEventEntity> {
-    return this.scheduleService.createEvent(createEventDto);
+  ): Promise<ScheduleEvent> {
+    return this.scheduleService.createEvent(createEventDto) as any;
   }
 
   @Get('events')
   @ApiOperation({ summary: 'Get events with filters' })
   async getEvents(
     @Query() query: ScheduleQueryDto,
-  ): Promise<ScheduleEventEntity[]> {
-    return this.scheduleService.getEvents(query);
+  ): Promise<ScheduleEvent[]> {
+    return this.scheduleService.getEvents(query) as any;
   }
 
   @Get('cycles/:cycleId/events')
@@ -90,8 +92,8 @@ export class ScheduleController {
   @ApiParam({ name: 'cycleId', description: 'Cycle ID' })
   async getEventsByCycle(
     @Param('cycleId', ParseIntPipe) cycleId: number,
-  ): Promise<ScheduleEventEntity[]> {
-    return this.scheduleService.getEventsByCycle(cycleId);
+  ): Promise<ScheduleEvent[]> {
+    return this.scheduleService.getEventsByCycle(cycleId) as any;
   }
 
   @Get('events/:id')
@@ -99,8 +101,8 @@ export class ScheduleController {
   @ApiParam({ name: 'id', description: 'Event ID' })
   async getEventById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ScheduleEventEntity | null> {
-    return this.scheduleService.getEventById(id);
+  ): Promise<ScheduleEvent | null> {
+    return this.scheduleService.getEventById(id) as any;
   }
 
   @Put('events/:id')
@@ -109,8 +111,8 @@ export class ScheduleController {
   async updateEvent(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: Partial<CreateEventDto>,
-  ): Promise<ScheduleEventEntity> {
-    return this.scheduleService.updateEvent(id, updateData);
+  ): Promise<ScheduleEvent> {
+    return this.scheduleService.updateEvent(id, updateData) as any;
   }
 
   @Delete('events/:id')

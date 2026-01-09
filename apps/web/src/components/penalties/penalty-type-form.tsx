@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import penaltyTypeService from '@/shared/services/client/penalty-type.service';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreatePenaltyTypeDto, PenaltyType } from '@qnoffice/shared';
+import { ICreatePenaltyTypeDto, PenaltyType } from '@qnoffice/shared';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -60,7 +60,7 @@ export function PenaltyTypeForm({
         await penaltyTypeService.update(penaltyType.id, values);
         toast.success('Penalty type updated successfully');
       } else {
-        await penaltyTypeService.create(values as CreatePenaltyTypeDto);
+        await penaltyTypeService.create(values as ICreatePenaltyTypeDto);
         toast.success('Penalty type created successfully');
       }
       onSuccess();

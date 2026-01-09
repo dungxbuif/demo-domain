@@ -2,12 +2,12 @@ import { StaffStatus, UserRole } from '../enums';
 import { Branch } from './branch.types';
 
 export interface User {
-  id: string;
+  mezonId: string;
   name: string;
   email: string;
   avatar: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface Staff {
@@ -17,18 +17,18 @@ export interface Staff {
   userId: string | null;
   role: UserRole;
   branchId: number;
-  user: User;
-  branch: Branch;
-  created_at: string;
-  updated_at: string;
+  user?: User;
+  branch?: Branch;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-export interface CreateStaffDto {
+export interface ICreateStaffDto {
   email: string;
   branchId: number;
   role: UserRole;
 }
 
-export interface UpdateStaffUserIdDto {
+export interface IUpdateStaffUserIdDto {
   userId?: string | null;
 }

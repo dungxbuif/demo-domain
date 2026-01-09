@@ -1,19 +1,12 @@
 import {
-    CreateCycleDto,
-    CreateEventDto,
+    ICreateCycleDto,
+    ICreateEventDto,
+    IScheduleQueryDto,
+    IUpdateEventDto,
     ScheduleCycle,
     ScheduleEvent,
-    UpdateEventDto,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
-
-export interface ScheduleQueryParams {
-  type?: string;
-  status?: string;
-  cycleId?: number;
-  startDate?: string;
-  endDate?: string;
-}
 
 export class ScheduleServerService extends BaseServerService {
   private readonly baseUrl = '/schedules';
@@ -44,7 +37,7 @@ export class ScheduleServerService extends BaseServerService {
     }
   }
 
-  async createCycle(data: CreateCycleDto): Promise<ScheduleCycle> {
+  async createCycle(data: ICreateCycleDto): Promise<ScheduleCycle> {
     try {
       const response = await this.post<ScheduleCycle>(
         `${this.baseUrl}/cycles`,
@@ -59,7 +52,7 @@ export class ScheduleServerService extends BaseServerService {
 
   // Event endpoints
   async getAllEvents(
-    params: ScheduleQueryParams = {},
+    params: IScheduleQueryDto = {},
   ): Promise<ScheduleEvent[]> {
     try {
       const searchParams = new URLSearchParams();
@@ -107,7 +100,7 @@ export class ScheduleServerService extends BaseServerService {
     }
   }
 
-  async createEvent(data: CreateEventDto): Promise<ScheduleEvent> {
+  async createEvent(data: ICreateEventDto): Promise<ScheduleEvent> {
     try {
       const response = await this.post<ScheduleEvent>(
         `${this.baseUrl}/events`,
@@ -120,7 +113,7 @@ export class ScheduleServerService extends BaseServerService {
     }
   }
 
-  async updateEvent(id: number, data: UpdateEventDto): Promise<ScheduleEvent> {
+  async updateEvent(id: number, data: IUpdateEventDto): Promise<ScheduleEvent> {
     try {
       const response = await this.put<ScheduleEvent>(
         `${this.baseUrl}/events/${id}`,
@@ -159,13 +152,13 @@ export class ScheduleServerService extends BaseServerService {
 
   // Helper methods for opentalk compatibility
   async getOpentalkEvents(
-    params: ScheduleQueryParams = {},
+    params: IScheduleQueryDto = {},
   ): Promise<ScheduleEvent[]> {
     return this.getAllEvents({ ...params, type: 'OPENTALK' });
   }
 
   async getCleaningEvents(
-    params: ScheduleQueryParams = {},
+    params: IScheduleQueryDto = {},
   ): Promise<ScheduleEvent[]> {
     return this.getAllEvents({ ...params, type: 'CLEANING' });
   }

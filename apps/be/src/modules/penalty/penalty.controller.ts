@@ -1,21 +1,23 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
-  UseGuards,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    Query,
+    UseGuards,
 } from '@nestjs/common';
-import { UserRole } from '@qnoffice/shared';
+import {
+    IPaginationDto,
+    Penalty as IPenalty,
+    UserRole,
+} from '@qnoffice/shared';
 import { AppPaginateOptionsDto } from '@src/common/dtos/page-options.dto';
-import { AppPaginationDto } from '@src/common/dtos/paginate.dto';
 import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
-import { Penalty } from '@src/modules/penalty/penalty.entity';
 import { CreatePenaltyDto } from './dto/create-penalty.dto';
 import { UpdatePenaltyEvidenceDto } from './dto/update-penalty-evidence.dto';
 import { UpdatePenaltyDto } from './dto/update-penalty.dto';
@@ -29,40 +31,40 @@ export class PenaltyController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles([UserRole.HR])
-  async create(@Body() createPenaltyDto: CreatePenaltyDto) {
-    return this.penaltyService.create(createPenaltyDto);
+  async create(@Body() createPenaltyDto: CreatePenaltyDto): Promise<IPenalty> {
+    return this.penaltyService.create(createPenaltyDto) as any;
   }
 
   @Get()
   async findAll(
     @Query() queries: AppPaginateOptionsDto,
-  ): Promise<AppPaginationDto<Penalty>> {
-    return this.penaltyService.findAll(queries);
+  ): Promise<IPaginationDto<IPenalty>> {
+    return this.penaltyService.findAll(queries) as any;
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.penaltyService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<IPenalty> {
+    return this.penaltyService.findOne(id) as any;
   }
 
   @Put(':id')
   @UseGuards(RolesGuard)
   @Roles([UserRole.HR, UserRole.GDVP])
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePenaltyDto: UpdatePenaltyDto,
-  ) {
-    return this.penaltyService.update(id, updatePenaltyDto);
+  ): Promise<IPenalty> {
+    return this.penaltyService.update(id, updatePenaltyDto) as any;
   }
 
   @Put(':id/evidence')
   @UseGuards(RolesGuard)
   @Roles([UserRole.HR, UserRole.GDVP])
-  updateEvidence(
+  async updateEvidence(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEvidenceDto: UpdatePenaltyEvidenceDto,
-  ) {
-    return this.penaltyService.updateEvidence(id, updateEvidenceDto);
+  ): Promise<IPenalty> {
+    return this.penaltyService.updateEvidence(id, updateEvidenceDto) as any;
   }
 
   @Delete(':id')

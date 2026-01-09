@@ -16,7 +16,7 @@ interface CalendarWrapperProps {
   }>;
   holidays?: Array<{
     id: number;
-    date: string;
+    date: string | Date;
     name: string;
   }>;
   currentMonth: Date;

@@ -8,8 +8,8 @@ export interface ScheduleCycle {
   status: CycleStatus;
   description?: string;
   events?: ScheduleEvent[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface ScheduleEvent {
@@ -22,8 +22,8 @@ export interface ScheduleEvent {
   notes?: string;
   cycle?: ScheduleCycle;
   eventParticipants?: ScheduleEventParticipant[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface ScheduleEventParticipant {
@@ -31,25 +31,25 @@ export interface ScheduleEventParticipant {
   eventId: number;
   staffId: number;
   staff?: Staff;
-  created_at: string;
-  updated_at: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-export interface CreateCycleDto {
+export interface ICreateCycleDto {
   name: string;
   type: ScheduleType;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   description?: string;
 }
 
-export interface UpdateCycleDto {
+export interface IUpdateCycleDto {
   name?: string;
   status?: CycleStatus;
   description?: string;
 }
 
-export interface CreateEventDto {
+export interface ICreateEventDto {
   title: string;
   type: ScheduleType;
   cycleId: number;
@@ -58,7 +58,7 @@ export interface CreateEventDto {
   notes?: string;
 }
 
-export interface UpdateEventDto {
+export interface IUpdateEventDto {
   title?: string;
   eventDate?: string;
   status?: EventStatus;
@@ -66,7 +66,17 @@ export interface UpdateEventDto {
   participantIds?: number[];
 }
 
-export interface SwapEventsDto {
+export interface ISwapEventsDto {
   eventId1: number;
   eventId2: number;
+}
+
+import { SearchParams } from './pagination.types';
+
+export interface IScheduleQueryDto extends SearchParams {
+  type?: string;
+  status?: EventStatus;
+  cycleId?: number;
+  startDate?: string;
+  endDate?: string;
 }

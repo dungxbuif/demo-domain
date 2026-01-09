@@ -3,12 +3,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Penalty, PenaltyStatus, SearchOrder } from '@qnoffice/shared';
 import { format } from 'date-fns';
@@ -98,10 +98,10 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
             <TableRow key={penalty.id}>
               {showAllUsers && (
                 <TableCell className="font-medium">
-                  User #{penalty.user_id}
+                  User #{penalty.userId}
                 </TableCell>
               )}
-              <TableCell>Type {penalty.penalty_type_id}</TableCell>
+              <TableCell>Type {penalty.penaltyTypeId}</TableCell>
               <TableCell>{format(new Date(penalty.date), 'PP')}</TableCell>
               <TableCell className="max-w-xs truncate">
                 {penalty.reason}
