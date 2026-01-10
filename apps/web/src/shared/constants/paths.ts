@@ -26,6 +26,12 @@ export const PATHS = {
     },
     HOLIDAYS: '/dashboard/holidays',
     OPENTALK: '/dashboard/opentalk',
+    MANAGEMENT: {
+      BASE: '/dashboard/management',
+      OPENTALK_SWAPS: '/dashboard/management/opentalk-swaps',
+      CLEANING_SWAPS: '/dashboard/management/cleaning-swaps',
+      OPENTALK_SLIDES: '/dashboard/management/opentalk-slides',
+    },
     PENALTIES: '/dashboard/penalties',
     MANAGE_PENALTIES: '/dashboard/manage-penalties',
     CHANNELS: '/dashboard/channels',

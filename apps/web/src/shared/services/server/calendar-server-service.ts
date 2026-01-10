@@ -13,6 +13,7 @@ export interface CalendarEvent {
     name?: string;
   }[];
   notes?: string;
+  slideStatus?: string;
 }
 
 export class CalendarServerService {

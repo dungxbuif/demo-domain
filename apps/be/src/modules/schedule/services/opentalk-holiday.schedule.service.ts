@@ -50,7 +50,7 @@ export class OpentalkHolidayScheduleService {
     const holidays = await this.getHolidays();
     holidays.add(holidayDate);
 
-    const changes = this.calculateHolidayChanges(before, holidayDate, holidays);
+    const changes = this.calculateHolidayChanges(before, holidays);
 
     const after = this.applyInMemoryChanges(before, changes);
     this.logCyclesTable(`AFTER - Holiday Add (${holidayDate})`, after);
@@ -69,7 +69,6 @@ export class OpentalkHolidayScheduleService {
 
   private calculateHolidayChanges(
     cycles: Cycle[],
-    holidayDate: string,
     holidays: Set<string>,
   ): ScheduleChanges {
     const changes: ScheduleChanges = {
@@ -88,13 +87,13 @@ export class OpentalkHolidayScheduleService {
     for (let i = 0; i < cycles.length; i++) {
         const cycle = cycles[i];
         
-        const cycleUpdates = this.processCycleEvents(cycle, prevCycleEndDate, holidays, holidayDate);
+        const cycleUpdates = this.processCycleEvents(cycle, prevCycleEndDate, holidays);
         
         if (cycleUpdates.length > 0) {
             changes.eventsToUpdate.push(...cycleUpdates);
             
             // Calculate new end date for this cycle
-            const lastUpdate = cycleUpdates[cycleUpdates.length - 1];
+            // Calculate new end date for this cycle
             // If the last event was updated, use its new date.
             // If not, we still need the actual end date of the cycle (which might be the original last event).
             // But we need the *projected* end date considering updates.
@@ -116,7 +115,6 @@ export class OpentalkHolidayScheduleService {
       cycle: Cycle, 
       prevCycleEndDate: string | null, 
       holidays: Set<string>,
-      holidayChangeDate: string // The holiday that triggered this
   ): EventUpdate[] {
       const updates: EventUpdate[] = [];
       let prevProyectedDate: Date | null = null;
@@ -128,7 +126,7 @@ export class OpentalkHolidayScheduleService {
       // We iterate events in the cycle.
       for (let j = 0; j < cycle.events.length; j++) {
           const event = cycle.events[j];
-          const currentDate = new Date(event.date);
+
           
           let projectedDate = new Date(event.date);
           let needsUpdate = false;

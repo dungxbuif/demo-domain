@@ -184,6 +184,51 @@ function cleanUserLabel(label?: string | null): string | undefined {
   return trimmed.length ? trimmed : undefined;
 }
 
+// Sync helper for resolving user mentions with labels (no async needed)
+function resolveMentionPlaceholdersSync(
+  text: string,
+  placeholders: Record<string, MentionPlaceholderValue>,
+): { text: string; mentions: ApiMessageMention[] } {
+  if (!text) {
+    return { text, mentions: [] };
+  }
+
+  const regex = /\{\{\s*([a-zA-Z0-9_.:-]+)\s*\}\}/g;
+  let result = '';
+  let cursor = 0;
+  const mentions: ApiMessageMention[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    const key = match[1];
+    const placeholder = placeholders[key];
+
+    // Add text before placeholder
+    result += text.slice(cursor, match.index);
+    cursor = match.index + match[0].length;
+
+    if (placeholder && placeholder.kind === 'user') {
+      const username = placeholder.label ?? placeholder.userId;
+      const mentionText = `@${username}`;
+      const start = result.length;
+      result += mentionText;
+
+      mentions.push({
+        user_id: placeholder.userId,
+        username,
+        s: start,
+        e: start + mentionText.length,
+      });
+    } else {
+      // Keep placeholder if not found or not a user mention
+      result += match[0];
+    }
+  }
+
+  result += text.slice(cursor);
+  return { text: result, mentions };
+}
+
 async function resolveMentionPlaceholders(
   text: string,
   placeholders: Record<string, MentionPlaceholderValue>,
@@ -589,6 +634,39 @@ export class SmartMessage {
     if (this.embeds.length > 0) {
       contentWithComponents.embed = this.embeds.map((embed) => ({ ...embed }));
     }
+
+    const placeholders =
+      Object.keys(this.mentionPlaceholders).length > 0
+        ? cloneMentionPlaceholdersRecord(this.mentionPlaceholders)
+        : undefined;
+
+    // Auto-resolve mentions if all placeholders have labels (username provided)
+    if (placeholders && typeof contentWithComponents.t === 'string') {
+      const allHaveLabels = Object.values(placeholders).every(
+        (p) => p.kind === 'user' && p.label !== undefined,
+      );
+
+      console.log('[DEBUG toJSON] allHaveLabels:', allHaveLabels);
+
+      if (allHaveLabels) {
+        // Use sync helper to resolve mentions
+        const resolved = resolveMentionPlaceholdersSync(
+          contentWithComponents.t,
+          placeholders,
+        );
+
+        return {
+          content: { ...contentWithComponents, t: resolved.text },
+          attachments:
+            this.attachments.length > 0
+              ? this.attachments.map((attachment) => ({ ...attachment }))
+              : undefined,
+          mentions:
+            resolved.mentions.length > 0 ? resolved.mentions : undefined,
+        };
+      }
+    }
+
     return {
       content: contentWithComponents,
       attachments:

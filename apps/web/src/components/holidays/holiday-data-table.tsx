@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PERMISSIONS, ProtectedComponent } from '@/shared/auth';
 import { usePagination } from '@/shared/hooks/use-pagination';
@@ -57,7 +57,7 @@ export function HolidayDataTable({
   const columns: ColumnDef<Holiday>[] = [
     {
       accessorKey: 'date',
-      header: 'Date',
+      header: 'Ngày',
       cell: ({ row }) => {
         const date = new Date(row.original.date);
         const isPast = isPastDate(row.original.date);
@@ -65,11 +65,11 @@ export function HolidayDataTable({
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className={isPast ? 'text-muted-foreground' : ''}>
-              {format(date, 'MMM dd, yyyy')}
+              {format(date, 'dd/MM/yyyy')}
             </span>
             {isPast && (
               <Badge variant="secondary" className="ml-2">
-                Past
+                Đã qua
               </Badge>
             )}
           </div>
@@ -78,7 +78,7 @@ export function HolidayDataTable({
     },
     {
       accessorKey: 'name',
-      header: 'Holiday Name',
+      header: 'Tên ngày nghỉ',
       cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     },
     {
@@ -92,17 +92,17 @@ export function HolidayDataTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">Mở menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
                 <DropdownMenuItem
                   onClick={() => handleEdit(holiday)}
                   disabled={isPast}
                 >
-                  {isPast ? 'Cannot Edit (Past Date)' : 'Edit'}
+                  {isPast ? 'Không thể sửa (Đã qua)' : 'Chỉnh sửa'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -119,7 +119,7 @@ export function HolidayDataTable({
         initialData={initialData}
         initialPagination={initialPagination}
         pagination={pagination}
-        searchPlaceholder="Search holidays..."
+        searchPlaceholder="Tìm kiếm ngày nghỉ..."
         showSearch={false}
       />
       <EditHolidayModal

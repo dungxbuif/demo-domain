@@ -2,34 +2,34 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
 } from '@/components/ui/command';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import penaltyTypeService from '@/shared/services/client/penalty-type.service';
@@ -38,10 +38,10 @@ import staffService from '@/shared/services/client/staff.service';
 import { cn } from '@/shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    ApiResponse,
-    ICreatePenaltyDto,
-    PenaltyType,
-    Staff,
+  ApiResponse,
+  ICreatePenaltyDto,
+  PenaltyType,
+  Staff,
 } from '@qnoffice/shared';
 import { Check, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -50,11 +50,11 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  userId: z.number().min(1, 'Staff member is required'),
-  penaltyTypeId: z.number().min(1, 'Penalty type is required'),
-  date: z.string().min(1, 'Date is required'),
+  userId: z.number().min(1, 'Nhân viên là bắt buộc'),
+  penaltyTypeId: z.number().min(1, 'Loại phạt là bắt buộc'),
+  date: z.string().min(1, 'Ngày là bắt buộc'),
   amount: z.number().optional(),
-  reason: z.string().min(1, 'Reason is required'),
+  reason: z.string().min(1, 'Lý do là bắt buộc'),
   evidenceUrls: z.array(z.string()).optional(),
 });
 
@@ -110,7 +110,7 @@ export function CreatePenaltyForm({
       );
       setStaffTotal(data.total);
     } catch {
-      toast.error('Failed to load staff');
+      toast.error('Không thể tải danh sách nhân viên');
     } finally {
       setStaffLoading(false);
     }
@@ -125,7 +125,7 @@ export function CreatePenaltyForm({
       setPenaltyTypes(types);
       setTypeTotal(response.data.data.total);
     } catch (error) {
-      toast.error('Failed to load penalty types');
+      toast.error('Không thể tải loại phạt');
     } finally {
       setTypeLoading(false);
     }
@@ -219,13 +219,13 @@ export function CreatePenaltyForm({
       };
 
       await penaltyService.create(payload);
-      toast.success('Penalty created successfully');
+      toast.success('Tạo phạt thành công');
       onSuccess();
       onClose();
       form.reset();
       setEvidenceFiles([]);
     } catch (error) {
-      toast.error('Failed to create penalty');
+      toast.error('Tạo phạt thất bại');
     } finally {
       setIsUploading(false);
     }
@@ -251,7 +251,7 @@ export function CreatePenaltyForm({
     const imageFiles = files.filter((file) => file.type.startsWith('image/'));
 
     if (imageFiles.length !== files.length) {
-      toast.error('Only image files are allowed');
+      toast.error('Chỉ cho phép tải lên file ảnh');
     }
 
     setEvidenceFiles((prev) => [...prev, ...imageFiles]);
@@ -265,9 +265,9 @@ export function CreatePenaltyForm({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create Penalty</DialogTitle>
+          <DialogTitle>Tạo phạt</DialogTitle>
           <DialogDescription>
-            Create a new penalty record for a staff member
+            Tạo bản ghi phạt mới cho nhân viên
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -277,7 +277,7 @@ export function CreatePenaltyForm({
               name="userId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Staff Member</FormLabel>
+                  <FormLabel>Nhân viên</FormLabel>
                   <Popover open={staffOpen} onOpenChange={setStaffOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -296,20 +296,20 @@ export function CreatePenaltyForm({
                               staffList.find(
                                 (staff) => staff.id === field.value,
                               )?.email
-                            : 'Select staff member'}
+                            : 'Chọn nhân viên'}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
                       <Command>
-                        <CommandInput placeholder="Search staff..." />
+                        <CommandInput placeholder="Tìm kiếm nhân viên..." />
                         <CommandList
                           onScroll={handleStaffScroll}
                           ref={staffListRef}
                           className="max-h-[300px] overflow-y-auto"
                         >
-                          <CommandEmpty>No staff found.</CommandEmpty>
+                          <CommandEmpty>Không tìm thấy nhân viên.</CommandEmpty>
                           <CommandGroup>
                             {staffList.map((staff) => (
                               <CommandItem
@@ -351,7 +351,7 @@ export function CreatePenaltyForm({
               name="penaltyTypeId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Penalty Type</FormLabel>
+                  <FormLabel>Loại phạt</FormLabel>
                   <Popover open={typeOpen} onOpenChange={setTypeOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -370,21 +370,21 @@ export function CreatePenaltyForm({
                                 );
                                 return type
                                   ? `${type.name} - ${formatCurrency(type.amount)}`
-                                  : 'Select penalty type';
+                                  : 'Chọn loại phạt';
                               })()
-                            : 'Select penalty type'}
+                            : 'Chọn loại phạt'}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
                       <Command>
-                        <CommandInput placeholder="Search penalty type..." />
+                        <CommandInput placeholder="Tìm kiếm loại phạt..." />
                         <CommandList
                           ref={typeListRef}
                           className="max-h-[300px] overflow-y-auto"
                         >
-                          <CommandEmpty>No penalty type found.</CommandEmpty>
+                          <CommandEmpty>Không tìm thấy loại phạt.</CommandEmpty>
                           <CommandGroup>
                             {penaltyTypes.map((type) => (
                               <CommandItem
@@ -428,7 +428,7 @@ export function CreatePenaltyForm({
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Ngày</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -442,7 +442,7 @@ export function CreatePenaltyForm({
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Amount (VND)</FormLabel>
+                    <FormLabel>Số tiền (VND)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -461,10 +461,10 @@ export function CreatePenaltyForm({
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reason</FormLabel>
+                  <FormLabel>Lý do</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the violation..."
+                      placeholder="Mô tả vi phạm..."
                       rows={4}
                       {...field}
                     />
@@ -475,7 +475,7 @@ export function CreatePenaltyForm({
             />
 
             <div className="space-y-2">
-              <FormLabel>Evidence (Images)</FormLabel>
+              <FormLabel>Minh chứng (Ảnh)</FormLabel>
               <div className="flex flex-col gap-2">
                 <Button
                   type="button"
@@ -486,7 +486,7 @@ export function CreatePenaltyForm({
                   className="w-full"
                 >
                   <ImagePlus className="h-4 w-4 mr-2" />
-                  Add Evidence Images
+                  Thêm ảnh minh chứng
                 </Button>
                 <input
                   id="evidence-upload"
@@ -504,7 +504,7 @@ export function CreatePenaltyForm({
                     <div key={index} className="relative group">
                       <img
                         src={URL.createObjectURL(file)}
-                        alt={`Evidence ${index + 1}`}
+                        alt={`Minh chứng ${index + 1}`}
                         className="w-full h-24 object-cover rounded border"
                       />
                       <Button
@@ -525,10 +525,10 @@ export function CreatePenaltyForm({
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                Hủy
               </Button>
               <Button type="submit" disabled={isUploading}>
-                {isUploading ? 'Uploading...' : 'Create Penalty'}
+                {isUploading ? 'Đang tải lên...' : 'Tạo phạt'}
               </Button>
             </DialogFooter>
           </form>

@@ -50,7 +50,7 @@ export function UpdateMezonIdModal({
   const form = useForm<UpdateMezonIdFormValues>({
     resolver: zodResolver(updateMezonIdSchema),
     defaultValues: {
-      mezonId: staff.userId || '',
+      mezonId:'',
     },
   });
 

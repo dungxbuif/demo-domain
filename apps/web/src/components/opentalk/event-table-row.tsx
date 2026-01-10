@@ -5,21 +5,27 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { getStatusBadgeProps } from '@/shared/utils';
-import { IOpentalEventMetadata, ScheduleEvent } from '@qnoffice/shared';
+import { IOpentalkEventMetadata, ScheduleEvent } from '@qnoffice/shared';
 import { Calendar, FileText, User } from 'lucide-react';
 
+import { Checkbox } from '@/components/ui/checkbox';
+
 interface EventTableRowProps {
-  event: ScheduleEvent<IOpentalEventMetadata>;
+  event: ScheduleEvent<IOpentalkEventMetadata>;
   isEditingTopic: boolean;
   editedTopicValue: string;
   canEditTopic: boolean;
   canEditSlide: boolean;
+  canManageOpentalk: boolean;
+  isSelected: boolean;
   onTopicEdit: (topic: string) => void;
   onTopicSave: () => void;
   onTopicCancel: () => void;
   onTopicChange: (value: string) => void;
   onSlideClick: () => void;
+  onSelect: (checked: boolean) => void;
   formatDate: (date: string) => string;
+  isLocked?: boolean;
 }
 
 export function EventTableRow({
@@ -28,12 +34,16 @@ export function EventTableRow({
   editedTopicValue,
   canEditTopic,
   canEditSlide,
+  canManageOpentalk,
+  isSelected,
   onTopicEdit,
   onTopicSave,
   onTopicCancel,
   onTopicChange,
   onSlideClick,
+  onSelect,
   formatDate,
+  isLocked = false,
 }: EventTableRowProps) {
   const renderPresenter = () => {
     if (event.eventParticipants && event.eventParticipants.length > 0) {
@@ -55,8 +65,26 @@ export function EventTableRow({
     return 'Unassigned';
   };
 
+  const isPast = new Date(event.eventDate).getTime() < new Date().getTime();
+  const isCompleted =
+    event.status === 'COMPLETED' || event.status === 'CANCELLED';
+  const isCheckboxDisabled = isLocked || isPast || isCompleted;
+
   return (
-    <TableRow className="hover:bg-muted/50">
+    <TableRow
+      className={`hover:bg-muted/50 ${isSelected ? 'bg-muted/50' : ''} ${
+        isCheckboxDisabled ? 'opacity-60 bg-gray-50' : ''
+      }`}
+    >
+      {canManageOpentalk && (
+        <TableCell className="w-[50px]">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelect(checked as boolean)}
+            disabled={isCheckboxDisabled}
+          />
+        </TableCell>
+      )}
       <TableCell>
         <div className="flex items-center space-x-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />

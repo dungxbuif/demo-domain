@@ -2,12 +2,12 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,9 +37,10 @@ export function EditHolidayModal({
   useEffect(() => {
     if (holiday) {
       setFormData({
-        date: typeof holiday.date === 'string' 
-          ? holiday.date.split('T')[0] 
-          : holiday.date.toISOString().split('T')[0],
+        date:
+          typeof holiday.date === 'string'
+            ? holiday.date.split('T')[0]
+            : holiday.date.toISOString().split('T')[0],
         name: holiday.name,
       });
     }
@@ -65,13 +66,13 @@ export function EditHolidayModal({
         throw new Error(error.message || 'Failed to update holiday');
       }
 
-      toast.success('Holiday updated successfully');
+      toast.success('Cập nhật ngày nghỉ thành công');
 
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to update holiday',
+        error instanceof Error ? error.message : 'Cập nhật ngày nghỉ thất bại',
       );
     } finally {
       setIsLoading(false);
@@ -87,15 +88,16 @@ export function EditHolidayModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Holiday</DialogTitle>
+          <DialogTitle>Chỉnh sửa ngày nghỉ</DialogTitle>
           <DialogDescription>
-            Update holiday details. You cannot edit holidays in the past.
+            Cập nhật thông tin ngày nghỉ. Không thể chỉnh sửa ngày nghỉ trong
+            quá khứ.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-date">Date</Label>
+              <Label htmlFor="edit-date">Ngày</Label>
               <Input
                 id="edit-date"
                 type="date"
@@ -108,10 +110,10 @@ export function EditHolidayModal({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">Holiday Name</Label>
+              <Label htmlFor="edit-name">Tên ngày nghỉ</Label>
               <Input
                 id="edit-name"
-                placeholder="e.g., New Year's Day"
+                placeholder="VD: Tết Dương lịch"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -127,10 +129,10 @@ export function EditHolidayModal({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update Holiday'}
+              {isLoading ? 'Đang cập nhật...' : 'Cập nhật ngày nghỉ'}
             </Button>
           </DialogFooter>
         </form>

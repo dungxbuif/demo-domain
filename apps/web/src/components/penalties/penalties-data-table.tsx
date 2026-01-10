@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { usePagination } from '@/shared/hooks/use-pagination';
 import { PaginationState, Penalty, PenaltyStatus } from '@qnoffice/shared';
@@ -40,7 +40,7 @@ export function PenaltiesDataTable({
           className="bg-green-50 text-green-700 border-green-200"
         >
           <CheckCircle2 className="h-3 w-3 mr-1" />
-          Paid
+          Đã thanh toán
         </Badge>
       );
     }
@@ -50,7 +50,7 @@ export function PenaltiesDataTable({
         className="bg-red-50 text-red-700 border-red-200"
       >
         <AlertCircle className="h-3 w-3 mr-1" />
-        Unpaid
+        Chưa thanh toán
       </Badge>
     );
   };
@@ -65,29 +65,29 @@ export function PenaltiesDataTable({
   const columns: ColumnDef<Penalty>[] = [
     {
       accessorKey: 'userId',
-      header: 'User ID',
+      header: 'Mã nhân viên',
       cell: ({ row }) => row.original.userId,
     },
     {
       accessorKey: 'penaltyTypeId',
-      header: 'Type',
-      cell: ({ row }) => `Type ${row.original.penaltyTypeId}`,
+      header: 'Loại phạt',
+      cell: ({ row }) => `Loại ${row.original.penaltyTypeId}`,
     },
     {
       accessorKey: 'date',
-      header: 'Date',
+      header: 'Ngày',
       cell: ({ row }) => format(new Date(row.original.date), 'PP'),
     },
     {
       accessorKey: 'reason',
-      header: 'Reason',
+      header: 'Lý do',
       cell: ({ row }) => (
         <div className="max-w-xs truncate">{row.original.reason}</div>
       ),
     },
     {
       accessorKey: 'amount',
-      header: 'Amount',
+      header: 'Số tiền',
       cell: ({ row }) => (
         <div className="text-right font-medium">
           {formatCurrency(Number(row.original.amount))}
@@ -96,7 +96,7 @@ export function PenaltiesDataTable({
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
@@ -107,7 +107,7 @@ export function PenaltiesDataTable({
           size="sm"
           onClick={() => setSelectedPenalty(row.original)}
         >
-          View Details
+          Xem chi tiết
         </Button>
       ),
     },
@@ -120,7 +120,7 @@ export function PenaltiesDataTable({
         initialData={initialData}
         initialPagination={initialPagination}
         pagination={pagination}
-        searchPlaceholder="Search penalties..."
+        searchPlaceholder="Tìm kiếm phạt..."
         showSearch={false}
       />
 
@@ -132,39 +132,39 @@ export function PenaltiesDataTable({
         >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Penalty Details</DialogTitle>
+              <DialogTitle>Chi tiết phạt</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">User ID</p>
+                  <p className="text-sm text-muted-foreground">Mã nhân viên</p>
                   <p className="font-medium">{selectedPenalty.userId}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Type</p>
+                  <p className="text-sm text-muted-foreground">Loại phạt</p>
                   <p className="font-medium">
-                    Type {selectedPenalty.penaltyTypeId}
+                    Loại {selectedPenalty.penaltyTypeId}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Amount</p>
+                  <p className="text-sm text-muted-foreground">Số tiền</p>
                   <p className="font-medium">
                     {formatCurrency(Number(selectedPenalty.amount))}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="text-sm text-muted-foreground">Ngày</p>
                   <p className="font-medium">
                     {format(new Date(selectedPenalty.date), 'PPP')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-sm text-muted-foreground">Trạng thái</p>
                   <div>{getStatusBadge(selectedPenalty.status)}</div>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Reason</p>
+                <p className="text-sm text-muted-foreground mb-2">Lý do</p>
                 <p className="text-sm bg-muted p-3 rounded-md">
                   {selectedPenalty.reason}
                 </p>
@@ -173,14 +173,14 @@ export function PenaltiesDataTable({
                 selectedPenalty.evidenceUrls.length > 0 && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">
-                      Evidence
+                      Minh chứng
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedPenalty.evidenceUrls.map((url, index) => (
                         <img
                           key={index}
                           src={url}
-                          alt={`Evidence ${index + 1}`}
+                          alt={`Minh chứng ${index + 1}`}
                           className="rounded-md border"
                         />
                       ))}

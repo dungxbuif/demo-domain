@@ -1,5 +1,5 @@
 import baseApi from '@/shared/services/client/base-api';
-import { ApiResponse } from '@qnoffice/shared';
+import { ApiResponse, IOpentalkSlide } from '@qnoffice/shared';
 
 export interface OpentalkEvent {
   id: number;
@@ -21,15 +21,6 @@ export interface OpentalkEvent {
       };
     };
   }>;
-}
-
-export interface OpentalkSlide {
-  id: number;
-  slideUrl: string;
-  eventId: number;
-  presentedAt?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface IUpdateEventDto {
@@ -54,7 +45,7 @@ class OpentalkClientService {
     eventId: number,
     data: { slideUrl?: string; presentedAt?: string },
   ) {
-    return baseApi.put<ApiResponse<OpentalkSlide>>(
+    return baseApi.put<ApiResponse<IOpentalkSlide>>(
       `${this.baseUrl}/events/${eventId}/slide`,
       data,
     );
@@ -65,6 +56,36 @@ class OpentalkClientService {
       `${this.baseUrl}/events?participantId=${staffId}`,
     );
     return response.data.data || [];
+  }
+
+  async getSlide(eventId: number) {
+    return baseApi.get<ApiResponse<IOpentalkSlide>>(
+      `${this.baseUrl}/events/${eventId}/slide`,
+    );
+  }
+
+  async submitSlide(payload: {
+    eventId: number;
+    slidesUrl: string;
+    type: string;
+    fileType?: string;
+    fileName?: string;
+  }) {
+    return baseApi.post<void>(`${this.baseUrl}/slides/submit`, payload);
+  }
+
+  async approveSlide(eventId: number) {
+    return baseApi.put<void>(`${this.baseUrl}/events/${eventId}/approve-slide`);
+  }
+
+  async rejectSlide(eventId: number, reason: string) {
+    return baseApi.put<void>(`${this.baseUrl}/events/${eventId}/reject-slide`, {
+      reason,
+    });
+  }
+
+  async swapEvents(payload: { event1Id: number; event2Id: number }) {
+    return baseApi.post<void>(`${this.baseUrl}/swap`, payload);
   }
 }
 

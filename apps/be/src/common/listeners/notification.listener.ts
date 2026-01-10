@@ -18,7 +18,7 @@ export class NotificationListener {
   async handleCleaningMorningReminder(payload: CleaningReminderPayload) {
     const channelId = await this.channelConfigService.getChannelId('CLEANING');
     this.logger.log(
-      `[Bot Integration] Cleaning morning reminder: Channel ${channelId}, Event ${payload.eventId}, Participants: ${payload.participantEmails.join(', ')}`,
+      `[Bot Integration] Cleaning morning reminder: Channel ${channelId}, Event ${payload.eventId}, Participants: ${payload.participants.map((p) => p.username).join(', ')}`,
     );
   }
 
@@ -26,7 +26,7 @@ export class NotificationListener {
   async handleCleaningAfternoonReminder(payload: CleaningReminderPayload) {
     const channelId = await this.channelConfigService.getChannelId('CLEANING');
     this.logger.log(
-      `[Bot Integration] Cleaning afternoon reminder: Channel ${channelId}, Event ${payload.eventId}, Participants: ${payload.participantEmails.join(', ')}`,
+      `[Bot Integration] Cleaning afternoon reminder: Channel ${channelId}, Event ${payload.eventId}, Participants: ${payload.participants.map((p) => p.username).join(', ')}`,
     );
   }
 
@@ -34,7 +34,7 @@ export class NotificationListener {
   async handleCleaningNextDayReminder(payload: CleaningReminderPayload) {
     const channelId = await this.channelConfigService.getChannelId('CLEANING');
     this.logger.log(
-      `[Bot Integration] Cleaning next day reminder: Channel ${channelId}, Event ${payload.eventId}, Date: ${payload.eventDate}, Participants: ${payload.participantEmails.join(', ')}`,
+      `[Bot Integration] Cleaning next day reminder: Channel ${channelId}, Event ${payload.eventId}, Date: ${payload.eventDate}, Participants: ${payload.participants.map((p) => p.username).join(', ')}`,
     );
   }
 
@@ -42,7 +42,7 @@ export class NotificationListener {
   async handleOpentalkSlideReminder(payload: OpentalkSlideReminderPayload) {
     const channelId = await this.channelConfigService.getChannelId('OPENTALK');
     this.logger.log(
-      `[Bot Integration] Opentalk slide reminder: Channel ${channelId}, Event ${payload.eventId}, Days until: ${payload.daysUntilEvent}, Participant: ${payload.participantEmail}`,
+      `[Bot Integration] Opentalk slide reminder: Channel ${channelId}, Event ${payload.eventId}, Days until: ${payload.daysUntilEvent}, Participant: ${payload.participant.username}`,
     );
   }
 
@@ -50,7 +50,7 @@ export class NotificationListener {
   async handleOpentalkSlideOverdue(payload: OpentalkSlideReminderPayload) {
     const channelId = await this.channelConfigService.getChannelId('OPENTALK');
     this.logger.log(
-      `[Bot Integration] Opentalk slide OVERDUE: Channel ${channelId}, Event ${payload.eventId}, Participant: ${payload.participantEmail}`,
+      `[Bot Integration] Opentalk slide OVERDUE: Channel ${channelId}, Event ${payload.eventId}, Participant: ${payload.participant.username}`,
     );
   }
 

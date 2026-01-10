@@ -1,16 +1,17 @@
 import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
+    BadRequestException,
+    ConflictException,
+    Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  CycleStatus,
-  EventStatus,
-  OpentalkSlideStatus,
-  ScheduleType,
-  SearchOrder,
+    CycleStatus,
+    EventStatus,
+    OpentalkSlideStatus,
+    OpentalkSlideType,
+    ScheduleType,
+    SearchOrder,
 } from '@qnoffice/shared';
 import { SubmitSlideDto } from '@src/modules/opentalk/dtos/submit-slide.dto';
 import { CreateSwapRequestDto } from '@src/modules/swap-request/dtos/create-swap-request.dto';
@@ -23,6 +24,7 @@ import { CreateOpentalkCycleDto } from './dtos/create-opentalk-cycle.dto';
 import { CreateOpentalkEventDto } from './dtos/create-opentalk-event.dto';
 import { OpentalkQueryDto } from './dtos/opentalk-query.dto';
 import { SwapOpentalkDto } from './dtos/swap-opentalk.dto';
+import OpentalkSlideEntity from './entities/opentalk-slide.entity';
 
 @Injectable()
 export class OpentalkService {
@@ -35,6 +37,8 @@ export class OpentalkService {
     private readonly participantRepository: Repository<ScheduleEventParticipantEntity>,
     @InjectRepository(SwapRequestEntity)
     private readonly swapRequestRepository: Repository<SwapRequestEntity>,
+    @InjectRepository(OpentalkSlideEntity)
+    private readonly slideRepository: Repository<OpentalkSlideEntity>,
   ) {}
 
   async getCycles(status?: string): Promise<ScheduleCycleEntity[]> {
@@ -53,10 +57,10 @@ export class OpentalkService {
         'events.eventParticipants.staff.user',
       ],
       order: {
+        id: 'DESC',
         events: {
           eventDate: SearchOrder.ASC,
         },
-        // createdAt: SearchOrder.ASC,
       },
     });
   }
@@ -131,6 +135,24 @@ export class OpentalkService {
       );
     }
 
+    // Manually attach slides to events (no FK relation)
+    if (filtered.length > 0) {
+      const eventIds = filtered.map((e) => e.id);
+      const slides = await this.slideRepository
+        .createQueryBuilder('slide')
+        .where('slide.eventId IN (:...eventIds)', { eventIds })
+        .getMany();
+      
+      console.log('OpentalkService getEvents IDs:', eventIds);
+      console.log('OpentalkService found slides:', slides);
+
+      // Create a map for quick lookup
+      const slideMap = new Map(slides.map((s) => [s.eventId, s]));
+      filtered.forEach((event) => {
+        (event as any).slide = slideMap.get(event.id) || null;
+      });
+    }
+
     return filtered;
   }
 
@@ -195,20 +217,54 @@ export class OpentalkService {
       throw new NotFoundException('Event not found');
     }
 
-    let slideKey = payload.slidesUrl;
-    try {
-      const url = new URL(payload.slidesUrl);
-      slideKey = url.pathname.substring(1);
-    } catch (e) {
-      slideKey = payload.slidesUrl;
+    let slideUrl = payload.slidesUrl;
+    let slideKey: string | undefined;
+    let type = payload.type || OpentalkSlideType.LINK;
+
+    if (!payload.type) {
+      if (slideUrl.includes('amazonaws.com') || !slideUrl.startsWith('http')) {
+        type = OpentalkSlideType.FILE;
+      }
     }
 
-    await this.eventRepository.update(payload.eventId, {
-      metadata: {
-        slideKey: slideKey,
-        status: OpentalkSlideStatus.PENDING,
-      },
+    if (type === OpentalkSlideType.FILE) {
+      if (payload.slidesUrl.startsWith('http')) {
+        try {
+          const url = new URL(payload.slidesUrl);
+          slideKey = url.pathname.substring(1);
+        } catch (e) {
+          slideKey = payload.slidesUrl;
+        }
+      } else {
+        slideKey = payload.slidesUrl;
+      }
+    }
+
+    let slide = await this.slideRepository.findOne({
+      where: { eventId: payload.eventId },
     });
+
+    if (slide) {
+      slide.slideUrl = type === OpentalkSlideType.LINK ? slideUrl : undefined;
+      slide.slideKey = slideKey;
+      slide.type = type;
+      slide.status = OpentalkSlideStatus.PENDING;
+      slide.approvedBy = undefined;
+      slide.approvedAt = undefined;
+      slide.rejectedBy = undefined;
+      slide.rejectedAt = undefined;
+      slide.rejectionReason = undefined;
+    } else {
+      slide = this.slideRepository.create({
+        eventId: payload.eventId,
+        slideUrl: type === OpentalkSlideType.LINK ? slideUrl : undefined,
+        slideKey,
+        type,
+        status: OpentalkSlideStatus.PENDING,
+      });
+    }
+
+    await this.slideRepository.save(slide);
   }
 
   async updateEvent(
@@ -304,7 +360,7 @@ export class OpentalkService {
     // Validate that the requester is participating in the original event
     const participant = await this.participantRepository.findOne({
       where: {
-        eventId: createSwapRequestDto.scheduleId,
+        eventId: createSwapRequestDto.fromEventId,
         staffId: requesterId,
       },
     });
@@ -314,10 +370,10 @@ export class OpentalkService {
     }
 
     // Find available slots or create a general swap request
-    const toEventId = createSwapRequestDto.scheduleId; // For now, use the same event ID
+    const toEventId = createSwapRequestDto.toEventId;
 
     const swapRequest = this.swapRequestRepository.create({
-      fromEventId: createSwapRequestDto.scheduleId,
+      fromEventId: createSwapRequestDto.fromEventId,
       toEventId,
       requesterId,
       reason: createSwapRequestDto.reason,
@@ -342,6 +398,57 @@ export class OpentalkService {
       where,
       relations: ['fromEvent', 'toEvent', 'requester'],
       order: { createdAt: 'DESC' },
+    });
+  }
+
+  async approveSlide(eventId: number, userId: number): Promise<void> {
+    const slide = await this.slideRepository.findOne({
+      where: { eventId },
+    });
+
+    if (!slide) {
+      throw new NotFoundException('Slide not found for this event');
+    }
+
+    if (slide.status !== OpentalkSlideStatus.PENDING) {
+      throw new BadRequestException('Only pending slides can be approved');
+    }
+
+    slide.status = OpentalkSlideStatus.APPROVED;
+    slide.approvedBy = userId;
+    slide.approvedAt = new Date();
+
+    await this.slideRepository.save(slide);
+  }
+
+  async rejectSlide(
+    eventId: number,
+    userId: number,
+    reason: string,
+  ): Promise<void> {
+    const slide = await this.slideRepository.findOne({
+      where: { eventId },
+    });
+
+    if (!slide) {
+      throw new NotFoundException('Slide not found for this event');
+    }
+
+    if (slide.status !== OpentalkSlideStatus.PENDING) {
+      throw new BadRequestException('Only pending slides can be rejected');
+    }
+
+    slide.status = OpentalkSlideStatus.REJECTED;
+    slide.rejectedBy = userId;
+    slide.rejectedAt = new Date();
+    slide.rejectionReason = reason;
+
+    await this.slideRepository.save(slide);
+  }
+
+  async getSlideByEventId(eventId: number): Promise<OpentalkSlideEntity | null> {
+    return this.slideRepository.findOne({
+      where: { eventId },
     });
   }
 }

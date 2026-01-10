@@ -1,30 +1,19 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
+import { ActionPanel } from '@/components/ui/action-panel';
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/shared/contexts/auth-context';
-import { getStatusBadgeProps } from '@/shared/utils';
+import { cleaningClientService } from '@/shared/services/client/cleaning-client-service';
 import { ArrowRightLeft, Download, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { SwapRequestManagement } from './swap-request-management';
+import { CleaningCycleCard } from './cleaning-cycle-card';
 
 interface CleaningSpreadsheetViewProps {
   events: any[];
@@ -53,7 +42,7 @@ export function CleaningSpreadsheetView({
   };
 
   const getParticipantNames = (eventParticipants: any[]) => {
-    if (!eventParticipants?.length) return 'No participants';
+    if (!eventParticipants?.length) return 'Không có người trực';
 
     return eventParticipants
       .map(
@@ -90,7 +79,7 @@ export function CleaningSpreadsheetView({
     a.click();
     window.URL.revokeObjectURL(url);
 
-    toast.success('Schedule exported successfully');
+    toast.success('Lịch trực xuất thành công');
   };
 
   const handleRefresh = () => {
@@ -98,7 +87,7 @@ export function CleaningSpreadsheetView({
     // Simulate refresh
     setTimeout(() => {
       setIsLoading(false);
-      toast.success('Data refreshed');
+      toast.success('Dữ liệu đã được làm mới');
     }, 1000);
   };
 
@@ -108,6 +97,20 @@ export function CleaningSpreadsheetView({
     email: string,
     cycleId: number,
   ) => {
+    // Validate event
+    const targetEvent = events.find((e) => e.id === eventId);
+    if (targetEvent) {
+      const isPast = new Date(targetEvent.eventDate).getTime() < Date.now();
+      if (
+        isPast ||
+        targetEvent.status === 'COMPLETED' ||
+        targetEvent.status === 'CANCELLED'
+      ) {
+        toast.error('Không thể chọn sự kiện đã kết thúc hoặc trong quá khứ');
+        return;
+      }
+    }
+
     setSelectedParticipants((prev) => {
       const exists = prev.find(
         (p) => p.eventId === eventId && p.staffId === staffId,
@@ -120,18 +123,18 @@ export function CleaningSpreadsheetView({
 
       // Prevent selecting from same event
       if (prev.length > 0 && prev[0].eventId === eventId) {
-        toast.error('Cannot select participants from the same event');
+        toast.error('Không thể chọn người trực trong cùng một sự kiện');
         return prev;
       }
 
       // Prevent selecting from different cycles
       if (prev.length > 0 && prev[0].cycleId !== cycleId) {
-        toast.error('Cannot select participants from different cycles');
+        toast.error('Không thể chọn người trực ở các chu kỳ khác nhau');
         return prev;
       }
 
       if (prev.length >= 2) {
-        toast.error('You can only select 2 participants to swap');
+        toast.error('Bạn chỉ có thể chọn 2 người để đổi lịch');
         return prev;
       }
       return [...prev, { eventId, staffId, email, cycleId }];
@@ -140,31 +143,23 @@ export function CleaningSpreadsheetView({
 
   const handleSwapParticipants = async () => {
     if (selectedParticipants.length !== 2) {
-      toast.error('Please select exactly 2 participants to swap');
+      toast.error('Vui lòng chọn đúng 2 người để đổi lịch');
       return;
     }
 
     setIsSwapping(true);
     try {
       const [p1, p2] = selectedParticipants;
-      const response = await fetch(`/api/cleaning/swap`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          participant1: { eventId: p1.eventId, staffId: p1.staffId },
-          participant2: { eventId: p2.eventId, staffId: p2.staffId },
-        }),
+      await cleaningClientService.swapParticipants({
+        participant1: { eventId: p1.eventId, staffId: p1.staffId },
+        participant2: { eventId: p2.eventId, staffId: p2.staffId },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to swap participants');
-      }
-
-      toast.success('Participants swapped successfully');
+      toast.success('Đổi lịch trực thành công');
       setSelectedParticipants([]);
       window.location.reload();
     } catch (error) {
-      toast.error('Failed to swap participants');
+      toast.error('Lỗi khi đổi lịch trực');
       console.error(error);
     } finally {
       setIsSwapping(false);
@@ -202,47 +197,40 @@ export function CleaningSpreadsheetView({
   return (
     <div className="space-y-6">
       {/* Swap Controls - Fixed Bottom */}
-      {selectedParticipants.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 border-0 bg-background shadow-lg mx-auto max-w-3xl">
-          <div className="container ">
-            <Card className="border-0 border-orange-200 bg-orange-50 shadow-none">
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <ArrowRightLeft className="h-5 w-5 text-orange-600" />
-                    <span className="font-medium text-orange-900">
-                      {selectedParticipants.length === 1
-                        ? `1 participant selected (${selectedParticipants[0].email}). Select one more to swap.`
-                        : `2 participants selected (${selectedParticipants[0].email} ↔ ${selectedParticipants[1].email}). Ready to swap.`}
-                    </span>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedParticipants([])}
-                    >
-                      Clear Selection
-                    </Button>
-                    <Button
-                      size="sm"
-                      disabled={selectedParticipants.length !== 2 || isSwapping}
-                      onClick={handleSwapParticipants}
-                    >
-                      {isSwapping ? 'Swapping...' : 'Swap Participants'}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
+      <ActionPanel
+        open={selectedParticipants.length > 0}
+        onClose={() => setSelectedParticipants([])}
+        icon={<ArrowRightLeft className="h-5 w-5" />}
+        title={
+          selectedParticipants.length === 1
+            ? `1 người đã chọn (${
+                selectedParticipants[0]?.email || 'N/A'
+              }). Chọn thêm 1 người nữa để đổi.`
+            : `2 người đã chọn (${
+                selectedParticipants[0]?.email || 'N/A'
+              } ↔ ${
+                selectedParticipants[1]?.email || 'N/A'
+              }). Sẵn sàng đổi lịch.`
+        }
+        variant="warning"
+        primaryAction={{
+          label: 'Đổi người trực',
+          onClick: handleSwapParticipants,
+          disabled: selectedParticipants.length !== 2,
+          loading: isSwapping,
+        }}
+        secondaryAction={{
+          label: 'Hủy chọn',
+          onClick: () => setSelectedParticipants([]),
+          variant: 'outline',
+        }}
+        showClose={false}
+      />
 
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex items-center">
-          <h2 className="text-lg font-semibold">Cleaning Schedule</h2>
+          <h2 className="text-lg font-semibold">Lịch Trực Nhật</h2>
         </div>
 
         <div className="flex gap-2">
@@ -255,144 +243,45 @@ export function CleaningSpreadsheetView({
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
             />
-            Refresh
+            Làm mới
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportData}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Xuất file
           </Button>
         </div>
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="schedule" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="schedule">Schedule View</TabsTrigger>
-          <TabsTrigger value="requests">Swap Requests</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="schedule" className="space-y-4">
-          <div className="grid gap-4">
-            {Object.entries(eventsByCycle).length === 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>No Cleaning Cycles Found</CardTitle>
-                  <CardDescription>
-                    No cleaning events have been scheduled yet.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ) : (
-              Object.entries(eventsByCycle).map(([cycleKey, cycleEvents]) => {
-                const cycleId = parseInt(cycleKey.replace('cycle-', ''));
-                return (
-                  <Card key={cycleKey}>
-                    <CardHeader>
-                      <CardTitle>{getCycleName(cycleId)}</CardTitle>
-                      <CardDescription>
-                        {cycleEvents.length} cleaning session
-                        {cycleEvents.length !== 1 ? 's' : ''}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="max-h-96 overflow-y-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Day</TableHead>
-                              <TableHead>Participants</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Notes</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {cycleEvents.map((event) => (
-                              <TableRow key={event.id}>
-                                <TableCell className="font-medium">
-                                  {event.eventDate}
-                                </TableCell>
-                                <TableCell>
-                                  {formatDate(event.eventDate)}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="space-y-1">
-                                    {event.eventParticipants?.length > 0 ? (
-                                      event.eventParticipants.map(
-                                        (participant: any, idx: number) => (
-                                          <div
-                                            key={idx}
-                                            className="flex items-center space-x-2"
-                                          >
-                                            {event.status !== 'COMPLETED' && (
-                                              <Checkbox
-                                                checked={selectedParticipants.some(
-                                                  (p) =>
-                                                    p.eventId === event.id &&
-                                                    p.staffId ===
-                                                      participant.staffId,
-                                                )}
-                                                onCheckedChange={() =>
-                                                  handleParticipantToggle(
-                                                    event.id,
-                                                    participant.staffId,
-                                                    participant.staff?.user
-                                                      ?.email ||
-                                                      participant.staff
-                                                        ?.email ||
-                                                      'Unknown',
-                                                    event.cycleId,
-                                                  )
-                                                }
-                                              />
-                                            )}
-                                            <span className="text-sm">
-                                              {participant.staff?.user?.email ||
-                                                participant.staff?.email ||
-                                                'Unknown'}
-                                            </span>
-                                          </div>
-                                        ),
-                                      )
-                                    ) : (
-                                      <span className="text-muted-foreground text-sm">
-                                        No participants assigned
-                                      </span>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    {...getStatusBadgeProps(event.status)}
-                                  />
-                                </TableCell>
-                                <TableCell className="max-w-xs">
-                                  <div className="truncate" title={event.notes}>
-                                    {event.notes || 'No notes'}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="sm">
-                                    View
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })
-            )}
+      <div className="h-[calc(100vh-240px)] flex flex-col">
+        {Object.entries(eventsByCycle).length === 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Không tìm thấy chu kỳ trực nhật nào</CardTitle>
+              <CardDescription>
+                Chưa có lịch trực nhật nào được lên.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ) : (
+          <div className="flex-1 overflow-y-auto pr-4 space-y-6">
+            {Object.entries(eventsByCycle).map(([cycleKey, cycleEvents]) => {
+              const cycleId = parseInt(cycleKey.replace('cycle-', ''));
+              return (
+                <CleaningCycleCard
+                  key={cycleKey}
+                  cycleId={cycleId}
+                  cycleName={getCycleName(cycleId)}
+                  cycleEvents={cycleEvents}
+                  selectedParticipants={selectedParticipants}
+                  onParticipantToggle={handleParticipantToggle}
+                  formatDate={formatDate}
+                />
+              );
+            })}
           </div>
-        </TabsContent>
-        <TabsContent value="requests" className="space-y-4">
-          <SwapRequestManagement mode="user" user={user || undefined} />
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }

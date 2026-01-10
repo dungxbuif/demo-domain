@@ -2,27 +2,27 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
 import {
-  ICreateSwapRequestDto,
-  ScheduleEvent,
-  ScheduleType,
+    ICreateSwapRequestDto,
+    ScheduleEvent,
+    ScheduleType,
 } from '@qnoffice/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -32,6 +32,7 @@ interface CreateSwapRequestModalProps {
   onOpenChange: (open: boolean) => void;
   scheduleId: number;
   onSuccess?: () => void;
+  lockedEventIds?: number[];
 }
 
 export function CreateSwapRequestModal({
@@ -39,6 +40,7 @@ export function CreateSwapRequestModal({
   onOpenChange,
   scheduleId,
   onSuccess,
+  lockedEventIds = [],
 }: CreateSwapRequestModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [availableEvents, setAvailableEvents] = useState<ScheduleEvent[]>([]);
@@ -95,7 +97,6 @@ export function CreateSwapRequestModal({
       onSuccess?.();
     } catch (error) {
       console.error('Error creating swap request:', error);
-      toast.error('Failed to create swap request');
     } finally {
       setIsLoading(false);
     }
@@ -123,24 +124,33 @@ export function CreateSwapRequestModal({
                   <SelectValue placeholder="Select event to swap with" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableEvents.map((event) => (
-                    <SelectItem key={event.id} value={event.id.toString()}>
-                      {event.title || 'OpenTalk'} -{' '}
-                      {new Date(event.eventDate).toLocaleDateString()}
-                      {event.eventParticipants &&
-                        event.eventParticipants.length > 0 && (
-                          <span className="text-muted-foreground ml-2">
-                            (
-                            {event.eventParticipants
-                              .map(
-                                (ep) => ep.staff?.user?.name || ep.staff?.email,
+                  {availableEvents.map((event) => {
+                    const isLocked = lockedEventIds.includes(event.id);
+                    return (
+                      <SelectItem
+                        key={event.id}
+                        value={event.id.toString()}
+                        disabled={isLocked}
+                      >
+                        {event.title || 'OpenTalk'} -{' '}
+                        {new Date(event.eventDate).toLocaleDateString()}
+                        {event.eventParticipants &&
+                          event.eventParticipants.length > 0 && (
+                            <span className="text-muted-foreground ml-2">
+                              (
+                              {event.eventParticipants
+                                .map(
+                                  (ep) =>
+                                    ep.staff?.user?.name || ep.staff?.email,
+                                )
+                                .join(', ')}
                               )
-                              .join(', ')}
-                            )
-                          </span>
-                        )}
-                    </SelectItem>
-                  ))}
+                            </span>
+                          )}
+                        {isLocked ? ' (Chờ duyệt)' : ''}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

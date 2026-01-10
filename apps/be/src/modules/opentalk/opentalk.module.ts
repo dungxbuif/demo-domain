@@ -5,6 +5,7 @@ import ScheduleEventParticipantEntity from '../schedule/enties/schedule-event-pa
 import ScheduleEventEntity from '../schedule/enties/schedule-event.entity';
 import StaffEntity from '../staff/staff.entity';
 import SwapRequestEntity from '../swap-request/swap-request.entity';
+import OpentalkSlideEntity from './entities/opentalk-slide.entity';
 import { OpentalkController } from './opentalk.controller';
 import { OpentalkService } from './opentalk.service';
 
@@ -16,6 +17,7 @@ import { OpentalkService } from './opentalk.service';
       ScheduleEventParticipantEntity,
       StaffEntity,
       SwapRequestEntity,
+      OpentalkSlideEntity,
     ]),
   ],
   controllers: [OpentalkController],

@@ -8,3 +8,5 @@ export * from './penalty.types';
 export * from './schedule.types';
 export * from './staff.types';
 export * from './swap-request.types';
+export * from './upload.types';
+

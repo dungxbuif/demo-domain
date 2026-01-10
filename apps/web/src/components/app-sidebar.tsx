@@ -35,7 +35,7 @@ const navigationData = [
     permission: PERMISSIONS.VIEW_STAFF,
   },
   {
-    title: 'Lịch trình',
+    title: 'Lên lịch',
     href: PATHS.DASHBOARD.SCHEDULES.BASE,
     icon: '📋',
     permission: PERMISSIONS.VIEW_SCHEDULES,
@@ -58,7 +58,7 @@ const navigationData = [
         permission: PERMISSIONS.VIEW_OPENTALK,
       },
       {
-        title: 'Dọn dẹp',
+        title: 'Trực nhật',
         href: PATHS.DASHBOARD.SCHEDULES.CLEANING,
         icon: '🧹',
         permission: PERMISSIONS.VIEW_SCHEDULES,
@@ -82,16 +82,42 @@ const navigationData = [
     ],
   },
   {
-    title: 'Quản lý kênh',
-    href: PATHS.DASHBOARD.CHANNELS,
-    icon: '📢',
-    permission: PERMISSIONS.MANAGE_CHANNELS,
+    title: 'Quản lý',
+    icon: '⚙️',
+    permission: PERMISSIONS.MANAGE_OPENTALK,
+    items: [
+      {
+        title: 'Slide OpenTalk',
+        href: PATHS.DASHBOARD.MANAGEMENT.OPENTALK_SLIDES,
+        icon: '📊',
+        permission: PERMISSIONS.APPROVE_OPENTALK_SLIDES,
+      },
+      {
+        title: 'Đổi lịch OpenTalk',
+        href: PATHS.DASHBOARD.MANAGEMENT.OPENTALK_SWAPS,
+        icon: '🔄',
+        permission: PERMISSIONS.MANAGE_OPENTALK_SWAP_REQUESTS,
+      },
+      {
+        title: 'Đổi lịch dọn dẹp',
+        href: PATHS.DASHBOARD.MANAGEMENT.CLEANING_SWAPS,
+        icon: '🧹',
+        permission: PERMISSIONS.MANAGE_CLEANING_SWAP_REQUESTS,
+      },
+      {
+        title: 'Quản lý kênh',
+        href: PATHS.DASHBOARD.CHANNELS,
+        icon: '📢',
+        permission: PERMISSIONS.MANAGE_CHANNELS,
+      },
+    ],
   },
   {
     title: 'Nhật ký hệ thống',
     href: PATHS.DASHBOARD.AUDIT_LOGS,
     icon: '📋',
   },
+  
 ];
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {

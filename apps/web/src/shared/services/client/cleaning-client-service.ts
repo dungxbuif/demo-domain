@@ -55,6 +55,13 @@ class CleaningClientService {
       params: { participantId: staffId },
     });
   }
+
+  async swapParticipants(payload: {
+    participant1: { eventId: number; staffId: number };
+    participant2: { eventId: number; staffId: number };
+  }) {
+    return baseApi.post<void>(`${this.baseUrl}/swap`, payload);
+  }
 }
 
 export const cleaningClientService = new CleaningClientService();

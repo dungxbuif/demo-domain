@@ -3,12 +3,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Penalty, PenaltyStatus, SearchOrder } from '@qnoffice/shared';
 import { format } from 'date-fns';
@@ -35,7 +35,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
       setPenalties(data.result || []);
       setTotal(data.total);
     } catch (error) {
-      toast.error('Failed to load penalties');
+      toast.error('Không thể tải danh sách phạt');
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +53,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
           className="bg-green-50 text-green-700 border-green-200"
         >
           <CheckCircle2 className="h-3 w-3 mr-1" />
-          Paid
+          Đã thanh toán
         </Badge>
       );
     }
@@ -63,7 +63,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
         className="bg-red-50 text-red-700 border-red-200"
       >
         <AlertCircle className="h-3 w-3 mr-1" />
-        Unpaid
+        Chưa thanh toán
       </Badge>
     );
   };
@@ -76,7 +76,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
@@ -84,13 +84,13 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            {showAllUsers && <TableHead>Staff</TableHead>}
-            <TableHead>Type</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Reason</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            {showAllUsers && <TableHead>Nhân viên</TableHead>}
+            <TableHead>Loại phạt</TableHead>
+            <TableHead>Ngày</TableHead>
+            <TableHead>Lý do</TableHead>
+            <TableHead className="text-right">Số tiền</TableHead>
+            <TableHead>Trạng thái</TableHead>
+            <TableHead className="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -98,10 +98,10 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
             <TableRow key={penalty.id}>
               {showAllUsers && (
                 <TableCell className="font-medium">
-                  User #{penalty.userId}
+                  NV #{penalty.userId}
                 </TableCell>
               )}
-              <TableCell>Type {penalty.penaltyTypeId}</TableCell>
+              <TableCell>Loại {penalty.penaltyTypeId}</TableCell>
               <TableCell>{format(new Date(penalty.date), 'PP')}</TableCell>
               <TableCell className="max-w-xs truncate">
                 {penalty.reason}
@@ -123,7 +123,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {penalties.length} of {total} penalties
+          Hiển thị {penalties.length} trên tổng {total} lượt phạt
         </p>
         <div className="flex gap-2">
           <Button
@@ -132,7 +132,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
-            Previous
+            Trước
           </Button>
           <Button
             variant="outline"
@@ -140,7 +140,7 @@ export function PenaltyList({ showAllUsers = false }: PenaltyListProps) {
             onClick={() => setPage((p) => p + 1)}
             disabled={page * 10 >= total}
           >
-            Next
+            Tiếp
           </Button>
         </div>
       </div>

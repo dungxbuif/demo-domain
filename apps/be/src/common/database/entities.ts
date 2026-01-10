@@ -2,6 +2,7 @@ import AuditLogEntity from '@src/modules/audit-log/audit-log.entity';
 import { BranchEntity } from '@src/modules/branch/branch.entity';
 import ChannelConfigEntity from '@src/modules/channel/channel-config.entity';
 import HolidayEntity from '@src/modules/holiday/holiday.entity';
+import OpentalkSlideEntity from '@src/modules/opentalk/entities/opentalk-slide.entity';
 import { PenaltyType } from '@src/modules/penalty-type/penalty-type.entity';
 import { Penalty } from '@src/modules/penalty/penalty.entity';
 import ScheduleCycleEntity from '@src/modules/schedule/enties/schedule-cycle.entity';
@@ -24,5 +25,6 @@ const entities = [
   ScheduleEventEntity,
   ScheduleEventParticipantEntity,
   AuditLogEntity,
+  OpentalkSlideEntity,
 ];
 export default entities;

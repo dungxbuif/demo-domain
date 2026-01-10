@@ -24,3 +24,8 @@ export enum OpentalkSlideStatus {
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
 }
+
+export enum OpentalkSlideType {
+  FILE = 'file',
+  LINK = 'link',
+}

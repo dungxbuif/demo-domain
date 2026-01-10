@@ -8,21 +8,26 @@ export enum NotificationEvent {
   STAFF_OFFBOARDING = 'notification.staff.offboarding',
 }
 
+export interface EventParticipant {
+  userId: string;
+  username: string;
+}
+
 export interface CleaningReminderPayload {
   eventId: number;
   eventDate: string;
-  participantIds: number[];
-  participantEmails: string[];
+  participants: EventParticipant[];
   type: 'morning' | 'afternoon' | 'nextday';
+  journeyId: string;
 }
 
 export interface OpentalkSlideReminderPayload {
   eventId: number;
   eventDate: string;
-  participantId: number;
-  participantEmail: string;
+  participant: EventParticipant;
   daysUntilEvent: number;
   slideSubmitted: boolean;
+  journeyId: string;
 }
 
 export interface StaffChangePayload {
@@ -33,4 +38,5 @@ export interface StaffChangePayload {
     type: 'cleaning' | 'opentalk';
     changes: string[];
   }[];
+  journeyId: string;
 }

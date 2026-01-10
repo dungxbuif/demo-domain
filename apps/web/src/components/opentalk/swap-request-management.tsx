@@ -1,47 +1,34 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { hasPermission, PERMISSIONS } from '@/shared/auth/permissions';
 import { useAuth } from '@/shared/contexts/auth-context';
 import {
-  opentalkClientService,
-  OpentalkEvent,
+    opentalkClientService,
+    OpentalkEvent,
 } from '@/shared/services/client/opentalk-client-service';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
 import {
-  ScheduleType,
-  SwapRequest,
-  SwapRequestStatus,
-  UserAuth,
+    ScheduleType,
+    SwapRequest,
+    SwapRequestStatus,
+    UserAuth,
 } from '@qnoffice/shared';
 import {
-  ArrowRightLeft,
-  Calendar,
-  CheckCircle,
-  Plus,
-  XCircle,
+    Plus
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CreateSwapRequestModal } from './create-swap-request-modal';
+import { SwapRequestTable } from './swap-request-table';
 
 interface SwapRequestManagementProps {
   mode: 'user' | 'hr';
@@ -57,15 +44,11 @@ export function SwapRequestManagement({
   const [swapRequests, setSwapRequests] = useState<SwapRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<SwapRequest | null>(
-    null,
-  );
-  const [reviewNote, setReviewNote] = useState('');
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   );
   const [userSchedules, setUserSchedules] = useState<OpentalkEvent[]>([]);
+  const [isProcessing, setIsProcessing] = useState<number | null>(null);
 
   const userStaffId = user?.staffId;
 
@@ -101,6 +84,7 @@ export function SwapRequestManagement({
       loadSwapRequests();
     }
   }, [user?.staffId, loadSwapRequests]);
+
   // Early return if no user
   if (!user) {
     return (
@@ -151,22 +135,20 @@ export function SwapRequestManagement({
       return;
     }
 
+    setIsProcessing(requestId);
     try {
       await swapRequestClientService.reviewSwapRequest(requestId, {
         status: action,
-        reviewNote: reviewNote,
+        reviewNote: action === SwapRequestStatus.APPROVED ? 'Approved' : 'Rejected',
       });
 
       toast.success(`Request ${action.toLowerCase()} successfully`);
-      setReviewModalOpen(false);
-      setSelectedRequest(null);
-      setReviewNote('');
-
-      // Reload swap requests
       await loadSwapRequests();
     } catch (error) {
       console.error('Failed to review request:', error);
       toast.error('Failed to review request');
+    } finally {
+      setIsProcessing(null);
     }
   };
 
@@ -176,18 +158,11 @@ export function SwapRequestManagement({
     await loadSwapRequests();
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'APPROVED':
-        return 'bg-green-100 text-green-800';
-      case 'REJECTED':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const lockedEventIds = useMemo(() => {
+    return swapRequests
+      .filter((req) => req.status === SwapRequestStatus.PENDING)
+      .flatMap((req) => [req.fromEventId, req.toEventId]);
+  }, [swapRequests]);
 
   const filteredRequests =
     mode === 'hr'
@@ -231,15 +206,20 @@ export function SwapRequestManagement({
                     <SelectValue placeholder="Select your schedule to swap" />
                   </SelectTrigger>
                   <SelectContent>
-                    {userSchedules.map((schedule) => (
-                      <SelectItem
-                        key={schedule.id}
-                        value={schedule.id.toString()}
-                      >
-                        {schedule.title || 'OpenTalk'} -{' '}
-                        {new Date(schedule.eventDate).toLocaleDateString()}
-                      </SelectItem>
-                    ))}
+                    {userSchedules.map((schedule) => {
+                      const isLocked = lockedEventIds.includes(schedule.id);
+                      return (
+                        <SelectItem
+                          key={schedule.id}
+                          value={schedule.id.toString()}
+                          disabled={isLocked}
+                        >
+                          {schedule.title || 'OpenTalk'} -{' '}
+                          {new Date(schedule.eventDate).toLocaleDateString()}
+                          {isLocked ? ' (Chờ duyệt)' : ''}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <Button
@@ -251,6 +231,7 @@ export function SwapRequestManagement({
                 </Button>
               </div>
             ) : (
+                // ...
               <div className="text-sm text-muted-foreground">
                 <p>You have no scheduled OpenTalk sessions to swap.</p>
                 <p className="text-xs mt-1">
@@ -265,169 +246,18 @@ export function SwapRequestManagement({
                 onOpenChange={setCreateModalOpen}
                 scheduleId={selectedScheduleId}
                 onSuccess={handleCreateSuccess}
+                lockedEventIds={lockedEventIds}
               />
             )}
           </>
         )}
       </div>
 
-      <div className="space-y-4">
-        {filteredRequests.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8 text-muted-foreground">
-                <ArrowRightLeft className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>
-                  {mode === 'hr'
-                    ? 'No swap requests pending approval'
-                    : 'You have not submitted any swap requests'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredRequests.map((request) => (
-            <Card key={request.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center space-x-4">
-                      <Badge className={getStatusColor(request.status)}>
-                        {request.status}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(request.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Calendar className="h-4 w-4 text-red-600" />
-                          <span className="font-medium text-red-900">
-                            From Event
-                          </span>
-                        </div>
-                        <p className="text-sm text-red-800">
-                          Event Date: {request?.fromEvent?.eventDate}
-                        </p>
-                      </div>
-
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Calendar className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-green-900">
-                            To Event
-                          </span>
-                        </div>
-                        <p className="text-sm text-green-800">
-                          Event Date: {request?.toEvent?.eventDate}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-medium mb-1">Reason:</p>
-                      <p className="text-sm text-muted-foreground">
-                        {request.reason}
-                      </p>
-                    </div>
-
-                    {request.reviewNote && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">Review Note:</p>
-                        <p className="text-sm text-muted-foreground">
-                          {request.reviewNote}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {mode === 'hr' &&
-                    request.status === 'PENDING' &&
-                    canApproveRequests && (
-                      <div className="flex space-x-2 ml-4">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedRequest(request);
-                            setReviewModalOpen(true);
-                          }}
-                        >
-                          Review
-                        </Button>
-                      </div>
-                    )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-
-      {/* Review Modal */}
-      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Review Swap Request</DialogTitle>
-            <DialogDescription>
-              Review and approve or reject this swap request.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">Request Details:</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedRequest.reason}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">
-                  Review Note (optional)
-                </label>
-                <Textarea
-                  value={reviewNote}
-                  onChange={(e) => setReviewNote(e.target.value)}
-                  placeholder="Add a note about your decision..."
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() =>
-                selectedRequest &&
-                handleReviewRequest(
-                  selectedRequest.id,
-                  SwapRequestStatus.REJECTED,
-                )
-              }
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Reject
-            </Button>
-            <Button
-              onClick={() =>
-                selectedRequest &&
-                handleReviewRequest(
-                  selectedRequest.id,
-                  SwapRequestStatus.APPROVED,
-                )
-              }
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Approve
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SwapRequestTable 
+          requests={filteredRequests}
+          onReview={mode === 'hr' ? handleReviewRequest : undefined}
+          isProcessingId={isProcessing}
+      />
     </div>
   );
 }

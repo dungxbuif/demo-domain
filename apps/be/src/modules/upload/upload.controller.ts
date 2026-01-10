@@ -1,14 +1,14 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { UserRole } from '@qnoffice/shared';
+import { Body, Controller, Logger, Post, UseGuards } from '@nestjs/common';
+import { IPresignedDownloadUrlResponse, UserRole } from '@qnoffice/shared';
 import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { S3Service } from '@src/common/shared/services/s3.service';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
-  IsArray,
-  IsString,
-  ValidateNested,
+    ArrayMinSize,
+    IsArray,
+    IsString,
+    ValidateNested,
 } from 'class-validator';
 
 class FileUploadDto {
@@ -38,6 +38,8 @@ class GenerateMultiplePresignedUrlsDto {
 @Controller('upload')
 @UseGuards(JwtAuthGuard)
 export class UploadController {
+  private readonly logger = new Logger(UploadController.name);
+
   constructor(private readonly s3Service: S3Service) {}
 
   @Post('presigned-url')
@@ -60,11 +62,26 @@ export class UploadController {
   async getOpentalkPresignedUrls(
     @Body() dto: GenerateMultiplePresignedUrlsDto,
   ) {
-    return this.s3Service.getMultiplePresignedUrls(dto.files);
+    this.logger.log(
+      `[getOpentalkPresignedUrls] Generating presigned URLs for ${dto.files.length} files`,
+    );
+    const result = await this.s3Service.getMultiplePresignedUrls(dto.files);
+    this.logger.log(`[getOpentalkPresignedUrls] Result:`, JSON.stringify(result));
+    return result;
   }
 
   @Post('presigned-url/opentalk/view')
-  async getOpentalkViewPresignedUrl(@Body() dto: { slideKey: string }) {
-    return this.s3Service.getPresignedDownloadUrl(dto.slideKey);
+  async getOpentalkViewPresignedUrl(
+    @Body() dto: { slideKey: string },
+  ): Promise<IPresignedDownloadUrlResponse> {
+    this.logger.log(
+      `[getOpentalkViewPresignedUrl] Generating view URL for key: ${dto.slideKey}`,
+    );
+    const result = await this.s3Service.getPresignedDownloadUrl(dto.slideKey);
+    this.logger.log(
+      `[getOpentalkViewPresignedUrl] Result:`,
+      JSON.stringify(result),
+    );
+    return result;
   }
 }

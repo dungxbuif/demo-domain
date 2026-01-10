@@ -5,14 +5,19 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ScheduleCycle, ScheduleEvent } from '@qnoffice/shared';
+import { ScheduleCycle, ScheduleEvent, UserRole } from '@qnoffice/shared';
+import { Roles, RolesGuard } from '@src/common/gaurds/role.gaurd';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { SubmitSlideDto } from '@src/modules/opentalk/dtos/submit-slide.dto';
 import { OpentalkQueryDto } from './dtos/opentalk-query.dto';
+import { RejectSlideDto } from './dtos/reject-slide.dto';
+import { SwapOpentalkDto } from './dtos/swap-opentalk.dto';
 import { OpentalkService } from './opentalk.service';
 
 @ApiTags('Opentalk Management')
@@ -30,33 +35,6 @@ export class OpentalkController {
   async submitSlide(@Body() dto: SubmitSlideDto): Promise<void> {
     this.opentalkService.submitSlide(dto);
   }
-
-  // @Get('cycles/:id')
-  // @ApiOperation({ summary: 'Get opentalk cycle by ID' })
-  // @ApiParam({ name: 'id', description: 'Cycle ID' })
-  // async getCycleById(
-  //   @Param('id', ParseIntPipe) id: number,
-  // ): Promise<ScheduleCycle | null> {
-  //   return this.opentalkService.getCycleById(id) as any;
-  // }
-
-  // @Put('cycles/:id')
-  // @ApiOperation({ summary: 'Update opentalk cycle' })
-  // @ApiParam({ name: 'id', description: 'Cycle ID' })
-  // async updateCycle(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updateData: Partial<CreateOpentalkCycleDto>,
-  // ): Promise<ScheduleCycle> {
-  //   return this.opentalkService.updateCycle(id, updateData) as any;
-  // }
-
-  // @Delete('cycles/:id')
-  // @ApiOperation({ summary: 'Delete opentalk cycle' })
-  // @ApiParam({ name: 'id', description: 'Cycle ID' })
-  // async deleteCycle(@Param('id', ParseIntPipe) id: number): Promise<void> {
-  //   return this.opentalkService.deleteCycle(id);
-  // }
-
   @Get('events')
   async getEvents(@Query() query: OpentalkQueryDto): Promise<ScheduleEvent[]> {
     return this.opentalkService.getEvents(query) as any;
@@ -69,43 +47,39 @@ export class OpentalkController {
     return this.opentalkService.getCycleEventsByEventId(eventId) as any;
   }
 
-  // @Get('events/:id')
-  // @ApiOperation({ summary: 'Get opentalk event by ID' })
-  // @ApiParam({ name: 'id', description: 'Event ID' })
-  // async getEventById(
-  //   @Param('id', ParseIntPipe) id: number,
-  // ): Promise<ScheduleEvent | null> {
-  //   return this.opentalkService.getEventById(id) as any;
-  // }
+  @Get('events/:id/slide')
+  async getSlide(@Param('id', ParseIntPipe) eventId: number) {
+    return this.opentalkService.getSlideByEventId(eventId);
+  }
 
-  // @Put('events/:id')
-  // @ApiOperation({ summary: 'Update opentalk event' })
-  // @ApiParam({ name: 'id', description: 'Event ID' })
-  // async updateEvent(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updateData: Partial<CreateOpentalkEventDto>,
-  // ): Promise<ScheduleEvent> {
-  //   return this.opentalkService.updateEvent(id, updateData) as any;
-  // }
+  @Put('events/:id/approve-slide')
+  @UseGuards(RolesGuard)
+  @Roles([UserRole.GDVP])
+  async approveSlide(
+    @Param('id', ParseIntPipe) eventId: number,
+    @Req() req: any,
+  ): Promise<void> {
+    const userId = req.user?.id;
+    return this.opentalkService.approveSlide(eventId, userId);
+  }
 
-  // @Delete('events/:id')
-  // @ApiOperation({ summary: 'Delete opentalk event' })
-  // @ApiParam({ name: 'id', description: 'Event ID' })
-  // async deleteEvent(@Param('id', ParseIntPipe) id: number): Promise<void> {
-  //   return this.opentalkService.deleteEvent(id);
-  // }
+  @Put('events/:id/reject-slide')
+  @UseGuards(RolesGuard)
+  @Roles([UserRole.GDVP])
+  async rejectSlide(
+    @Param('id', ParseIntPipe) eventId: number,
+    @Body() dto: RejectSlideDto,
+    @Req() req: any,
+  ): Promise<void> {
+    const userId = req.user?.id;
+    return this.opentalkService.rejectSlide(eventId, userId, dto.reason);
+  }
 
-  // @Post('swap')
-  // async swapOpentalk(@Body() swapDto: SwapOpentalkDto): Promise<void> {
-  //   return this.opentalkService.swapOpentalk(swapDto);
-  // }
+  @Post('swap')
+  @UseGuards(RolesGuard)
+  @Roles([UserRole.GDVP, UserRole.HR])
+  async swapOpentalk(@Body() swapDto: SwapOpentalkDto): Promise<void> {
+    return this.opentalkService.swapOpentalk(swapDto);
+  }
 
-  // @Get('slides/:eventId')
-  // @ApiOperation({ summary: 'Get slide submission for an event' })
-  // @ApiParam({ name: 'eventId', description: 'Event ID' })
-  // async getSlideSubmission(
-  //   @Param('eventId', ParseIntPipe) eventId: number,
-  // ): Promise<OpentalkSlideSubmission | null> {
-  //   return this.slideService.getSlideSubmission(eventId) as any;
-  // }
 }

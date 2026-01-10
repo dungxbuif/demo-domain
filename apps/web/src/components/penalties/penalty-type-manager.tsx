@@ -55,10 +55,10 @@ export function PenaltyTypeManager({
 
     try {
       await penaltyTypeService.remove(deleteId);
-      toast.success('Penalty type deleted successfully');
+      toast.success('Xóa loại phạt thành công');
       window.location.reload();
     } catch {
-      toast.error('Failed to delete penalty type');
+      toast.error('Xóa loại phạt thất bại');
     } finally {
       setDeleteId(null);
     }
@@ -74,12 +74,12 @@ export function PenaltyTypeManager({
   const columns: ColumnDef<PenaltyType>[] = [
     {
       accessorKey: 'name',
-      header: 'Name',
+      header: 'Tên',
       cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     },
     {
       accessorKey: 'description',
-      header: 'Description',
+      header: 'Mô tả',
       cell: ({ row }) => (
         <div className="max-w-md truncate">
           {row.original.description || '-'}
@@ -88,7 +88,7 @@ export function PenaltyTypeManager({
     },
     {
       accessorKey: 'amount',
-      header: 'Default Amount',
+      header: 'Mức phạt mặc định',
       cell: ({ row }) => (
         <div className="text-right font-medium">
           {formatCurrency(Number(row.original.amount))}
@@ -97,7 +97,7 @@ export function PenaltyTypeManager({
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Thao tác',
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
           <ProtectedComponent permission={PERMISSIONS.MANAGE_PENALTIES}>
@@ -127,7 +127,7 @@ export function PenaltyTypeManager({
         <ProtectedComponent permission={PERMISSIONS.MANAGE_PENALTIES}>
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Penalty Type
+            Thêm loại phạt
           </Button>
         </ProtectedComponent>
       </div>
@@ -137,7 +137,7 @@ export function PenaltyTypeManager({
         initialData={initialData}
         initialPagination={initialPagination}
         pagination={pagination}
-        searchPlaceholder="Search penalty types..."
+        searchPlaceholder="Tìm loại phạt..."
         showSearch={false}
       />
 
@@ -154,15 +154,14 @@ export function PenaltyTypeManager({
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Bạn có chắc chắn?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this penalty type. This action cannot
-              be undone.
+              Thao tác này sẽ xóa vĩnh viễn loại phạt này. Không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Xóa</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

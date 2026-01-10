@@ -3,11 +3,10 @@
 import { OpentalkSpreadsheetView } from '@/components/opentalk/opentalk-spreadsheet-view';
 import { SwapRequestManagement } from '@/components/opentalk/swap-request-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { hasPermission, PERMISSIONS } from '@/shared/auth/permissions';
 import { useAuth } from '@/shared/contexts/auth-context';
 import { ScheduleCycle } from '@qnoffice/shared';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface OpentalkPageClientProps {
   cycles: ScheduleCycle[];
@@ -16,27 +15,24 @@ interface OpentalkPageClientProps {
 
 export function OpentalkPageClient({ cycles, error }: OpentalkPageClientProps) {
   const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const canApproveRequests = hasPermission(
-    user?.role,
-    PERMISSIONS.APPROVE_OPENTALK_SWAP_REQUESTS,
-  );
+  const currentTab = searchParams.get('tab') || 'schedules';
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', value);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="schedules" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="schedules">Schedule Management</TabsTrigger>
           <TabsTrigger value="requests">Swap Requests</TabsTrigger>
-          {canApproveRequests && (
-            <TabsTrigger value="approval">GDVP Approval</TabsTrigger>
-          )}
         </TabsList>
 
         <TabsContent value="schedules" className="space-y-4">
@@ -46,12 +42,6 @@ export function OpentalkPageClient({ cycles, error }: OpentalkPageClientProps) {
         <TabsContent value="requests" className="space-y-4">
           <SwapRequestManagement mode="user" user={user || undefined} />
         </TabsContent>
-
-        {canApproveRequests && (
-          <TabsContent value="approval" className="space-y-4">
-            <SwapRequestManagement mode="hr" user={user} />
-          </TabsContent>
-        )}
       </Tabs>
     </div>
   );

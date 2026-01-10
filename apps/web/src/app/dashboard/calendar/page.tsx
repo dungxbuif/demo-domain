@@ -31,6 +31,7 @@ function mapCalendarEventsToFullCalendar(events: CalendarEvent[]) {
     ),
     notes: event.notes,
     status: event.status,
+    slideStatus: event.slideStatus,
   }));
 }
 
@@ -92,7 +93,9 @@ export default async function CalendarPage({
   const events = await CalendarServerService.getCalendarEvents(
     startDate,
     endDate,
-    params.type,
+    params.type
+      ? (params.type.toString().toUpperCase() as ScheduleType)
+      : undefined,
   );
 
   // Fetch holidays for the same period

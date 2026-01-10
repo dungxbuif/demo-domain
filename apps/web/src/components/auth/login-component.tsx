@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useAuth } from '@/shared/contexts/auth-context';
+import Image from 'next/image';
 
 interface LoginComponentProps {
   className?: string;
@@ -23,6 +24,15 @@ export function LoginComponent({ className }: LoginComponentProps) {
     >
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/images/logo.png"
+              alt="QN Office Logo"
+              width={80}
+              height={80}
+              quality={100}
+            />
+          </div>
           <CardTitle className="text-2xl font-bold">
             QN Office Management
           </CardTitle>

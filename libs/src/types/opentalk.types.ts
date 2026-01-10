@@ -1,14 +1,18 @@
 import {
-  CycleStatus,
-  EventStatus,
-  OpentalkSlideStatus,
-  ScheduleType,
+    CycleStatus,
+    EventStatus,
+    OpentalkSlideStatus,
+    OpentalkSlideType,
+    ScheduleType,
 } from '../enums';
 import { SearchParams } from './pagination.types';
 
 export interface ISubmitSlideDto {
   eventId: number;
   slidesUrl: string;
+  type?: OpentalkSlideType;
+  fileType?: string;
+  fileName?: string;
 }
 
 export interface ICreateOpentalkCycleDto {
@@ -76,7 +80,31 @@ export interface IOpentalkQueryDto extends SearchParams {
   participantId?: number;
 }
 
-export interface IOpentalEventMetadata {
+export interface IOpentalkSlide {
+  id: number;
+  eventId: number;
+  topic?: string;
+  slideUrl?: string;
   slideKey?: string;
+  type: OpentalkSlideType;
+  status: OpentalkSlideStatus;
+  rejectionReason?: string;
+  approvedBy?: number;
+  approvedAt?: Date;
+  rejectedBy?: number;
+  rejectedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * @deprecated Use IOpentalkSlide instead. Metadata-based storage is being phased out.
+ */
+export interface IOpentalkEventMetadata {
+  slideKey?: string;
+  url?: string;
+  type?: OpentalkSlideType;
+  fileType?: string; // MIME type
+  fileName?: string;
   status: OpentalkSlideStatus;
 }

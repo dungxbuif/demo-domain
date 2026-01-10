@@ -13,6 +13,7 @@ interface CalendarWrapperProps {
     participants?: string[];
     notes?: string;
     status?: string;
+    slideStatus?: string;
   }>;
   holidays?: Array<{
     id: number;
@@ -39,6 +40,7 @@ export function CalendarWrapper({
     participants?: string[];
     notes?: string;
     status?: string;
+    slideStatus?: string;
   } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -75,6 +77,7 @@ export function CalendarWrapper({
         participants: originalEvent.participants,
         notes: originalEvent.notes,
         status: originalEvent.status,
+        slideStatus: originalEvent.slideStatus,
       });
       setIsModalOpen(true);
     }

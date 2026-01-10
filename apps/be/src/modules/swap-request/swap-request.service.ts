@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { ScheduleType, SwapRequestStatus } from '@qnoffice/shared';
 import ScheduleEventParticipantEntity from '@src/modules/schedule/enties/schedule-event-participant.entity';
@@ -22,6 +22,33 @@ export class SwapRequestService {
     dto: CreateSwapRequestDto,
     requesterId?: number | null,
   ): Promise<SwapRequestEntity> {
+    const existingRequest = await this.swapRequestRepository.findOne({
+      where: [
+        {
+          fromEventId: dto.fromEventId,
+          status: SwapRequestStatus.PENDING,
+        },
+        {
+          toEventId: dto.fromEventId,
+          status: SwapRequestStatus.PENDING,
+        },
+        {
+          fromEventId: dto.toEventId,
+          status: SwapRequestStatus.PENDING,
+        },
+        {
+          toEventId: dto.toEventId,
+          status: SwapRequestStatus.PENDING,
+        },
+      ],
+    });
+
+    if (existingRequest) {
+      throw new BadRequestException(
+        'One of the events is already involved in a pending swap request',
+      );
+    }
+
     const swapRequest = this.swapRequestRepository.create({
       ...dto,
       requesterId: requesterId || null,

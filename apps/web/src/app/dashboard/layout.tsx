@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sidebar';
 import { PATHS } from '@/shared/constants/paths';
 import { useAuth } from '@/shared/contexts/auth-context';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -58,7 +59,16 @@ export default function DashboardLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href={PATHS.DASHBOARD.BASE}>
+                  <BreadcrumbLink
+                    href={PATHS.DASHBOARD.BASE}
+                    className="flex items-center gap-2"
+                  >
+                    <Image
+                      src="/images/logo.png"
+                      alt="Logo"
+                      width={20}
+                      height={20}
+                    />
                     QN Office Management
                   </BreadcrumbLink>
                 </BreadcrumbItem>

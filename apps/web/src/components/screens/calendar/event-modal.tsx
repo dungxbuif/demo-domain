@@ -1,5 +1,6 @@
 'use client';
 
+import { FilePreviewDialog } from '@/components/opentalk/file-preview-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +11,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useOpentalkSlide } from '@/shared/hooks/use-opentalk-slide';
+import { uploadClientService } from '@/shared/services/client/upload-client-service';
+import { OpentalkSlideType } from '@qnoffice/shared';
 import { format } from 'date-fns';
-import { Calendar, Clock, FileText, Users } from 'lucide-react';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  Clock,
+  ExternalLink,
+  FileText,
+  Paperclip,
+  Upload,
+  Users
+} from 'lucide-react';
+import { useState } from 'react';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -24,11 +39,22 @@ interface EventModalProps {
     participants?: string[];
     notes?: string;
     status?: string;
+    slideStatus?: string;
   } | null;
 }
 
 export function EventModal({ isOpen, onClose, event }: EventModalProps) {
+  const { data: slide, isLoading: loadingSlide } = useOpentalkSlide(
+    isOpen && event?.type.toLowerCase() === 'opentalk' ? Number(event.id) : null,
+  );
+
+  const [showPreview, setShowPreview] = useState(false);
+  const [presignedUrl, setPresignedUrl] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+
   if (!event) return null;
+
+  // ... helpers
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
@@ -56,7 +82,119 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
     }
   };
 
+  const handlePreview = async () => {
+    const key = slide?.slideKey || slide?.slideUrl;
+    if (!key) return;
+
+    try {
+      setLoadingPreview(true);
+      const response = await uploadClientService.getOpentalkViewPresignedUrl(key);
+      const downloadUrl = (response.data as any).data?.downloadUrl || response.data.downloadUrl;
+      
+      if (downloadUrl) {
+        setPresignedUrl(downloadUrl);
+        setShowPreview(true);
+      }
+    } catch (error) {
+      console.error('Failed to fetch presigned URL:', error);
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
+  const renderSlideStatus = () => {
+    if (event.type.toLowerCase() !== 'opentalk') return null;
+
+    if (loadingSlide) {
+      return (
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+           <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+           Loading slide info...
+        </div>
+      );
+    }
+
+    // Use fetched status if available, fallback to list status
+    const currentStatus = slide?.status || event.slideStatus;
+
+    let icon = <Paperclip className="h-4 w-4 text-muted-foreground" />;
+    let colorClass = 'text-muted-foreground';
+    let label = 'Not submitted';
+
+    if (currentStatus) {
+      label = currentStatus;
+      switch (currentStatus) {
+        case 'APPROVED':
+          icon = <CheckCircle className="h-4 w-4 text-green-500" />;
+          colorClass = 'text-green-500';
+          break;
+        case 'PENDING':
+          icon = <Clock className="h-4 w-4 text-yellow-500" />;
+          colorClass = 'text-yellow-500';
+          break;
+        case 'REJECTED':
+          icon = <AlertCircle className="h-4 w-4 text-red-500" />;
+          colorClass = 'text-red-500';
+          break;
+        default:
+          break;
+      }
+    }
+
+    const hasSlide = slide?.slideUrl || slide?.slideKey;
+    const isFileType = slide?.type === OpentalkSlideType.FILE;
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-start gap-3">
+          <Paperclip className="h-4 w-4 text-muted-foreground mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium mb-1">Slide Submission</p>
+            <div className="flex items-center gap-2">
+              {icon}
+              <p className={`text-sm capitalize ${colorClass}`}>{label}</p>
+            </div>
+          </div>
+        </div>
+        
+        {hasSlide && (
+          <div className="ml-7">
+            {isFileType ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreview}
+                disabled={loadingPreview}
+                className="gap-2"
+              >
+                <Upload className="h-3 w-3 rotate-180" />
+                {loadingPreview ? 'Loading...' : 'Preview File'}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => slide?.slideUrl && window.open(slide.slideUrl, '_blank')}
+                className="gap-2"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Open Link
+              </Button>
+            )}
+          </div>
+        )}
+        
+        {slide?.rejectionReason && currentStatus === 'REJECTED' && (
+          <div className="ml-7 text-sm text-red-600 bg-red-50 p-2 rounded">
+             Reason: {slide.rejectionReason}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -117,6 +255,9 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
             </div>
           )}
 
+          {/* Slide Status */}
+          {renderSlideStatus()}
+
           {/* Notes */}
           {event.notes && (
             <div className="flex items-start gap-3">
@@ -136,5 +277,14 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <FilePreviewDialog
+      open={showPreview}
+      onOpenChange={setShowPreview}
+      url={presignedUrl}
+      fileName={slide?.slideKey || 'Slide'}
+      fileType={slide?.type}
+    />
+  </>
   );
 }

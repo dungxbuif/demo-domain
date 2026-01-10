@@ -59,7 +59,7 @@ export function CreateSwapRequestModal({
       }
     } catch (error) {
       console.error('Error fetching available events for swap:', error);
-      toast.error('Failed to load available events');
+      toast.error('Không thể tải sự kiện khả dụng');
     }
   }, [scheduleId]);
 
@@ -75,7 +75,7 @@ export function CreateSwapRequestModal({
     e.preventDefault();
 
     if (!selectedParticipant) {
-      toast.error('Please select a participant to swap with');
+      toast.error('Vui lòng chọn người tham gia để đổi lịch');
       return;
     }
 
@@ -92,14 +92,14 @@ export function CreateSwapRequestModal({
 
       await swapRequestClientService.createSwapRequest(requestData);
 
-      toast.success('Swap request created successfully');
+      toast.success('Tạo yêu cầu đổi lịch thành công');
       setReason('');
       setSelectedParticipant(null);
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
       console.error('Error creating swap request:', error);
-      toast.error('Failed to create swap request');
+      toast.error('Tạo yêu cầu đổi lịch thất bại');
     } finally {
       setIsLoading(false);
     }
@@ -109,17 +109,17 @@ export function CreateSwapRequestModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Request Participant Swap</DialogTitle>
+          <DialogTitle>Yêu cầu đổi lịch dọn dẹp</DialogTitle>
           <DialogDescription>
-            Select a participant from another cleaning event to swap with. You
-            will take their event date and they will take yours.
+            Chọn người tham gia từ sự kiện dọn dẹp khác để đổi lịch. Bạn sẽ nhận
+            ngày của họ và họ sẽ nhận ngày của bạn.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="targetEvent">
-                Select Participant to Swap With
+                Chọn người tham gia để đổi lịch
               </Label>
               <Select
                 value={
@@ -133,7 +133,7 @@ export function CreateSwapRequestModal({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select participant's event" />
+                  <SelectValue placeholder="Chọn sự kiện của người tham gia" />
                 </SelectTrigger>
                 <SelectContent>
                   {availableEvents.flatMap((event) => {
@@ -148,7 +148,7 @@ export function CreateSwapRequestModal({
                         >
                           <div className="flex flex-col">
                             <span className="text-muted-foreground">
-                              No participants
+                              Không có người tham gia
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(event.eventDate).toLocaleDateString()}
@@ -167,7 +167,7 @@ export function CreateSwapRequestModal({
                           <span className="font-medium">
                             {participant.staff?.user?.name ||
                               participant.staff?.email ||
-                              'Unknown'}
+                              'Không rõ'}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(event.eventDate).toLocaleDateString()}
@@ -180,18 +180,18 @@ export function CreateSwapRequestModal({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason</Label>
+              <Label htmlFor="reason">Lý do</Label>
               <Textarea
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Explain why you need to swap with this participant..."
+                placeholder="Giải thích lý do bạn cần đổi lịch với người này..."
                 rows={4}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Note: You will be assigned to their cleaning date, and they will
-                be assigned to your cleaning date.
+                Lưu ý: Bạn sẽ được chuyển sang ngày dọn dẹp của họ, và họ sẽ
+                được chuyển sang ngày của bạn.
               </p>
             </div>
           </div>
@@ -201,10 +201,10 @@ export function CreateSwapRequestModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isLoading || !selectedParticipant}>
-              {isLoading ? 'Submitting...' : 'Submit Request'}
+              {isLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
             </Button>
           </DialogFooter>
         </form>

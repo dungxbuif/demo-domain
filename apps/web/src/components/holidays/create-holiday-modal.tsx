@@ -58,13 +58,13 @@ export function CreateHolidayModal({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to create holiday');
+        throw new Error(error.message || 'Tạo ngày nghỉ thất bại');
       }
 
       const successMessage =
         mode === 'single'
-          ? 'Holiday created successfully'
-          : 'Holidays created successfully';
+          ? 'Tạo ngày nghỉ thành công'
+          : 'Tạo nhiều ngày nghỉ thành công';
       toast.success(successMessage);
 
       setSingleFormData({ date: '', name: '' });
@@ -73,7 +73,7 @@ export function CreateHolidayModal({
       onSuccess?.();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to create holiday',
+        error instanceof Error ? error.message : 'Tạo ngày nghỉ thất bại',
       );
     } finally {
       setIsLoading(false);
@@ -89,9 +89,9 @@ export function CreateHolidayModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Add New Holiday</DialogTitle>
+          <DialogTitle>Thêm ngày nghỉ mới</DialogTitle>
           <DialogDescription>
-            Create a single holiday or multiple holidays by date range.
+            Tạo một ngày nghỉ hoặc nhiều ngày nghỉ theo khoảng ngày.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -101,13 +101,13 @@ export function CreateHolidayModal({
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="single">Single Date</TabsTrigger>
-              <TabsTrigger value="range">Date Range</TabsTrigger>
+              <TabsTrigger value="single">Ngày đơn</TabsTrigger>
+              <TabsTrigger value="range">Khoảng ngày</TabsTrigger>
             </TabsList>
 
             <TabsContent value="single" className="space-y-4 mt-4">
               <div className="grid gap-2">
-                <Label htmlFor="single-date">Date</Label>
+                <Label htmlFor="single-date">Ngày</Label>
                 <Input
                   id="single-date"
                   type="date"
@@ -123,10 +123,10 @@ export function CreateHolidayModal({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="single-name">Holiday Name</Label>
+                <Label htmlFor="single-name">Tên ngày nghỉ</Label>
                 <Input
                   id="single-name"
-                  placeholder="e.g., New Year's Day"
+                  placeholder="VD: Tết Dương lịch"
                   value={singleFormData.name}
                   onChange={(e) =>
                     setSingleFormData({
@@ -141,7 +141,7 @@ export function CreateHolidayModal({
 
             <TabsContent value="range" className="space-y-4 mt-4">
               <div className="grid gap-2">
-                <Label htmlFor="start-date">Start Date</Label>
+                <Label htmlFor="start-date">Ngày bắt đầu</Label>
                 <Input
                   id="start-date"
                   type="date"
@@ -157,7 +157,7 @@ export function CreateHolidayModal({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="end-date">End Date</Label>
+                <Label htmlFor="end-date">Ngày kết thúc</Label>
                 <Input
                   id="end-date"
                   type="date"
@@ -173,10 +173,10 @@ export function CreateHolidayModal({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="range-name">Holiday Name</Label>
+                <Label htmlFor="range-name">Tên ngày nghỉ</Label>
                 <Input
                   id="range-name"
-                  placeholder="e.g., Spring Break"
+                  placeholder="VD: Nghỉ lễ Xuân"
                   value={rangeFormData.name}
                   onChange={(e) =>
                     setRangeFormData({ ...rangeFormData, name: e.target.value })
@@ -184,7 +184,7 @@ export function CreateHolidayModal({
                   required={mode === 'range'}
                 />
                 <p className="text-xs text-muted-foreground">
-                  This name will be applied to all dates in the range
+                  Tên này sẽ được áp dụng cho tất cả các ngày trong khoảng
                 </p>
               </div>
             </TabsContent>
@@ -197,14 +197,14 @@ export function CreateHolidayModal({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading
-                ? 'Creating...'
+                ? 'Đang tạo...'
                 : mode === 'single'
-                  ? 'Create Holiday'
-                  : 'Create Holidays'}
+                  ? 'Tạo ngày nghỉ'
+                  : 'Tạo nhiều ngày nghỉ'}
             </Button>
           </DialogFooter>
         </form>

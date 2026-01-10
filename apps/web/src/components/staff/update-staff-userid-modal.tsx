@@ -120,9 +120,7 @@ export function UpdateStaffUserIdModal({
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-sm text-muted-foreground">
-                    Current: {staff.userId || 'Not linked'}
-                  </p>
+                  
                 </FormItem>
               )}
             />

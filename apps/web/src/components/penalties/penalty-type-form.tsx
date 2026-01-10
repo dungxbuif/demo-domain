@@ -27,9 +27,9 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, 'Tên là bắt buộc'),
   description: z.string().optional(),
-  amount: z.number().min(0, 'Amount must be positive'),
+  amount: z.number().min(0, 'Số tiền phải lớn hơn 0'),
 });
 
 interface PenaltyTypeFormProps {
@@ -58,18 +58,16 @@ export function PenaltyTypeForm({
     try {
       if (penaltyType) {
         await penaltyTypeService.update(penaltyType.id, values);
-        toast.success('Penalty type updated successfully');
+        toast.success('Cập nhật loại phạt thành công');
       } else {
         await penaltyTypeService.create(values as ICreatePenaltyTypeDto);
-        toast.success('Penalty type created successfully');
+        toast.success('Tạo loại phạt thành công');
       }
       onSuccess();
       onClose();
     } catch {
       toast.error(
-        penaltyType
-          ? 'Failed to update penalty type'
-          : 'Failed to create penalty type',
+        penaltyType ? 'Cập nhật loại phạt thất bại' : 'Tạo loại phạt thất bại',
       );
     }
   };
@@ -79,11 +77,11 @@ export function PenaltyTypeForm({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {penaltyType ? 'Edit' : 'Create'} Penalty Type
+            {penaltyType ? 'Chỉnh sửa' : 'Tạo mới'} loại phạt
           </DialogTitle>
           <DialogDescription>
-            {penaltyType ? 'Update the' : 'Add a new'} penalty type with default
-            amount
+            {penaltyType ? 'Cập nhật' : 'Thêm mới'} loại phạt với mức phạt mặc
+            định
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -93,9 +91,9 @@ export function PenaltyTypeForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Tên</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Late to Work" {...field} />
+                    <Input placeholder="VD: Đi làm muộn" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,12 +104,9 @@ export function PenaltyTypeForm({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Mô tả</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Describe the violation..."
-                      {...field}
-                    />
+                    <Textarea placeholder="Mô tả vi phạm..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,7 +117,7 @@ export function PenaltyTypeForm({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Default Amount (VND)</FormLabel>
+                  <FormLabel>Mức phạt mặc định (VND)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="10000" {...field} />
                   </FormControl>
@@ -132,9 +127,11 @@ export function PenaltyTypeForm({
             />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                Hủy
               </Button>
-              <Button type="submit">{penaltyType ? 'Update' : 'Create'}</Button>
+              <Button type="submit">
+                {penaltyType ? 'Cập nhật' : 'Tạo mới'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

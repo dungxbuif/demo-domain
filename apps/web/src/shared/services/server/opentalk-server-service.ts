@@ -1,17 +1,15 @@
 import {
-    ICreateOpentalkCycleDto,
-    ICreateOpentalkEventDto,
-    IOpentalkQueryDto,
-    ISwapOpentalkDto,
-    IUpdateOpentalkCycleDto,
-    IUpdateOpentalkEventDto,
-    OpentalkEvent,
-    ScheduleCycle,
+  ICreateOpentalkCycleDto,
+  IOpentalkQueryDto,
+  ISwapOpentalkDto,
+  IUpdateOpentalkCycleDto,
+  ScheduleCycle,
+  ScheduleEvent,
 } from '@qnoffice/shared';
 import { BaseServerService } from './base-server-service';
 
 export interface OpentalkSpreadsheetData {
-  events: OpentalkEvent[];
+  events: ScheduleEvent[];
   cycles: ScheduleCycle[];
 }
 
@@ -41,8 +39,8 @@ export class OpentalkServerService extends BaseServerService {
   }
 
   // Event operations
-  async createEvent(data: ICreateOpentalkEventDto) {
-    return this.post<OpentalkEvent>(`${this.baseUrl}/events`, data);
+  async createEvent(data: any) {
+    return this.post<ScheduleEvent>(`${this.baseUrl}/events`, data);
   }
 
   async getEvents(query?: IOpentalkQueryDto) {
@@ -53,23 +51,24 @@ export class OpentalkServerService extends BaseServerService {
       searchParams.set('participantId', query.participantId.toString());
 
     const url = `${this.baseUrl}/events${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-    const response = await this.get<OpentalkEvent[]>(url);
+    const response = await this.get<ScheduleEvent[]>(url);
     return response.data || [];
   }
 
   async getEventsByCycle(cycleId: number) {
-    const response = await this.get<OpentalkEvent[]>(
+    const response = await this.get<ScheduleEvent[]>(
       `${this.baseUrl}/cycles/${cycleId}/events`,
     );
     return response.data || [];
   }
 
   async getEventById(id: number) {
-    return this.get<OpentalkEvent>(`${this.baseUrl}/events/${id}`);
+    return this.get<ScheduleEvent>(`${this.baseUrl}/events/${id}`);
   }
 
-  async updateEvent(id: number, data: IUpdateOpentalkEventDto) {
-    return this.put<OpentalkEvent>(`${this.baseUrl}/events/${id}`, data);
+  // TODO: Fix types - using any temporarily due to shared lib caching issue
+  async updateEvent(id: number, data: any) {
+    return this.put<ScheduleEvent>(`${this.baseUrl}/events/${id}`, data);
   }
 
   async deleteEvent(id: number) {
@@ -102,7 +101,7 @@ export class OpentalkServerService extends BaseServerService {
   }
 
   // Legacy compatibility methods
-  async getOpentalkEvents(): Promise<OpentalkEvent[]> {
+  async getScheduleEvents(): Promise<ScheduleEvent[]> {
     return this.getEvents();
   }
 }

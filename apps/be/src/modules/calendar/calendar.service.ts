@@ -18,6 +18,7 @@ export interface CalendarEvent {
     name?: string;
   }[];
   notes?: string;
+  slideStatus?: string;
 }
 
 @Injectable()
@@ -51,6 +52,8 @@ export class CalendarService {
   }
 
   private mapToCalendarEvent(event: ScheduleEventEntity): CalendarEvent {
+    const slide = (event as any).slide;
+
     return {
       id: event.id,
       title: event.title,
@@ -64,6 +67,7 @@ export class CalendarService {
           name: participant.staff.user?.name,
         })) || [],
       notes: event.notes,
+      slideStatus: slide?.status,
     };
   }
 

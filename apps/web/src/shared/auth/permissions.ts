@@ -28,6 +28,7 @@ export const PERMISSIONS = {
   CREATE_OPENTALK_SWAP_REQUEST: { roles: ALL_ROLES },
   MANAGE_OPENTALK_SWAP_REQUESTS: { roles: [UserRole.HR, UserRole.GDVP] },
   APPROVE_OPENTALK_SWAP_REQUESTS: { roles: [UserRole.GDVP] },
+  APPROVE_OPENTALK_SLIDES: { roles: [UserRole.GDVP] },
   EDIT_OPENTALK_TOPIC: { roles: [UserRole.HR, UserRole.GDVP] },
   EDIT_OWN_OPENTALK_TOPIC: { roles: ALL_ROLES },
   VIEW_PENALTIES: { roles: ALL_ROLES },

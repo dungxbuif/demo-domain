@@ -95,7 +95,7 @@ export function SwapRequestManagement({
       }
     } catch (error) {
       console.error('Failed to load swap requests:', error);
-      toast.error('Failed to load swap requests');
+      toast.error('Không thể tải yêu cầu đổi lịch');
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ export function SwapRequestManagement({
   if (!user) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        Please log in to access this feature.
+        Vui lòng đăng nhập để sử dụng chức năng này.
       </div>
     );
   }
@@ -134,7 +134,7 @@ export function SwapRequestManagement({
   if (isUserMode && !canCreateRequests && !canManageRequests) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        You don&apos;t have permission to access swap requests.
+        Bạn không có quyền truy cập yêu cầu đổi lịch.
       </div>
     );
   }
@@ -142,7 +142,7 @@ export function SwapRequestManagement({
   if (isHRMode && !canApproveRequests) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        You don&apos;t have permission to approve swap requests.
+        Bạn không có quyền duyệt yêu cầu đổi lịch.
       </div>
     );
   }
@@ -152,7 +152,7 @@ export function SwapRequestManagement({
     action: SwapRequestStatus,
   ) => {
     if (!canApproveRequests) {
-      toast.error("You don't have permission to approve requests");
+      toast.error('Bạn không có quyền duyệt yêu cầu');
       return;
     }
 
@@ -162,7 +162,9 @@ export function SwapRequestManagement({
         reviewNote: reviewNote,
       });
 
-      toast.success(`Request ${action.toLowerCase()} successfully`);
+      toast.success(
+        `Yêu cầu đã được ${action === 'APPROVED' ? 'duyệt' : 'từ chối'} thành công`,
+      );
       setReviewModalOpen(false);
       setSelectedRequest(null);
       setReviewNote('');
@@ -171,7 +173,7 @@ export function SwapRequestManagement({
       await loadSwapRequests();
     } catch (error) {
       console.error('Failed to review request:', error);
-      toast.error('Failed to review request');
+      toast.error('Duyệt yêu cầu thất bại');
     }
   };
 
@@ -205,7 +207,7 @@ export function SwapRequestManagement({
         <CardContent className="pt-6">
           <div className="text-center py-8">
             <div className="animate-spin h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-2">Loading requests...</p>
+            <p className="text-muted-foreground mt-2">Đang tải yêu cầu...</p>
           </div>
         </CardContent>
       </Card>
@@ -217,8 +219,8 @@ export function SwapRequestManagement({
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">
           {mode === 'hr'
-            ? 'Participant Swap Approval Queue'
-            : 'My Swap Requests'}
+            ? 'Danh sách duyệt yêu cầu đổi lịch'
+            : 'Yêu cầu đổi lịch của tôi'}
         </h2>
         {mode === 'user' && canCreateRequests && (
           <>
@@ -235,7 +237,7 @@ export function SwapRequestManagement({
                   }
                 >
                   <SelectTrigger className="w-64">
-                    <SelectValue placeholder="Select your schedule to swap" />
+                    <SelectValue placeholder="Chọn lịch trực để đổi" />
                   </SelectTrigger>
                   <SelectContent>
                     {userSchedules.map((schedule) => (
@@ -254,14 +256,15 @@ export function SwapRequestManagement({
                   disabled={!selectedScheduleId}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Request Swap
+                  Tạo yêu cầu đổi lịch
                 </Button>
               </div>
             ) : (
               <div className="text-sm text-muted-foreground">
-                <p>You have no scheduled cleaning sessions to swap.</p>
+                <p>Bạn chưa có lịch trực nhật nào để đổi.</p>
                 <p className="text-xs mt-1">
-                  User ID: {user?.mezonId} | Schedules: {userSchedules.length}
+                  Mã người dùng: {user?.mezonId} | Số lịch:{' '}
+                  {userSchedules.length}
                 </p>
               </div>
             )}
@@ -286,8 +289,8 @@ export function SwapRequestManagement({
                 <ArrowRightLeft className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>
                   {mode === 'hr'
-                    ? 'No participant swap requests pending approval'
-                    : 'You have not submitted any participant swap requests'}
+                    ? 'Không có yêu cầu đổi lịch nào cần duyệt'
+                    : 'Bạn chưa gửi yêu cầu đổi lịch nào'}
                 </p>
               </div>
             </CardContent>
@@ -312,7 +315,7 @@ export function SwapRequestManagement({
                         <div className="flex items-center space-x-2 mb-2">
                           <Calendar className="h-4 w-4 text-blue-600" />
                           <span className="font-medium text-blue-900">
-                            Your Current Schedule
+                            Lịch hiện tại của bạn
                           </span>
                         </div>
                         <p className="text-sm text-blue-800">
@@ -330,7 +333,7 @@ export function SwapRequestManagement({
                         <div className="flex items-center space-x-2 mb-2">
                           <Calendar className="h-4 w-4 text-purple-600" />
                           <span className="font-medium text-purple-900">
-                            Swap With Schedule
+                            Lịch muốn đổi
                           </span>
                         </div>
                         <p className="text-sm text-purple-800">
@@ -346,7 +349,7 @@ export function SwapRequestManagement({
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium mb-1">Reason:</p>
+                      <p className="text-sm font-medium mb-1">Lý do:</p>
                       <p className="text-sm text-muted-foreground">
                         {request.reason}
                       </p>
@@ -354,7 +357,9 @@ export function SwapRequestManagement({
 
                     {request.reviewNote && (
                       <div>
-                        <p className="text-sm font-medium mb-1">Review Note:</p>
+                        <p className="text-sm font-medium mb-1">
+                          Ghi chú duyệt:
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {request.reviewNote}
                         </p>
@@ -374,7 +379,7 @@ export function SwapRequestManagement({
                             setReviewModalOpen(true);
                           }}
                         >
-                          Review
+                          Duyệt
                         </Button>
                       </div>
                     )}
@@ -389,27 +394,27 @@ export function SwapRequestManagement({
       <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Review Swap Request</DialogTitle>
+            <DialogTitle>Duyệt yêu cầu đổi lịch</DialogTitle>
             <DialogDescription>
-              Review and approve or reject this swap request.
+              Duyệt và chấp nhận hoặc từ chối yêu cầu đổi lịch này.
             </DialogDescription>
           </DialogHeader>
           {selectedRequest && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium">Request Details:</p>
+                <p className="text-sm font-medium">Chi tiết yêu cầu:</p>
                 <p className="text-sm text-muted-foreground">
                   {selectedRequest.reason}
                 </p>
               </div>
               <div>
                 <label className="text-sm font-medium">
-                  Review Note (optional)
+                  Ghi chú duyệt (không bắt buộc)
                 </label>
                 <Textarea
                   value={reviewNote}
                   onChange={(e) => setReviewNote(e.target.value)}
-                  placeholder="Add a note about your decision..."
+                  placeholder="Thêm ghi chú về quyết định của bạn..."
                   className="mt-1"
                 />
               </div>
@@ -417,7 +422,7 @@ export function SwapRequestManagement({
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setReviewModalOpen(false)}>
-              Cancel
+              Hủy
             </Button>
             <Button
               variant="destructive"
@@ -430,7 +435,7 @@ export function SwapRequestManagement({
               }
             >
               <XCircle className="h-4 w-4 mr-2" />
-              Reject
+              Từ chối
             </Button>
             <Button
               onClick={() =>
@@ -442,7 +447,7 @@ export function SwapRequestManagement({
               }
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              Approve
+              Chấp nhận
             </Button>
           </DialogFooter>
         </DialogContent>

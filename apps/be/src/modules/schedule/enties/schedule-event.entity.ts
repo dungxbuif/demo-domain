@@ -1,7 +1,6 @@
 import {
   EventStatus,
-  IOpentalEventMetadata,
-  ScheduleType,
+  ScheduleType
 } from '@qnoffice/shared';
 import { AbstractEntity } from '@src/common/database/abstract.entity';
 import ScheduleEventParticipantEntity from '@src/modules/schedule/enties/schedule-event-participant.entity';
@@ -37,9 +36,6 @@ export default class ScheduleEventEntity extends AbstractEntity {
 
   @Column({ nullable: true })
   notes?: string;
-
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: IOpentalEventMetadata | null;
 
   @ManyToOne(() => ScheduleCycleEntity)
   @JoinColumn({ name: 'cycle_id' })

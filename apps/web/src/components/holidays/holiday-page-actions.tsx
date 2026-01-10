@@ -20,7 +20,7 @@ export function HolidayPageActions({
       <ProtectedComponent permission={PERMISSIONS.MANAGE_HOLIDAYS}>
         <Button onClick={() => setCreateModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Holiday
+          Thêm ngày nghỉ
         </Button>
         <CreateHolidayModal
           open={createModalOpen}

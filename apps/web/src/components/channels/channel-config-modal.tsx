@@ -58,19 +58,17 @@ export function ChannelConfigModal({
           description: formData.description,
           isActive: formData.isActive,
         });
-        toast.success('Channel configuration updated successfully');
+        toast.success('Cập nhật cấu hình kênh thành công');
       } else {
         await service.configureChannel(formData);
-        toast.success('Channel configuration created successfully');
+        toast.success('Tạo cấu hình kênh thành công');
       }
 
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Failed to save channel configuration',
+        error instanceof Error ? error.message : 'Lưu cấu hình kênh thất bại',
       );
     } finally {
       setIsLoading(false);
@@ -82,18 +80,16 @@ export function ChannelConfigModal({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {config
-              ? 'Edit Channel Configuration'
-              : 'Add Channel Configuration'}
+            {config ? 'Chỉnh sửa cấu hình kênh' : 'Thêm cấu hình kênh'}
           </DialogTitle>
           <DialogDescription>
-            Configure Mezon channel ID for notifications
+            Thiết lập ID kênh Mezon để nhận thông báo
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="channelType">Channel Type</Label>
+              <Label htmlFor="channelType">Loại kênh</Label>
               <select
                 id="channelType"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -116,7 +112,7 @@ export function ChannelConfigModal({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="channelId">Channel ID *</Label>
+              <Label htmlFor="channelId">ID kênh *</Label>
               <Input
                 id="channelId"
                 type="text"
@@ -130,11 +126,11 @@ export function ChannelConfigModal({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="channelName">Channel Name</Label>
+              <Label htmlFor="channelName">Tên kênh</Label>
               <Input
                 id="channelName"
                 type="text"
-                placeholder="Cleaning Discussion"
+                placeholder="Thảo luận dọn dẹp"
                 value={formData.channelName}
                 onChange={(e) =>
                   setFormData({ ...formData, channelName: e.target.value })
@@ -143,10 +139,10 @@ export function ChannelConfigModal({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Mô tả</Label>
               <Textarea
                 id="description"
-                placeholder="Channel description..."
+                placeholder="Mô tả kênh..."
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -163,7 +159,7 @@ export function ChannelConfigModal({
                   setFormData({ ...formData, isActive: checked })
                 }
               />
-              <Label htmlFor="isActive">Active</Label>
+              <Label htmlFor="isActive">Kích hoạt</Label>
             </div>
           </div>
           <DialogFooter>
@@ -173,10 +169,10 @@ export function ChannelConfigModal({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : config ? 'Update' : 'Create'}
+              {isLoading ? 'Đang lưu...' : config ? 'Cập nhật' : 'Tạo mới'}
             </Button>
           </DialogFooter>
         </form>

@@ -38,7 +38,7 @@ export function ChannelManagement() {
 
       setChannelIds(newChannelIds);
     } catch {
-      toast.error('Failed to load channel configurations');
+      toast.error('Không thể tải cấu hình kênh');
     }
   };
 
@@ -68,10 +68,10 @@ export function ChannelManagement() {
         );
 
       await Promise.all(promises);
-      toast.success('Channel configurations saved successfully');
+      toast.success('Lưu cấu hình kênh thành công');
       loadChannels();
     } catch {
-      toast.error('Failed to save channel configurations');
+      toast.error('Lưu cấu hình kênh thất bại');
     } finally {
       setIsLoading(false);
     }
@@ -80,11 +80,9 @@ export function ChannelManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          Channel Management
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight">Quản lý kênh</h2>
         <p className="text-muted-foreground">
-          Configure Mezon channel IDs for notifications
+          Thiết lập ID kênh Mezon để nhận thông báo
         </p>
       </div>
 
@@ -98,7 +96,7 @@ export function ChannelManagement() {
               <Input
                 id={`channel-${key}`}
                 type="text"
-                placeholder="Enter channel ID"
+                placeholder="Nhập ID kênh"
                 value={channelIds[key as MezonChannelType]}
                 onChange={(e) =>
                   handleChannelIdChange(key as MezonChannelType, e.target.value)
@@ -109,7 +107,7 @@ export function ChannelManagement() {
         </div>
 
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Submit'}
+          {isLoading ? 'Đang lưu...' : 'Lưu'}
         </Button>
       </form>
     </div>

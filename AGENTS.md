@@ -14,12 +14,14 @@
 
 # Project Coding Standards
 
-## Type Management
+## Shared Code Architecture
 
+- **Every shared style between FE and BE must be built to libs**
 - All shared types should be defined in `/libs/src/types/`
 - Common enums should be defined in `/libs/src/enums/`
 - Import types from `@qn-utilities/shared` package
 - Never duplicate type definitions across apps
+- Shared utilities, constants, and helpers must be placed in `/libs/src/`
 
 ## Pagination
 

@@ -30,7 +30,6 @@ export function SubmitSlideModal({
 }: SubmitSlideModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<Omit<ISubmitSlideDto, 'eventId'>>({
-    topic: '',
     slidesUrl: '',
   });
 
@@ -47,7 +46,6 @@ export function SubmitSlideModal({
         body: JSON.stringify({
           eventId,
           slidesUrl: formData.slidesUrl,
-          topic: formData.topic,
         }),
       });
 
@@ -57,7 +55,7 @@ export function SubmitSlideModal({
       }
 
       toast.success('Slide submitted successfully');
-      setFormData({ topic: '', slidesUrl: '' });
+      setFormData({ slidesUrl: '' });
       onOpenChange(false);
       onSuccess?.();
     } catch (error: any) {
@@ -78,18 +76,6 @@ export function SubmitSlideModal({
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="topic">Topic</Label>
-              <Input
-                id="topic"
-                value={formData.topic}
-                onChange={(e) =>
-                  setFormData({ ...formData, topic: e.target.value })
-                }
-                placeholder="e.g., Introduction to NestJS"
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="slidesUrl">Slide URL</Label>
               <Input
