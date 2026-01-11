@@ -55,58 +55,6 @@ export class AuthService {
     return data;
   }
 
-  async signIn(
-    mezonId: string,
-    meta?: {
-      name?: string;
-      email?: string;
-      avatar?: string;
-    },
-  ): Promise<AuthProfile> {
-    const user = await this.userService.upsertByMezonId(mezonId, meta);
-    let staff: StaffEntity | null = null;
-    try {
-      staff = await this.staffService.findByUserId(user.mezonId);
-      Logger.log(`Staff data found for user ${user.mezonId}:`, staff);
-    } catch (error) {
-      Logger.warn(
-        `No staff data found for user ${user.mezonId}:`,
-        error.message,
-      );
-    }
-
-    const payload: UserAuth = {
-      mezonId: user.mezonId,
-      name: user?.name || '',
-      email: user?.email || '',
-      role: typeof staff?.role === 'number' ? staff.role : null,
-      staffId: staff?.id,
-    };
-
-    const jwtConfig = this.appConfigService.jwtConfig;
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '30d',
-    });
-    const refreshToken = await this.jwtService.signAsync(
-      { sub: user.mezonId },
-      { expiresIn: '30d', secret: jwtConfig.refreshSecret },
-    );
-
-    return {
-      user: {
-        mezonId: user.mezonId,
-        name: user?.name || '',
-        email: user?.email || '',
-        role: typeof staff?.role === 'number' ? staff.role : null,
-        staffId: staff?.id,
-      },
-      tokens: {
-        accessToken,
-        refreshToken,
-      },
-    };
-  }
-
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     try {
       const jwtConfig = this.appConfigService.jwtConfig;
@@ -183,11 +131,67 @@ export class AuthService {
   async handleOAuthExchange(code: string, state: string): Promise<AuthProfile> {
     const tokenData = await this.exchangeCode(code, state);
     const userInfo = await this.userInfo(tokenData.access_token);
-    return this.signIn(userInfo.user_id, {
+    
+    // Logic that was previously in signIn
+    const user = await this.userService.upsertByMezonId(userInfo.user_id, {
       name: userInfo.display_name,
       email: userInfo.email,
       avatar: userInfo.avatar,
     });
+
+    let staff: StaffEntity | null = null;
+    try {
+      staff = await this.staffService.findByUserId(user.mezonId);
+      
+      // If no staff found by userId, try to find by email and link
+      if (!staff && user.email) {
+        const potentialStaff = await this.staffService.findByEmail(user.email);
+        if (potentialStaff && !potentialStaff.userId) {
+          Logger.log(`Found unlinked staff for user ${user.email}, linking now...`);
+          potentialStaff.userId = user.mezonId;
+          const savedStaff = await this.staffService.updateStaffUserId(potentialStaff.id, user.mezonId);
+          staff = savedStaff;
+        }
+      }
+
+      Logger.log(`Staff data found for user ${user.mezonId}:`, staff);
+    } catch (error) {
+      Logger.warn(
+        `No staff data found for user ${user.mezonId}:`,
+        error.message,
+      );
+    }
+
+    const payload: UserAuth = {
+      mezonId: user.mezonId,
+      name: user?.name || '',
+      email: user?.email || '',
+      role: typeof staff?.role === 'number' ? staff.role : null,
+      staffId: staff?.id,
+    };
+
+    const jwtConfig = this.appConfigService.jwtConfig;
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '30d',
+    });
+    const refreshToken = await this.jwtService.signAsync(
+      { sub: user.mezonId },
+      { expiresIn: '30d', secret: jwtConfig.refreshSecret },
+    );
+
+    return {
+      user: {
+        mezonId: user.mezonId,
+        name: user?.name || '',
+        email: user?.email || '',
+        role: typeof staff?.role === 'number' ? staff.role : null,
+        staffId: staff?.id,
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+      },
+    };
   }
 
   async handleRefreshToken(refreshToken: string): Promise<AuthTokens> {

@@ -22,12 +22,12 @@ const navigationData = [
     href: PATHS.DASHBOARD.BASE,
     icon: '📊',
   },
-  {
-    title: 'Chi nhánh',
-    href: PATHS.DASHBOARD.BRANCHES,
-    icon: '🏢',
-    permission: PERMISSIONS.VIEW_BRANCHES,
-  },
+  // {
+  //   title: 'Chi nhánh',
+  //   href: PATHS.DASHBOARD.BRANCHES,
+  //   icon: '🏢',
+  //   permission: PERMISSIONS.VIEW_BRANCHES,
+  // },
   {
     title: 'Quản lý nhân sự',
     href: PATHS.DASHBOARD.STAFF,

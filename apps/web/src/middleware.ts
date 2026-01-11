@@ -1,4 +1,4 @@
-import { PathUtils } from '@/shared/constants/paths';
+import { PATHS, PathUtils } from '@/shared/constants/paths';
 import { sessionOptions } from '@/shared/session';
 import { AuthProfile } from '@qnoffice/shared';
 import { getIronSession } from 'iron-session';
@@ -34,6 +34,10 @@ export async function middleware(request: NextRequest) {
         hasTokens: !!session.tokens,
       });
       return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+
+    if (!session?.user?.staffId && pathname !== PATHS.DASHBOARD.BASE) {
+      return NextResponse.redirect(new URL(PATHS.DASHBOARD.BASE, request.url));
     }
 
     return response;

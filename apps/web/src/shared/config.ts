@@ -57,9 +57,7 @@ export const config: AppConfig = {
   backendBaseUrl: getEnvVar('BACKEND_BASE_URL'),
   frontendBaseUrl: getEnvVar(
     'NEXT_PUBLIC_FRONTEND_URL',
-    nodeEnv === 'production'
-      ? 'https://your-domain.com'
-      : 'http://localhost:3000',
+    'http://localhost:4200',
   ),
 
   nodeEnv,

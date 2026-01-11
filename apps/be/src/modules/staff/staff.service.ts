@@ -23,6 +23,10 @@ export class StaffService {
     });
   }
 
+  async findByEmail(email: string): Promise<StaffEntity | null> {
+    return this.staffRepository.findOneBy({ email });
+  }
+
   async getStaffs(
     queries: AppPaginateOptionsDto,
   ): Promise<AppPaginationDto<StaffEntity>> {
