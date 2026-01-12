@@ -8,7 +8,7 @@ interface AppConfig {
   sessionSecret: string;
 
   // API URLs
-  apiBaseUrl: string;
+  frontendBaseUrl: string;
   backendBaseUrl: string;
 
   // Environment
@@ -52,7 +52,7 @@ validateSessionSecret(sessionSecret);
 export const config: AppConfig = {
   sessionSecret,
 
-  apiBaseUrl: getEnvVar('NEXT_PUBLIC_API_BASE_URL'),
+  frontendBaseUrl: getEnvVar('NEXT_PUBLIC_FRONTEND_URL'),
   backendBaseUrl: getEnvVar('BACKEND_BASE_URL'),
 
   nodeEnv,

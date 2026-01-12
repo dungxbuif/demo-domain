@@ -32,10 +32,15 @@ export function CleaningSpreadsheetView({
   const [isSwapping, setIsSwapping] = useState(false);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      weekday: 'short',
-      month: 'short',
+    // Parse YYYY-MM-DD components directly to create local date
+    // This avoids UTC conversions that might shift the date (+1/-1)
+    const cleanDateString = dateString.includes('T') ? dateString.split('T')[0] : dateString;
+    const [year, month, day] = cleanDateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return new Intl.DateTimeFormat('vi-VN', {
+      weekday: 'long',
+      month: 'numeric',
       day: 'numeric',
       year: 'numeric',
     }).format(date);

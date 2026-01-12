@@ -35,13 +35,13 @@ export async function middleware(request: NextRequest) {
         hasTokens: !!session.tokens,
       });
       return NextResponse.redirect(
-        new URL(PATHS.AUTH.LOGIN, appConfig.apiBaseUrl),
+        new URL(PATHS.AUTH.LOGIN, appConfig.frontendBaseUrl),
       );
     }
 
     if (!session?.user?.staffId && pathname !== PATHS.DASHBOARD.BASE) {
       return NextResponse.redirect(
-        new URL(PATHS.DASHBOARD.BASE, appConfig.apiBaseUrl),
+        new URL(PATHS.DASHBOARD.BASE, appConfig.frontendBaseUrl),
       );
     }
 
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('Middleware auth check failed:', error);
     return NextResponse.redirect(
-      new URL(PATHS.AUTH.LOGIN, appConfig.apiBaseUrl),
+      new URL(PATHS.AUTH.LOGIN, appConfig.frontendBaseUrl),
     );
   }
 }

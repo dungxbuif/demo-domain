@@ -19,7 +19,6 @@ export function CleaningPageClient({ cycles, error }: CleaningPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
   const currentTab = searchParams.get('tab') || 'schedules';
 
   const handleTabChange = (value: string) => {
@@ -35,10 +34,14 @@ export function CleaningPageClient({ cycles, error }: CleaningPageClientProps) {
   }, [error]);
 
   const events = cycles.flatMap((cycle) => cycle.events || []);
-  
+
   return (
     <div className="space-y-6">
-      <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-4">
+      <Tabs
+        value={currentTab}
+        onValueChange={handleTabChange}
+        className="space-y-4"
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="schedules">Quản lý lịch trực</TabsTrigger>
           <TabsTrigger value="requests">Yêu cầu đổi lịch</TabsTrigger>
