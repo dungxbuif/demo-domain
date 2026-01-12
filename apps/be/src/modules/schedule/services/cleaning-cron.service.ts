@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { CycleStatus, EventStatus, ScheduleType } from '@qnoffice/shared';
 import {
   CleaningReminderPayload,
@@ -14,7 +14,7 @@ import {
 import HolidayEntity from '@src/modules/holiday/holiday.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import { addDays, addMonths, startOfMonth } from 'date-fns';
-import { Between, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, EntityManager, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
 import ScheduleCycleEntity from '../enties/schedule-cycle.entity';
 import ScheduleEventParticipantEntity from '../enties/schedule-event-participant.entity';
 import ScheduleEventEntity from '../enties/schedule-event.entity';
@@ -32,12 +32,12 @@ export class CleaningCronService {
     private readonly eventRepository: Repository<ScheduleEventEntity>,
     @InjectRepository(ScheduleCycleEntity)
     private readonly cycleRepository: Repository<ScheduleCycleEntity>,
-    @InjectRepository(ScheduleEventParticipantEntity)
-    private readonly participantRepository: Repository<ScheduleEventParticipantEntity>,
     @InjectRepository(StaffEntity)
     private readonly staffRepository: Repository<StaffEntity>,
     @InjectRepository(HolidayEntity)
     private readonly holidayRepository: Repository<HolidayEntity>,
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
     private readonly eventEmitter: EventEmitter2,
     private readonly appLogService: AppLogService,
   ) {}
@@ -53,7 +53,6 @@ export class CleaningCronService {
     const today = getCurrentDateString();
 
     try {
-      // Step 1: Find all ACTIVE events before today
       this.appLogService.stepLog(
         1,
         'Finding ACTIVE cleaning events before today',
@@ -67,9 +66,6 @@ export class CleaningCronService {
           type: ScheduleType.CLEANING,
           eventDate: LessThan(today),
           status: EventStatus.ACTIVE,
-        },
-        order: {
-          eventDate: 'ASC',
         },
       });
 
@@ -90,7 +86,6 @@ export class CleaningCronService {
         },
       );
 
-      // Step 2: Mark past ACTIVE events as COMPLETED
       if (pastActiveEvents.length > 0) {
         this.appLogService.stepLog(
           3,
@@ -138,7 +133,6 @@ export class CleaningCronService {
         );
       }
 
-      // Step 3: Find the next PENDING event to activate
       this.appLogService.stepLog(
         5,
         'Finding next PENDING cleaning event to activate',
@@ -238,7 +232,6 @@ export class CleaningCronService {
         'CleaningCronService',
         { error: error.message },
       );
-      throw error;
     }
   }
 
@@ -249,9 +242,7 @@ export class CleaningCronService {
       'CleaningCronService',
       { reminderType: 'morning', scheduleType: ScheduleType.CLEANING },
     );
-
     const today = getCurrentDateString();
-
     try {
       this.appLogService.stepLog(
         1,
@@ -265,12 +256,10 @@ export class CleaningCronService {
         where: {
           type: ScheduleType.CLEANING,
           eventDate: today,
-          status: EventStatus.ACTIVE,
         },
         relations: [
           'eventParticipants',
           'eventParticipants.staff',
-          'eventParticipants.staff.user',
         ],
       });
 
@@ -286,59 +275,57 @@ export class CleaningCronService {
         },
       );
 
+      const payloads: CleaningReminderPayload[] = [];
       let totalParticipants = 0;
-      let eventsWithParticipants = 0;
 
-      for (const event of todayEvents) {
+      todayEvents.forEach((event) => {
         const eventParticipants = event.eventParticipants || [];
 
         // Map to Participant format with mezonId and email prefix
-        const participants = eventParticipants
-          .filter((p) => p.staff?.user?.mezonId && p.staff?.email)
-          .map((p) => ({
-            userId: p.staff.user.mezonId,
-            username: p.staff.email.split('@')[0], // Email prefix before @
-          }));
+        const participants = eventParticipants.map((p) => ({
+          userId: p.staff.userId || '',
+          username: p.staff.email.split('@')[0],
+        }));
 
         if (participants.length > 0) {
-          eventsWithParticipants++;
           totalParticipants += participants.length;
-
-          const payload: CleaningReminderPayload = {
+          payloads.push({
             eventId: event.id,
             eventDate: event.eventDate,
             participants,
             type: 'morning',
             journeyId: journeyId,
-          };
+          });
+        }
+      });
 
-          this.appLogService.stepLog(
-            3,
-            `Emitting morning reminder for event ${event.id}`,
-            'CleaningCronService',
-            journeyId,
-            {
-              eventId: event.id,
-              eventDate: event.eventDate,
-              participantCount: participants.length,
-              participants: participants.map((p) => p.username),
-            },
-          );
+      if (payloads.length > 0) {
+        this.appLogService.stepLog(
+          3,
+          `Emitting morning reminders for ${payloads.length} events`,
+          'CleaningCronService',
+          journeyId,
+          {
+            eventCount: payloads.length,
+            totalParticipants,
+          },
+        );
 
+        payloads.forEach((payload) => {
           this.eventEmitter.emit(
             NotificationEvent.CLEANING_MORNING_REMINDER,
             payload,
           );
-        }
+        });
       }
 
       this.appLogService.journeyLog(
         journeyId,
-        `✅ Successfully sent morning reminders for ${eventsWithParticipants} events`,
+        `✅ Successfully sent morning reminders for ${payloads.length} events`,
         'CleaningCronService',
         {
           totalEvents: todayEvents.length,
-          eventsWithParticipants,
+          eventsWithParticipants: payloads.length,
           totalParticipants,
           today,
         },
@@ -351,7 +338,6 @@ export class CleaningCronService {
         'CleaningCronService',
         { error: error.message, today },
       );
-      throw error;
     }
   }
 
@@ -364,10 +350,8 @@ export class CleaningCronService {
     );
 
     const today = getCurrentDateString();
-    const tomorrow = addDays(new Date(today), 1).toISOString().split('T')[0];
 
     try {
-      // Process today's events (afternoon reminder)
       this.appLogService.stepLog(
         1,
         "Finding today's ACTIVE cleaning events for afternoon reminder",
@@ -380,12 +364,10 @@ export class CleaningCronService {
         where: {
           type: ScheduleType.CLEANING,
           eventDate: today,
-          status: EventStatus.ACTIVE,
         },
         relations: [
           'eventParticipants',
           'eventParticipants.staff',
-          'eventParticipants.staff.user',
         ],
       });
 
@@ -401,55 +383,82 @@ export class CleaningCronService {
         },
       );
 
-      let todayParticipants = 0;
-      let todayEventsWithParticipants = 0;
-
-      for (const event of todayEvents) {
+      const payloads: CleaningReminderPayload[] = [];
+      let totalParticipants = 0;
+      todayEvents.forEach((event) => {
         const eventParticipants = event.eventParticipants || [];
-
-        // Map to Participant format with mezonId and email prefix
-        const participants = eventParticipants
-          .filter((p) => p.staff?.user?.mezonId && p.staff?.email)
-          .map((p) => ({
-            userId: p.staff.user.mezonId,
-            username: p.staff.email.split('@')[0],
-          }));
-
+        const participants = eventParticipants.map((p) => ({
+          userId: p.staff.userId || '',
+          username: p.staff.email.split('@')[0],
+        }));
         if (participants.length > 0) {
-          todayEventsWithParticipants++;
-          todayParticipants += participants.length;
-
-          const payload: CleaningReminderPayload = {
+          totalParticipants += participants.length;
+          payloads.push({
             eventId: event.id,
             eventDate: event.eventDate,
             participants,
             type: 'afternoon',
             journeyId: journeyId,
-          };
+          });
+        }
+      });
 
-          this.appLogService.stepLog(
-            3,
-            `Emitting afternoon reminder for event ${event.id}`,
-            'CleaningCronService',
-            journeyId,
-            {
-              eventId: event.id,
-              eventDate: event.eventDate,
-              participantCount: participants.length,
-              participants: participants.map((p) => p.username),
-            },
-          );
+      if (payloads.length > 0) {
+        this.appLogService.stepLog(
+          3,
+          `Emitting afternoon reminders for ${payloads.length} events`,
+          'CleaningCronService',
+          journeyId,
+          {
+            eventCount: payloads.length,
+            totalParticipants,
+          },
+        );
 
+        payloads.forEach((payload) => {
           this.eventEmitter.emit(
             NotificationEvent.CLEANING_AFTERNOON_REMINDER,
             payload,
           );
-        }
+        });
       }
 
-      // Process tomorrow's events (next day reminder)
+      this.appLogService.journeyLog(
+        journeyId,
+        `✅ Successfully sent afternoon reminders for ${payloads.length} events`,
+        'CleaningCronService',
+        {
+          today: {
+            date: today,
+            totalEvents: todayEvents.length,
+            eventsWithParticipants: payloads.length,
+            totalParticipants: totalParticipants,
+          },
+        },
+      );
+    } catch (error) {
+      this.appLogService.journeyError(
+        journeyId,
+        '❌ Error sending afternoon reminders',
+        error.stack,
+        'CleaningCronService',
+        { error: error.message, today },
+      );
+    }
+  }
+
+  async sendNextDayReminder(journeyId: string): Promise<void> {
+    this.appLogService.journeyLog(
+      journeyId,
+      'Starting cleaning next day reminder process',
+      'CleaningCronService',
+      { reminderType: 'nextday', scheduleType: ScheduleType.CLEANING },
+    );
+    const today = getCurrentDateString();
+    const tomorrow = addDays(new Date(today), 1).toISOString().split('T')[0];
+    try {
       this.appLogService.stepLog(
-        4,
+        1,
         "Finding tomorrow's ACTIVE cleaning events for next day reminder",
         'CleaningCronService',
         journeyId,
@@ -465,12 +474,11 @@ export class CleaningCronService {
         relations: [
           'eventParticipants',
           'eventParticipants.staff',
-          'eventParticipants.staff.user',
         ],
       });
 
       this.appLogService.stepLog(
-        5,
+        2,
         `Found ${tomorrowEvents.length} cleaning events for tomorrow`,
         'CleaningCronService',
         journeyId,
@@ -481,80 +489,68 @@ export class CleaningCronService {
         },
       );
 
-      let tomorrowParticipants = 0;
-      let tomorrowEventsWithParticipants = 0;
+      const payloads: CleaningReminderPayload[] = [];
+      let totalParticipants = 0;
 
-      for (const event of tomorrowEvents) {
+      tomorrowEvents.forEach((event) => {
         const eventParticipants = event.eventParticipants || [];
-
-        // Map to Participant format with mezonId and email prefix
-        const participants = eventParticipants
-          .filter((p) => p.staff?.user?.mezonId && p.staff?.email)
-          .map((p) => ({
-            userId: p.staff.user.mezonId,
-            username: p.staff.email.split('@')[0],
-          }));
-
+        const participants = eventParticipants.map((p) => ({
+          userId: p.staff.userId || '',
+          username: p.staff.email.split('@')[0],
+        }));
         if (participants.length > 0) {
-          tomorrowEventsWithParticipants++;
-          tomorrowParticipants += participants.length;
-
-          const payload: CleaningReminderPayload = {
+          totalParticipants += participants.length;
+          payloads.push({
             eventId: event.id,
             eventDate: event.eventDate,
             participants,
             type: 'nextday',
             journeyId: journeyId,
-          };
+          });
+        }
+      });
 
-          this.appLogService.stepLog(
-            6,
-            `Emitting next day reminder for event ${event.id}`,
-            'CleaningCronService',
-            journeyId,
-            {
-              eventId: event.id,
-              eventDate: event.eventDate,
-              participantCount: participants.length,
-              participants: participants.map((p) => p.username),
-            },
-          );
+      if (payloads.length > 0) {
+        this.appLogService.stepLog(
+          3,
+          `Emitting next day reminders for ${payloads.length} events`,
+          'CleaningCronService',
+          journeyId,
+          {
+            eventCount: payloads.length,
+            totalParticipants,
+          },
+        );
 
+        payloads.forEach((payload) => {
           this.eventEmitter.emit(
             NotificationEvent.CLEANING_NEXT_DAY_REMINDER,
             payload,
           );
-        }
+        });
       }
 
       this.appLogService.journeyLog(
         journeyId,
-        `✅ Successfully sent afternoon reminders for ${todayEventsWithParticipants} events and next day reminders for ${tomorrowEventsWithParticipants} events`,
+        `✅ Successfully sent next day reminders for ${payloads.length} events`,
         'CleaningCronService',
         {
-          today: {
-            date: today,
-            totalEvents: todayEvents.length,
-            eventsWithParticipants: todayEventsWithParticipants,
-            totalParticipants: todayParticipants,
-          },
           tomorrow: {
             date: tomorrow,
             totalEvents: tomorrowEvents.length,
-            eventsWithParticipants: tomorrowEventsWithParticipants,
-            totalParticipants: tomorrowParticipants,
+            eventsWithParticipants: payloads.length,
+            totalParticipants: totalParticipants,
           },
         },
       );
     } catch (error) {
       this.appLogService.journeyError(
         journeyId,
-        '❌ Error sending afternoon/next day reminders',
+        '❌ Error sending next day reminders',
         error.stack,
         'CleaningCronService',
-        { error: error.message, today, tomorrow },
+        { error: error.message, tomorrow },
       );
-      throw error;
     }
   }
 
@@ -609,7 +605,7 @@ export class CleaningCronService {
 
     const algorithmStaff: Staff[] = staff.map((s) => ({
       id: s.id,
-      username: s.email || s.user?.email || `staff_${s.id}`,
+      username: s.email || `staff_${s.id}`,
     }));
 
     // Prepare previous cycle data for algorithm
@@ -670,58 +666,72 @@ export class CleaningCronService {
       config,
     );
 
-    const newCycle = this.cycleRepository.create({
-      name: `Cleaning ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
-      type: ScheduleType.CLEANING,
-      description: `Auto-generated schedule for ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
-      status: CycleStatus.DRAFT,
-    });
-
-    const savedCycle = await this.cycleRepository.save(newCycle);
-
-    for (const item of schedule) {
-      const eventDate = new Date(item.date);
-      const isSpecial = eventDate.getDay() === 5; // Friday
-
-      const assignedStaff = staff.filter((s) => item.staffIds.includes(s.id));
-      const names = assignedStaff
-        .map(
-          (s) =>
-            s.email?.split('@')[0] || s.user?.email?.split('@')[0] || 'Unknown',
-        )
-        .join(' & ');
-
-      const title = isSpecial
-        ? `Dọn dẹp + Đặc biệt (${names})`
-        : `Dọn dẹp văn phòng (${names})`;
-
-      const notes = isSpecial
-        ? 'Dọn dẹp văn phòng + vệ sinh lò vi sóng và tủ lạnh (đặc biệt Thứ Sáu)'
-        : 'Dọn dẹp văn phòng hàng ngày';
-
-      const event = this.eventRepository.create({
-        title,
+    await this.entityManager.transaction(async (manager) => {
+      const newCycle = manager.create(ScheduleCycleEntity, {
+        name: `Cleaning ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
         type: ScheduleType.CLEANING,
-        notes,
-        eventDate: item.date,
-        status: EventStatus.PENDING,
-        cycleId: savedCycle.id,
+        description: `Auto-generated schedule for ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
+        status: CycleStatus.DRAFT,
       });
-      const savedEvent = await this.eventRepository.save(event);
 
-      for (const staffId of item.staffIds) {
-        await this.participantRepository.save({
-          eventId: savedEvent.id,
-          staffId,
+      this.appLogService.stepLog(
+        2,
+        `Creating new cleaning cycle for ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
+        'CleaningCronService',
+        journeyId,
+        { cycleName: newCycle.name },
+      );
+
+      const savedCycle = await manager.save(ScheduleCycleEntity, newCycle);
+
+      const events = schedule.map((item) => {
+        const eventDate = new Date(item.date);
+        const isSpecial = eventDate.getDay() === 5; // Friday
+
+        const assignedStaff = staff.filter((s) => item.staffIds.includes(s.id));
+        const names = assignedStaff
+          .map((s) => s.email?.split('@')[0] || 'Unknown')
+          .join(' & ');
+
+        const title = isSpecial
+          ? `Dọn dẹp + Đặc biệt (${names})`
+          : `Dọn dẹp văn phòng (${names})`;
+
+        const notes = isSpecial
+          ? 'Dọn dẹp văn phòng + vệ sinh lò vi sóng và tủ lạnh (đặc biệt Thứ Sáu)'
+          : 'Dọn dẹp văn phòng hàng ngày';
+
+        return manager.create(ScheduleEventEntity, {
+          title,
+          type: ScheduleType.CLEANING,
+          notes,
+          eventDate: item.date,
+          status: EventStatus.PENDING,
+          cycle: savedCycle,
+          ...(item.staffIds.length > 0 && {
+            eventParticipants: item.staffIds.map((staffId) =>
+              manager.create(ScheduleEventParticipantEntity, { staffId }),
+            ),
+          }),
         });
-      }
-    }
+      });
 
-    this.appLogService.journeyLog(
-      journeyId,
-      `✅ Created new cycle ${savedCycle.name} with ${schedule.length} events`,
-      'CleaningCronService',
-      { cycleId: savedCycle.id },
-    );
+      this.appLogService.stepLog(
+        3,
+        `Creating ${events.length} events (batch save with participant cascade)`,
+        'CleaningCronService',
+        journeyId,
+        { eventCount: events.length },
+      );
+
+      await manager.save(ScheduleEventEntity, events);
+
+      this.appLogService.journeyLog(
+        journeyId,
+        `✅ Created new cycle ${savedCycle.name} with ${events.length} events`,
+        'CleaningCronService',
+        { cycleId: savedCycle.id },
+      );
+    });
   }
 }

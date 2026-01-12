@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CycleStatus, EventStatus, ScheduleType } from '@qnoffice/shared';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { CycleStatus, EventStatus, ScheduleType, SearchOrder, StaffStatus } from '@qnoffice/shared';
 import {
   NotificationEvent,
   OpentalkSlideReminderPayload,
@@ -15,7 +15,7 @@ import HolidayEntity from '@src/modules/holiday/holiday.entity';
 import OpentalkSlideEntity from '@src/modules/opentalk/entities/opentalk-slide.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import { addDays, addMonths, startOfMonth, subDays } from 'date-fns';
-import { Between, In, LessThan, Like, MoreThan, Repository } from 'typeorm';
+import { Between, EntityManager, In, LessThan, Like, MoreThan, Repository } from 'typeorm';
 import ScheduleCycleEntity from '../enties/schedule-cycle.entity';
 import ScheduleEventParticipantEntity from '../enties/schedule-event-participant.entity';
 import ScheduleEventEntity from '../enties/schedule-event.entity';
@@ -35,14 +35,15 @@ export class OpentalkCronService {
     private readonly slideRepository: Repository<OpentalkSlideEntity>,
     @InjectRepository(ScheduleCycleEntity)
     private readonly cycleRepository: Repository<ScheduleCycleEntity>,
-    @InjectRepository(ScheduleEventParticipantEntity)
-    private readonly participantRepository: Repository<ScheduleEventParticipantEntity>,
     @InjectRepository(StaffEntity)
     private readonly staffRepository: Repository<StaffEntity>,
     @InjectRepository(HolidayEntity)
     private readonly holidayRepository: Repository<HolidayEntity>,
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
     private readonly eventEmitter: EventEmitter2,
     private readonly appLogService: AppLogService,
+    p
   ) {}
 
   async markPastEventsCompleted(journeyId: string): Promise<void> {
@@ -259,7 +260,6 @@ export class OpentalkCronService {
         'OpentalkCronService',
         { error: error.message },
       );
-      throw error;
     }
   }
 
@@ -269,150 +269,157 @@ export class OpentalkCronService {
       .toISOString()
       .split('T')[0];
 
-    // Find all ACTIVE Opentalk events in the next 7 days
-    const upcomingEvents = await this.eventRepository.find({
-      where: {
-        type: ScheduleType.OPENTALK,
-        eventDate: Between(today, sevenDaysFromNow),
-        status: EventStatus.ACTIVE,
-      },
-      relations: [
-        'eventParticipants',
-        'eventParticipants.staff',
-        'eventParticipants.staff.user',
-      ],
-      order: {
-        eventDate: 'ASC',
-      },
-    });
+    // ... logic ...
+    try {
+      // Find all ACTIVE Opentalk events in the next 7 days
+      const upcomingEvents = await this.eventRepository.find({
+        where: {
+          type: ScheduleType.OPENTALK,
+          eventDate: Between(today, sevenDaysFromNow),
+          status: EventStatus.ACTIVE,
+        },
+        relations: ['eventParticipants', 'eventParticipants.staff'],
+        order: {
+          eventDate: 'ASC',
+        },
+      });
 
-    this.appLogService.journeyLog(
-      journeyId,
-      `Checking slide submissions for ${upcomingEvents.length} upcoming Opentalk events`,
-      'OpentalkCronService',
-      {
-        eventCount: upcomingEvents.length,
-        dateRange: { from: today, to: sevenDaysFromNow },
-      },
-    );
-
-    if (upcomingEvents.length === 0) {
       this.appLogService.journeyLog(
         journeyId,
-        'No upcoming Opentalk events found within 7 days',
+        `Checking slide submissions for ${upcomingEvents.length} upcoming Opentalk events`,
         'OpentalkCronService',
-        { today, sevenDaysFromNow },
-      );
-      return;
-    }
-
-    // Get all event IDs to check for slides
-    const eventIds = upcomingEvents.map((e) => e.id);
-
-    // Fetch all slides for these events
-    const slides = await this.slideRepository.find({
-      where: {
-        eventId: In(eventIds),
-      },
-    });
-
-    // Create a map of eventId -> slide for quick lookup
-    const slideMap = new Map(slides.map((s) => [s.eventId, s]));
-
-    // Reminder thresholds: 7, 5, 3, 1 days before event
-    const reminderDays = [7, 5, 3, 1];
-
-    let totalReminders = 0;
-
-    for (const event of upcomingEvents) {
-      const eventDate = new Date(event.eventDate);
-      const todayDate = new Date(today);
-      const daysUntilEvent = Math.ceil(
-        (eventDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24),
+        {
+          eventCount: upcomingEvents.length,
+          dateRange: { from: today, to: sevenDaysFromNow },
+        },
       );
 
-      // Check if today matches a reminder threshold
-      if (!reminderDays.includes(daysUntilEvent)) {
-        continue;
+      if (upcomingEvents.length === 0) {
+        this.appLogService.journeyLog(
+          journeyId,
+          'No upcoming Opentalk events found within 7 days',
+          'OpentalkCronService',
+          { today, sevenDaysFromNow },
+        );
+        return;
       }
 
-      // Check if slide has been submitted
-      const slide = slideMap.get(event.id);
-      const hasSlide = !!slide;
+      // Get all event IDs to check for slides
+      const eventIds = upcomingEvents.map((e) => e.id);
 
-      const participants = event.eventParticipants || [];
+      // Fetch all slides for these events
+      const slides = await this.slideRepository.find({
+        where: {
+          eventId: In(eventIds),
+        },
+      });
 
-      if (participants.length > 0) {
-        this.appLogService.stepLog(
-          1,
-          `Checking event ${event.id} (${daysUntilEvent} days before) - Slide: ${hasSlide ? 'YES' : 'NO'}`,
-          'OpentalkCronService',
-          journeyId,
-          {
-            eventId: event.id,
-            eventDate: event.eventDate,
-            daysUntilEvent,
-            participantCount: participants.length,
-            hasSlide,
-            slideStatus: slide?.status || null,
-          },
+      // Create a map of eventId -> slide for quick lookup
+      const slideMap = new Map(slides.map((s) => [s.eventId, s]));
+
+      // Reminder thresholds: 7, 5, 3, 1 days before event
+      const reminderDays = [7, 5, 3, 1];
+
+      let totalReminders = 0;
+
+      for (const event of upcomingEvents) {
+        const eventDate = new Date(event.eventDate);
+        const todayDate = new Date(today);
+        const daysUntilEvent = Math.ceil(
+          (eventDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24),
         );
 
-        // Emit event for each participant
-        for (const participant of participants) {
-          const staff = participant.staff;
-          const mezonId = staff?.user?.mezonId;
-          const email = staff?.email;
+        // Check if today matches a reminder threshold
+        if (!reminderDays.includes(daysUntilEvent)) {
+          continue;
+        }
 
-          if (mezonId && email) {
-            const payload: OpentalkSlideReminderPayload = {
+        // Check if slide has been submitted
+        const slide = slideMap.get(event.id);
+        const hasSlide = !!slide;
+
+        const participants = event.eventParticipants || [];
+
+        if (participants.length > 0) {
+          this.appLogService.stepLog(
+            1,
+            `Checking event ${event.id} (${daysUntilEvent} days before) - Slide: ${hasSlide ? 'YES' : 'NO'}`,
+            'OpentalkCronService',
+            journeyId,
+            {
               eventId: event.id,
               eventDate: event.eventDate,
-              participant: {
-                userId: mezonId,
-                username: email.split('@')[0],
-              },
               daysUntilEvent,
-              slideSubmitted: hasSlide,
-              journeyId: journeyId,
-            };
+              participantCount: participants.length,
+              hasSlide,
+              slideStatus: slide?.status || null,
+            },
+          );
 
-            this.eventEmitter.emit(
-              NotificationEvent.OPENTALK_SLIDE_REMINDER,
-              payload,
-            );
+          // Emit event for each participant
+          for (const participant of participants) {
+            const staff = participant.staff;
+            const mezonId = staff?.userId;
+            const email = staff?.email;
 
-            totalReminders++;
-
-            this.appLogService.stepLog(
-              2,
-              `Emitted slide reminder for ${email}`,
-              'OpentalkCronService',
-              journeyId,
-              {
+            if (mezonId && email) {
+              const payload: OpentalkSlideReminderPayload = {
                 eventId: event.id,
-                staffId: participant.staffId,
-                email,
-                mezonId,
+                eventDate: event.eventDate,
+                participant: {
+                  userId: mezonId,
+                  username: email.split('@')[0],
+                },
                 daysUntilEvent,
                 slideSubmitted: hasSlide,
-              },
-            );
+                journeyId: journeyId,
+              };
+
+              this.eventEmitter.emit(
+                NotificationEvent.OPENTALK_SLIDE_REMINDER,
+                payload,
+              );
+
+              totalReminders++;
+
+              this.appLogService.stepLog(
+                2,
+                `Emitted slide reminder for ${email}`,
+                'OpentalkCronService',
+                journeyId,
+                {
+                  eventId: event.id,
+                  staffId: participant.staffId,
+                  email,
+                  mezonId,
+                  daysUntilEvent,
+                  slideSubmitted: hasSlide,
+                },
+              );
+            }
           }
         }
       }
-    }
 
-    this.appLogService.journeyLog(
-      journeyId,
-      `✅ Successfully completed slide check - sent ${totalReminders} reminders`,
-      'OpentalkCronService',
-      {
-        totalEvents: upcomingEvents.length,
-        totalReminders,
-        dateRange: { from: today, to: sevenDaysFromNow },
-      },
-    );
+      this.appLogService.journeyLog(
+        journeyId,
+        `✅ Successfully completed slide check - sent ${totalReminders} reminders`,
+        'OpentalkCronService',
+        {
+          totalEvents: upcomingEvents.length,
+          totalReminders,
+          dateRange: { from: today, to: sevenDaysFromNow },
+        },
+      );
+    } catch (error) {
+      this.appLogService.journeyError(
+        journeyId,
+        '❌ Error checking slide submissions',
+        error.stack,
+        'OpentalkCronService',
+        { error: error.message },
+      );
+    }
   }
   async handleAutomaticCycleCreation(journeyId: string): Promise<void> {
     this.appLogService.journeyLog(
@@ -422,11 +429,10 @@ export class OpentalkCronService {
     );
 
     try {
-      // 1. Get current active cycle
       const currentCycle = await this.cycleRepository.findOne({
         where: { type: ScheduleType.OPENTALK, status: CycleStatus.ACTIVE },
         relations: ['events'],
-        order: { id: 'DESC' }, // Get latest active
+        order: { id: SearchOrder.DESC },
       });
 
       if (!currentCycle || currentCycle.events.length === 0) {
@@ -438,7 +444,6 @@ export class OpentalkCronService {
         return;
       }
 
-      // 2. Find last event date
       const sortedEvents = currentCycle.events.sort((a, b) =>
         a.eventDate.localeCompare(b.eventDate),
       );
@@ -446,7 +451,6 @@ export class OpentalkCronService {
       const lastEventDate = new Date(lastEvent.eventDate);
       const today = new Date(getCurrentDateString());
 
-      // 3. Check if we are within 7 days of the end
       const sevenDaysBeforeEnd = subDays(lastEventDate, 7);
 
       if (today < sevenDaysBeforeEnd) {
@@ -463,7 +467,6 @@ export class OpentalkCronService {
         return;
       }
 
-      // 4. Check if next cycle already exists
       const startOfNextMonth = startOfMonth(addMonths(lastEventDate, 1));
       const nextMonthStr = `${startOfNextMonth.getMonth() + 1}/${startOfNextMonth.getFullYear()}`;
 
@@ -474,7 +477,6 @@ export class OpentalkCronService {
         },
       });
 
-      // Better check: Is there a cycle created AFTER this one?
       const newerCycleEncoded = await this.cycleRepository.findOne({
         where: {
           type: ScheduleType.OPENTALK,
@@ -518,20 +520,23 @@ export class OpentalkCronService {
     journeyId: string,
   ): Promise<void> {
     const staff = await this.staffRepository.find({
-      where: { status: 0 }, // Active staff
+      where: { status: StaffStatus.ACTIVE },
       relations: ['user'],
     });
 
     if (staff.length === 0) {
-      throw new Error('No active staff found');
+      this.appLogService.journeyError(
+        journeyId,
+        '❌ No active staff found',
+        'OpentalkCronService',
+      );
+      return; 
     }
-
     const algorithmStaff: Staff[] = staff.map((s) => ({
       id: s.id,
-      username: s.email || s.user?.email || `staff_${s.id}`,
+      username: s.email ||  `staff_${s.id}`,
     }));
 
-    // Prepare previous cycle data for algorithm
     const previousEvents = await this.eventRepository.find({
       where: {
         cycleId: previousCycleEntity.id,
@@ -552,21 +557,18 @@ export class OpentalkCronService {
     const lastEventDate = new Date(
       previousEvents[previousEvents.length - 1].eventDate,
     );
-    // Start from the first day of the NEXT month after the last event
     const startDate = startOfMonth(addDays(lastEventDate, 1));
-    const endDate = addMonths(startDate, 1); // 1 month duration
+    const endDate = addMonths(startDate, 1); 
 
-    // Holidays
     const holidays = await this.holidayRepository.find({
       where: {
         date: Between(
           toDateString(startDate),
-          toDateString(addMonths(endDate, 12)), // Fetch 1 year ahead
+          toDateString(addMonths(endDate, 12)), 
         ),
       },
     });
 
-    // Configure for Opentalk (Saturdays, slot size 1)
     const config: SchedulerConfig = {
       type: ScheduleType.OPENTALK,
       startDate: toDateString(startDate),
@@ -589,50 +591,74 @@ export class OpentalkCronService {
       previousCycleData,
       config,
     );
-
-    const newCycle = this.cycleRepository.create({
-      name: `OpenTalk tháng ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
-      type: ScheduleType.OPENTALK,
-      description: `Auto-generated schedule for ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
-      status: CycleStatus.DRAFT,
-    });
-
-    const savedCycle = await this.cycleRepository.save(newCycle);
-
-    for (let i = 0; i < schedule.length; i++) {
-      const scheduleEvent = schedule[i];
-      const assignedStaffId = scheduleEvent.staffIds[0];
-
-      const assignedStaff = staff.find((s) => s.id === assignedStaffId);
-
-      const eventTitle = `OpenTalk hàng tuần #${i + 1}`;
-      const presenterInfo = assignedStaff
-        ? assignedStaff.email || assignedStaff.user?.email || 'Không rõ'
-        : 'Chưa có diễn giả';
-
-      const event = this.eventRepository.create({
-        title: eventTitle,
-        type: ScheduleType.OPENTALK,
-        notes: `Weekly Opentalk - Diễn giả: ${presenterInfo}`,
-        eventDate: scheduleEvent.date,
-        status: EventStatus.PENDING,
-        cycleId: savedCycle.id,
-      });
-      const savedEvent = await this.eventRepository.save(event);
-
-      if (assignedStaffId) {
-        await this.participantRepository.save({
-          eventId: savedEvent.id,
-          staffId: assignedStaffId,
-        });
-      }
-    }
-
-    this.appLogService.journeyLog(
-      journeyId,
-      `✅ Created new opentalk cycle ${savedCycle.name} with ${schedule.length} events`,
+this.appLogService.stepLog(
+      2,
+      `Generated opentalk schedule for ${toDateString(startDate)}`,
       'OpentalkCronService',
-      { cycleId: savedCycle.id },
-    );
+      journeyId,
+      { schedule },
+    );  
+    await this.entityManager.transaction(async (manager) => {
+      const newCycle = manager.create(ScheduleCycleEntity, {
+        name: `OpenTalk tháng ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
+        type: ScheduleType.OPENTALK,
+        description: `Auto-generated schedule for ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
+        status: CycleStatus.DRAFT,
+      });
+
+      this.appLogService.stepLog(
+        3,
+        `Creating new cycle for ${startDate.getMonth() + 1}/${startDate.getFullYear()}`,
+        'OpentalkCronService',
+        journeyId,
+        { cycleName: newCycle.name },
+      );
+
+      const savedCycle = await manager.save(ScheduleCycleEntity, newCycle);
+
+      // Create events with participants in memory
+      const events = schedule.map((scheduleEvent, i) => {
+        const assignedStaffId = scheduleEvent.staffIds[0];
+        const assignedStaff = staff.find((s) => s.id === assignedStaffId);
+
+        const eventTitle = `OpenTalk hàng tuần #${i + 1}`;
+        const presenterInfo = assignedStaff
+          ? assignedStaff.email || assignedStaff.email 
+          : 'Không rõ'
+
+        const event = manager.create(ScheduleEventEntity, {
+          title: eventTitle,
+          type: ScheduleType.OPENTALK,
+          notes: `Weekly Opentalk - Diễn giả: ${presenterInfo}`,
+          eventDate: scheduleEvent.date,
+          status: EventStatus.PENDING,
+          cycle: savedCycle,
+          ...(scheduleEvent.staffIds.length > 0 && {
+            eventParticipants: scheduleEvent.staffIds.map((staffId) =>
+              manager.create(ScheduleEventParticipantEntity, { staffId }),
+            ),
+          }),
+        });
+
+        return event;
+      });
+
+      this.appLogService.stepLog(
+        4,
+        `Creating ${events.length} events (batch save with participant cascade)`,
+        'OpentalkCronService',
+        journeyId,
+        { eventCount: events.length },
+      );
+
+      await manager.save(ScheduleEventEntity, events);
+
+      this.appLogService.journeyLog(
+        journeyId,
+        `✅ Created new opentalk cycle ${savedCycle.name} with ${events.length} events`,
+        'OpentalkCronService',
+        { cycleId: savedCycle.id },
+      );
+    });
   }
 }

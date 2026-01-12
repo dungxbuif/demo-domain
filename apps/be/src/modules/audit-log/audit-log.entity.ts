@@ -23,7 +23,7 @@ export default class AuditLogEntity extends AbstractAuditEntity {
   @Column({ type: 'varchar', length: 100, nullable: true })
   context?: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   journeyId?: string | null;
 
   @Column({ type: 'jsonb', nullable: true })

@@ -25,10 +25,6 @@ export class CronService {
     const journeyId = `mark-cleaning-events-completed-${uuidv4()}`;
     const executionTime = new Date();
 
-    this.logger.log(
-      '=== CRON: Mark Cleaning Events Completed (00:00 Tue-Sat UTC+7) ===',
-    );
-
     this.appLogService.journeyLog(
       journeyId,
       'Starting cleaning events completion cron job (Tuesday-Saturday)',
@@ -36,46 +32,11 @@ export class CronService {
       {
         cronJob: 'mark-cleaning-events-completed',
         dayOfWeek: executionTime.getDay(),
-        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
         executionTime: executionTime.toISOString(),
-        timezone: 'Asia/Bangkok',
-        localTime: executionTime.toLocaleString('en-US', {
-          timeZone: 'Asia/Bangkok',
-        }),
       },
     );
 
-    try {
-      this.appLogService.stepLog(
-        1,
-        'Executing cleaning events cleanup',
-        'CronService',
-        journeyId,
-      );
-
-      await this.cleaningCronService.markPastEventsCompleted(journeyId);
-
-      this.logger.log(
-        '✅ Successfully marked past cleaning events as completed',
-      );
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully marked past cleaning events as completed',
-        'CronService',
-      );
-    } catch (error) {
-      this.logger.error(
-        '❌ Error marking past cleaning events completed',
-        error,
-      );
-      this.appLogService.journeyError(
-        journeyId,
-        '❌ Error marking past cleaning events completed',
-        error.stack,
-        'CronService',
-        { error: error.message },
-      );
-    }
+    await this.cleaningCronService.markPastEventsCompleted(journeyId);
   }
 
   @Cron('0 0 * * 0', {
@@ -86,7 +47,6 @@ export class CronService {
     const journeyId = `mark-opentalk-events-completed-${uuidv4()}`;
     const executionTime = new Date();
 
-
     this.appLogService.journeyLog(
       journeyId,
       'Starting opentalk events completion cron job (Sunday)',
@@ -94,46 +54,11 @@ export class CronService {
       {
         cronJob: 'mark-opentalk-events-completed',
         dayOfWeek: executionTime.getDay(),
-        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
         executionTime: executionTime.toISOString(),
-        timezone: 'Asia/Bangkok',
-        localTime: executionTime.toLocaleString('en-US', {
-          timeZone: 'Asia/Bangkok',
-        }),
       },
     );
 
-    try {
-      this.appLogService.stepLog(
-        1,
-        'Executing opentalk events cleanup and activation',
-        'CronService',
-        journeyId,
-      );
-
-      await this.opentalkCronService.markPastEventsCompleted(journeyId);
-
-      this.logger.log(
-        '✅ Successfully marked past opentalk events as completed',
-      );
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully marked past opentalk events as completed',
-        'CronService',
-      );
-    } catch (error) {
-      this.logger.error(
-        '❌ Error marking past opentalk events completed',
-        error,
-      );
-      this.appLogService.journeyError(
-        journeyId,
-        '❌ Error marking past opentalk events completed',
-        error.stack,
-        'CronService',
-        { error: error.message },
-      );
-    }
+    await this.opentalkCronService.markPastEventsCompleted(journeyId);
   }
 
   @Cron('0 2 1 * *', {
@@ -142,9 +67,6 @@ export class CronService {
   })
   async cleanupOldAuditLogs(): Promise<void> {
     const journeyId = `cleanup-old-audit-logs-${uuidv4()}`;
-    this.logger.log(
-      '=== CRON: Cleanup Old Audit Logs (02:00 1st of month UTC+7) ===',
-    );
 
     this.appLogService.journeyLog(
       journeyId,
@@ -163,9 +85,6 @@ export class CronService {
 
       const deletedCount = await this.auditLogService.deleteOldLogs(30);
 
-      this.logger.log(
-        `✅ Successfully deleted ${deletedCount} old audit log entries`,
-      );
       this.appLogService.journeyLog(
         journeyId,
         `✅ Successfully deleted ${deletedCount} old audit log entries`,
@@ -201,41 +120,11 @@ export class CronService {
       {
         cronJob: 'cleaning-morning-reminder',
         dayOfWeek: executionTime.getDay(),
-        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
         executionTime: executionTime.toISOString(),
-        timezone: 'Asia/Bangkok',
-        localTime: executionTime.toLocaleString('en-US', {
-          timeZone: 'Asia/Bangkok',
-        }),
       },
     );
 
-    try {
-      this.appLogService.stepLog(
-        1,
-        'Executing cleaning morning reminder',
-        'CronService',
-        journeyId,
-      );
-
-      await this.cleaningCronService.sendMorningReminder(journeyId);
-
-      this.logger.log('✅ Cleaning morning reminders sent');
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully sent cleaning morning reminders',
-        'CronService',
-      );
-    } catch (error) {
-      this.logger.error('❌ Error sending cleaning morning reminders', error);
-      this.appLogService.journeyError(
-        journeyId,
-        '❌ Error sending cleaning morning reminders',
-        error.stack,
-        'CronService',
-        { error: error.message },
-      );
-    }
+    await this.cleaningCronService.sendMorningReminder(journeyId);
   }
 
   @Cron('0 9 * * *', {
@@ -257,41 +146,11 @@ export class CronService {
       {
         cronJob: 'opentalk-slide-check',
         dayOfWeek: executionTime.getDay(),
-        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
         executionTime: executionTime.toISOString(),
-        timezone: 'Asia/Bangkok',
-        localTime: executionTime.toLocaleString('en-US', {
-          timeZone: 'Asia/Bangkok',
-        }),
       },
     );
 
-    try {
-      this.appLogService.stepLog(
-        1,
-        'Executing opentalk slide submission check',
-        'CronService',
-        journeyId,
-      );
-
-      await this.opentalkCronService.checkSlideSubmission(journeyId);
-
-      this.logger.log('✅ Opentalk slide check completed');
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully completed opentalk slide check',
-        'CronService',
-      );
-    } catch (error) {
-      this.logger.error('❌ Error checking opentalk slides', error);
-      this.appLogService.journeyError(
-        journeyId,
-        '❌ Error checking opentalk slides',
-        error.stack,
-        'CronService',
-        { error: error.message },
-      );
-    }
+    await this.opentalkCronService.checkSlideSubmission(journeyId);
   }
 
   @Cron('0 17 * * 1-5', {
@@ -299,53 +158,35 @@ export class CronService {
     timeZone: 'Asia/Bangkok',
   })
   async sendCleaningAfternoonReminder(): Promise<void> {
-    const journeyId = `cleaning-afternoon-reminder-${uuidv4()}`;
+    const afternoonJourneyId = `cleaning-afternoon-reminder-${uuidv4()}`;
     const executionTime = new Date();
 
-    this.logger.log('=== CRON: Cleaning Afternoon Reminder (17:00 UTC+7) ===');
-
     this.appLogService.journeyLog(
-      journeyId,
+      afternoonJourneyId,
       'Starting cleaning afternoon reminder cron job (Monday-Friday)',
       'CronService',
       {
         cronJob: 'cleaning-afternoon-reminder',
         dayOfWeek: executionTime.getDay(),
-        dayName: executionTime.toLocaleDateString('en-US', { weekday: 'long' }),
         executionTime: executionTime.toISOString(),
-        timezone: 'Asia/Bangkok',
-        localTime: executionTime.toLocaleString('en-US', {
-          timeZone: 'Asia/Bangkok',
-        }),
       },
     );
 
-    try {
-      this.appLogService.stepLog(
-        1,
-        'Executing cleaning afternoon reminder',
-        'CronService',
-        journeyId,
-      );
+    const nextDayJourneyId = `cleaning-next-day-reminder-${uuidv4()}`;
+    
+    this.appLogService.journeyLog(
+      nextDayJourneyId,
+      'Starting cleaning next day reminder cron job',
+      'CronService',
+      {
+        cronJob: 'cleaning-next-day-reminder',
+        dayOfWeek: executionTime.getDay(),
+        executionTime: executionTime.toISOString(),
+      },
+    );
 
-      await this.cleaningCronService.sendAfternoonReminder(journeyId);
-
-      this.logger.log('✅ Cleaning afternoon reminders sent');
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully sent cleaning afternoon reminders',
-        'CronService',
-      );
-    } catch (error) {
-      this.logger.error('❌ Error sending cleaning afternoon reminders', error);
-      this.appLogService.journeyError(
-        journeyId,
-        '❌ Error sending cleaning afternoon reminders',
-        error.stack,
-        'CronService',
-        { error: error.message },
-      );
-    }
+    await this.cleaningCronService.sendAfternoonReminder(afternoonJourneyId);
+    await this.cleaningCronService.sendNextDayReminder(nextDayJourneyId);
   }
 
   @Cron('0 6 * * *', {
@@ -353,54 +194,29 @@ export class CronService {
     timeZone: 'Asia/Bangkok',
   })
   async handleDailyCycleCheck(): Promise<void> {
-    const journeyId = `daily-cycle-check-${uuidv4()}`;
     const executionTime = new Date();
-
-    this.logger.log('=== CRON: Daily Schedule Cycle Check (06:00 UTC+7) ===');
-
+    const cleaningJourneyId = `daily-cleaning-cycle-check-${uuidv4()}`;
     this.appLogService.journeyLog(
-      journeyId,
-      'Starting daily schedule cycle check cron job',
+      cleaningJourneyId,
+      'Starting daily cleaning cycle check',
       'CronService',
       {
-        cronJob: 'daily-schedule-cycle-check',
+        cronJob: 'daily-cleaning-cycle-check',
         executionTime: executionTime.toISOString(),
-        timezone: 'Asia/Bangkok',
+      },
+    );
+    const opentalkJourneyId = `daily-opentalk-cycle-check-${uuidv4()}`;
+    this.appLogService.journeyLog(
+      opentalkJourneyId,
+      'Starting daily opentalk cycle check',
+      'CronService',
+      {
+        cronJob: 'daily-opentalk-cycle-check',
+        executionTime: executionTime.toISOString(),
       },
     );
 
-    try {
-      this.appLogService.stepLog(
-        1,
-        'Checking cleaning cycle',
-        'CronService',
-        journeyId,
-      );
-      await this.cleaningCronService.handleAutomaticCycleCreation(journeyId);
-
-      this.appLogService.stepLog(
-        2,
-        'Checking opentalk cycle',
-        'CronService',
-        journeyId,
-      );
-      await this.opentalkCronService.handleAutomaticCycleCreation(journeyId);
-
-      this.logger.log('✅ Daily schedule cycle check completed');
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully completed daily schedule cycle check',
-        'CronService',
-      );
-    } catch (error) {
-      this.logger.error('❌ Error in daily schedule cycle check', error);
-      this.appLogService.journeyError(
-        journeyId,
-        '❌ Error in daily schedule cycle check',
-        error.stack,
-        'CronService',
-        { error: error.message },
-      );
-    }
+    await this.cleaningCronService.handleAutomaticCycleCreation(cleaningJourneyId);
+    await this.opentalkCronService.handleAutomaticCycleCreation(opentalkJourneyId);
   }
 }

@@ -91,7 +91,6 @@ export class AuditLogService {
     const result = await this.auditLogRepository.delete({
       createdAt: LessThan(cutoffDate),
     });
-
     return result.affected || 0;
   }
 
