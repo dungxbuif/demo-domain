@@ -8,13 +8,14 @@ import {
 } from '@src/common/events/notification.events';
 import { AppLogService } from '@src/common/shared/services/app-log.service';
 import {
+  fromDateString,
   getCurrentDateString,
   toDateString,
 } from '@src/common/utils/date.utils';
 import HolidayEntity from '@src/modules/holiday/holiday.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
 import { addDays, addMonths, startOfMonth } from 'date-fns';
-import { Between, EntityManager, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, EntityManager, In, LessThan, Not, Repository } from 'typeorm';
 import ScheduleCycleEntity from '../enties/schedule-cycle.entity';
 import ScheduleEventParticipantEntity from '../enties/schedule-event-participant.entity';
 import ScheduleEventEntity from '../enties/schedule-event.entity';
@@ -65,7 +66,7 @@ export class CleaningCronService {
         where: {
           type: ScheduleType.CLEANING,
           eventDate: LessThan(today),
-          status: EventStatus.ACTIVE,
+          status: Not(EventStatus.COMPLETED),
         },
       });
 
@@ -95,16 +96,12 @@ export class CleaningCronService {
           {
             eventsToUpdate: pastActiveEvents.length,
             eventIdsToUpdate: pastActiveEvents.map((e) => e.id),
-            statusBefore: EventStatus.ACTIVE,
-            statusAfter: EventStatus.COMPLETED,
           },
         );
 
         const result = await this.eventRepository.update(
           {
-            type: ScheduleType.CLEANING,
-            eventDate: LessThan(today),
-            status: EventStatus.ACTIVE,
+            id: In(pastActiveEvents.map((e) => e.id)),
           },
           {
             status: EventStatus.COMPLETED,
@@ -139,90 +136,6 @@ export class CleaningCronService {
         'CleaningCronService',
         journeyId,
         { fromDate: today },
-      );
-
-      const nextPendingEvent = await this.eventRepository.findOne({
-        where: {
-          type: ScheduleType.CLEANING,
-          eventDate: MoreThanOrEqual(today),
-          status: EventStatus.PENDING,
-        },
-        order: {
-          eventDate: 'ASC',
-        },
-      });
-
-      // Step 4: Activate the next PENDING event
-      if (nextPendingEvent) {
-        const daysUntilEvent = Math.ceil(
-          (new Date(nextPendingEvent.eventDate).getTime() -
-            new Date(today).getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-
-        this.appLogService.stepLog(
-          6,
-          'Activating next PENDING cleaning event',
-          'CleaningCronService',
-          journeyId,
-          {
-            eventId: nextPendingEvent.id,
-            eventDate: nextPendingEvent.eventDate,
-            title: nextPendingEvent.title,
-            cycleId: nextPendingEvent.cycleId,
-            daysUntilEvent,
-            statusBefore: EventStatus.PENDING,
-            statusAfter: EventStatus.ACTIVE,
-            today,
-          },
-        );
-
-        await this.eventRepository.update(
-          { id: nextPendingEvent.id },
-          { status: EventStatus.ACTIVE },
-        );
-
-        this.appLogService.stepLog(
-          7,
-          `Successfully activated cleaning event ${nextPendingEvent.id}`,
-          'CleaningCronService',
-          journeyId,
-          {
-            eventId: nextPendingEvent.id,
-            eventDate: nextPendingEvent.eventDate,
-            title: nextPendingEvent.title,
-            newStatus: EventStatus.ACTIVE,
-            activatedAt: new Date().toISOString(),
-          },
-        );
-      } else {
-        this.appLogService.stepLog(
-          6,
-          'No PENDING cleaning events found to activate',
-          'CleaningCronService',
-          journeyId,
-          {
-            searchCriteria: {
-              type: ScheduleType.CLEANING,
-              status: EventStatus.PENDING,
-              dateFrom: today,
-            },
-            reason: 'No PENDING events found from today onwards',
-          },
-        );
-      }
-
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully completed cleaning events process',
-        'CleaningCronService',
-        {
-          completedCount: pastActiveEvents.length,
-          activatedEvent: nextPendingEvent?.id || null,
-          activatedEventDate: nextPendingEvent?.eventDate || null,
-          executionDate: today,
-          totalStepsExecuted: nextPendingEvent ? 7 : 6,
-        },
       );
     } catch (error) {
       this.appLogService.journeyError(
@@ -275,29 +188,29 @@ export class CleaningCronService {
         },
       );
 
-      const payloads: CleaningReminderPayload[] = [];
       let totalParticipants = 0;
-
-      todayEvents.forEach((event) => {
+      const payloads: CleaningReminderPayload[] = (todayEvents.map((event) => {
         const eventParticipants = event.eventParticipants || [];
 
-        // Map to Participant format with mezonId and email prefix
         const participants = eventParticipants.map((p) => ({
           userId: p.staff.userId || '',
           username: p.staff.email.split('@')[0],
         }));
 
-        if (participants.length > 0) {
-          totalParticipants += participants.length;
-          payloads.push({
+        if (!participants.length) {
+            return null
+        }
+
+        totalParticipants += participants.length;
+          return {
             eventId: event.id,
             eventDate: event.eventDate,
             participants,
             type: 'morning',
             journeyId: journeyId,
-          });
-        }
-      });
+          };
+      }).filter(Boolean)) as CleaningReminderPayload[]; 
+
 
       if (payloads.length > 0) {
         this.appLogService.stepLog(
@@ -455,7 +368,7 @@ export class CleaningCronService {
       { reminderType: 'nextday', scheduleType: ScheduleType.CLEANING },
     );
     const today = getCurrentDateString();
-    const tomorrow = addDays(new Date(today), 1).toISOString().split('T')[0];
+    const tomorrow = toDateString(addDays(fromDateString(today), 1));
     try {
       this.appLogService.stepLog(
         1,
@@ -469,7 +382,6 @@ export class CleaningCronService {
         where: {
           type: ScheduleType.CLEANING,
           eventDate: tomorrow,
-          status: EventStatus.ACTIVE,
         },
         relations: [
           'eventParticipants',

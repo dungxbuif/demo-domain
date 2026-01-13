@@ -14,13 +14,14 @@ import {
 } from '@src/common/events/notification.events';
 import { AppLogService } from '@src/common/shared/services/app-log.service';
 import {
+  fromDateString,
   getCurrentDateString,
   toDateString,
 } from '@src/common/utils/date.utils';
 import HolidayEntity from '@src/modules/holiday/holiday.entity';
 import OpentalkSlideEntity from '@src/modules/opentalk/entities/opentalk-slide.entity';
 import StaffEntity from '@src/modules/staff/staff.entity';
-import { addDays, addMonths, startOfMonth, subDays } from 'date-fns';
+import { addDays, addMonths, differenceInCalendarDays, startOfMonth, subDays } from 'date-fns';
 import {
   Between,
   EntityManager,
@@ -28,6 +29,7 @@ import {
   LessThan,
   Like,
   MoreThan,
+  Not,
   Repository,
 } from 'typeorm';
 import ScheduleCycleEntity from '../enties/schedule-cycle.entity';
@@ -68,12 +70,8 @@ export class OpentalkCronService {
     );
 
     const today = getCurrentDateString();
-    const sevenDaysFromNow = addDays(new Date(today), 7)
-      .toISOString()
-      .split('T')[0];
 
     try {
-      // Step 1: Find all ACTIVE events before today
       this.appLogService.stepLog(
         1,
         'Finding ACTIVE opentalk events before today',
@@ -86,10 +84,7 @@ export class OpentalkCronService {
         where: {
           type: ScheduleType.OPENTALK,
           eventDate: LessThan(today),
-          status: EventStatus.ACTIVE,
-        },
-        order: {
-          eventDate: 'ASC',
+          status: Not(EventStatus.COMPLETED),
         },
       });
 
@@ -110,7 +105,6 @@ export class OpentalkCronService {
         },
       );
 
-      // Step 2: Mark past ACTIVE events as COMPLETED
       if (pastActiveEvents.length > 0) {
         this.appLogService.stepLog(
           3,
@@ -120,16 +114,12 @@ export class OpentalkCronService {
           {
             eventsToUpdate: pastActiveEvents.length,
             eventIdsToUpdate: pastActiveEvents.map((e) => e.id),
-            statusBefore: EventStatus.ACTIVE,
-            statusAfter: EventStatus.COMPLETED,
           },
         );
 
         const result = await this.eventRepository.update(
           {
-            type: ScheduleType.OPENTALK,
-            eventDate: LessThan(today),
-            status: EventStatus.ACTIVE,
+            id: In(pastActiveEvents.map((e) => e.id)),
           },
           {
             status: EventStatus.COMPLETED,
@@ -157,114 +147,6 @@ export class OpentalkCronService {
           { today, reason: 'No events found before today' },
         );
       }
-
-      // Step 3: Find the next PENDING event within 7 days to activate
-      this.appLogService.stepLog(
-        5,
-        'Finding next PENDING opentalk event within 7 days to activate',
-        'OpentalkCronService',
-        journeyId,
-        { fromDate: today, toDate: sevenDaysFromNow },
-      );
-
-      const nextPendingEvent = await this.eventRepository.findOne({
-        where: {
-          type: ScheduleType.OPENTALK,
-          eventDate: Between(today, sevenDaysFromNow),
-          status: EventStatus.PENDING,
-        },
-        order: {
-          eventDate: 'ASC',
-        },
-      });
-
-      // Step 4: Activate the next PENDING event within 7 days
-      if (nextPendingEvent) {
-        const daysFromToday = Math.ceil(
-          (new Date(nextPendingEvent.eventDate).getTime() -
-            new Date(today).getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-
-        this.appLogService.stepLog(
-          6,
-          'Activating next PENDING opentalk event',
-          'OpentalkCronService',
-          journeyId,
-          {
-            eventId: nextPendingEvent.id,
-            eventDate: nextPendingEvent.eventDate,
-            title: nextPendingEvent.title,
-            cycleId: nextPendingEvent.cycleId,
-            daysFromToday,
-            withinSevenDays: daysFromToday <= 7,
-            searchWindow: {
-              from: today,
-              to: sevenDaysFromNow,
-              windowDays: 7,
-            },
-            statusBefore: EventStatus.PENDING,
-            statusAfter: EventStatus.ACTIVE,
-          },
-        );
-
-        await this.eventRepository.update(
-          { id: nextPendingEvent.id },
-          { status: EventStatus.ACTIVE },
-        );
-
-        this.appLogService.stepLog(
-          7,
-          `Successfully activated opentalk event ${nextPendingEvent.id}`,
-          'OpentalkCronService',
-          journeyId,
-          {
-            eventId: nextPendingEvent.id,
-            eventDate: nextPendingEvent.eventDate,
-            title: nextPendingEvent.title,
-            newStatus: EventStatus.ACTIVE,
-            activatedAt: new Date().toISOString(),
-            daysUntilEvent: daysFromToday,
-          },
-        );
-      } else {
-        this.appLogService.stepLog(
-          6,
-          'No PENDING opentalk events found within 7 days to activate',
-          'OpentalkCronService',
-          journeyId,
-          {
-            searchRange: `${today} to ${sevenDaysFromNow}`,
-            searchCriteria: {
-              type: ScheduleType.OPENTALK,
-              status: EventStatus.PENDING,
-              dateRange: {
-                from: today,
-                to: sevenDaysFromNow,
-              },
-            },
-            reason: 'No PENDING events found within 7-day window',
-            windowDays: 7,
-          },
-        );
-      }
-
-      this.appLogService.journeyLog(
-        journeyId,
-        '✅ Successfully completed opentalk events process',
-        'OpentalkCronService',
-        {
-          completedCount: pastActiveEvents.length,
-          activatedEvent: nextPendingEvent?.id || null,
-          activatedEventDate: nextPendingEvent?.eventDate || null,
-          executionDate: today,
-          searchWindow: {
-            from: today,
-            to: sevenDaysFromNow,
-          },
-          totalStepsExecuted: nextPendingEvent ? 7 : 6,
-        },
-      );
     } catch (error) {
       this.appLogService.journeyError(
         journeyId,
@@ -278,24 +160,17 @@ export class OpentalkCronService {
 
   async checkSlideSubmission(journeyId: string): Promise<void> {
     const today = getCurrentDateString();
-    const sevenDaysFromNow = addDays(new Date(today), 7)
-      .toISOString()
-      .split('T')[0];
+    const sevenDaysFromNow = toDateString(addDays(fromDateString(today), 7));
 
-    // ... logic ...
     try {
-      // Find all Opentalk events in the next 7 days
+      const reminderDays = [1, 3, 5, 7];
       const upcomingEvents = await this.eventRepository.find({
         where: {
           type: ScheduleType.OPENTALK,
           eventDate: Between(today, sevenDaysFromNow),
         },
         relations: ['eventParticipants', 'eventParticipants.staff'],
-        order: {
-          eventDate: 'ASC',
-        },
       });
-
       this.appLogService.journeyLog(
         journeyId,
         `Checking slide submissions for ${upcomingEvents.length} upcoming Opentalk events`,
@@ -316,101 +191,69 @@ export class OpentalkCronService {
         return;
       }
 
-      // Get all event IDs to check for slides
       const eventIds = upcomingEvents.map((e) => e.id);
-
-      // Fetch all slides for these events
       const slides = await this.slideRepository.find({
         where: {
           eventId: In(eventIds),
         },
       });
 
-      // Create a map of eventId -> slide for quick lookup
       const slideMap = new Map(slides.map((s) => [s.eventId, s]));
-
-      // Reminder thresholds: 7, 5, 3, 1 days before event
-      const reminderDays = [7, 5, 3, 1];
-
       let totalReminders = 0;
 
       for (const event of upcomingEvents) {
-        const eventDate = new Date(event.eventDate);
-        const todayDate = new Date(today);
-        const daysUntilEvent = Math.ceil(
-          (eventDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24),
+        const daysUntilEvent = differenceInCalendarDays(
+          fromDateString(event.eventDate),
+          fromDateString(today),
         );
-
-        // Check if today matches a reminder threshold
         if (!reminderDays.includes(daysUntilEvent)) {
           continue;
         }
-
-        // Check if slide has been submitted
         const slide = slideMap.get(event.id);
         const hasSlide = !!slide;
-
         const participants = event.eventParticipants || [];
 
-        if (participants.length > 0) {
-          this.appLogService.stepLog(
-            1,
-            `Checking event ${event.id} (${daysUntilEvent} days before) - Slide: ${hasSlide ? 'YES' : 'NO'}`,
-            'OpentalkCronService',
-            journeyId,
-            {
+        participants.forEach((participant) => {
+          const staff = participant.staff;
+          const mezonId = staff?.userId;
+          const email = staff?.email;
+
+          if (mezonId && email) {
+            const payload: OpentalkSlideReminderPayload = {
               eventId: event.id,
               eventDate: event.eventDate,
+              participant: {
+                userId: mezonId,
+                username: email.split('@')[0],
+              },
               daysUntilEvent,
-              participantCount: participants.length,
-              hasSlide,
-              slideStatus: slide?.status || null,
-            },
-          );
+              slideSubmitted: hasSlide,
+              journeyId: journeyId,
+            };
 
-          // Emit event for each participant
-          for (const participant of participants) {
-            const staff = participant.staff;
-            const mezonId = staff?.userId;
-            const email = staff?.email;
+            this.eventEmitter.emit(
+              NotificationEvent.OPENTALK_SLIDE_REMINDER,
+              payload,
+            );
 
-            if (mezonId && email) {
-              const payload: OpentalkSlideReminderPayload = {
+            totalReminders++;
+
+            this.appLogService.stepLog(
+              2,
+              `Emitted slide reminder for ${email}`,
+              'OpentalkCronService',
+              journeyId,
+              {
                 eventId: event.id,
-                eventDate: event.eventDate,
-                participant: {
-                  userId: mezonId,
-                  username: email.split('@')[0],
-                },
+                staffId: participant.staffId,
+                email,
+                mezonId,
                 daysUntilEvent,
                 slideSubmitted: hasSlide,
-                journeyId: journeyId,
-              };
-
-              this.eventEmitter.emit(
-                NotificationEvent.OPENTALK_SLIDE_REMINDER,
-                payload,
-              );
-
-              totalReminders++;
-
-              this.appLogService.stepLog(
-                2,
-                `Emitted slide reminder for ${email}`,
-                'OpentalkCronService',
-                journeyId,
-                {
-                  eventId: event.id,
-                  staffId: participant.staffId,
-                  email,
-                  mezonId,
-                  daysUntilEvent,
-                  slideSubmitted: hasSlide,
-                },
-              );
-            }
+              },
+            );
           }
-        }
+        });
       }
 
       this.appLogService.journeyLog(
@@ -433,6 +276,7 @@ export class OpentalkCronService {
       );
     }
   }
+
   async handleAutomaticCycleCreation(journeyId: string): Promise<void> {
     this.appLogService.journeyLog(
       journeyId,

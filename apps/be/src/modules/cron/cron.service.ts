@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { APP_TIMEZONE } from '@src/common/constants';
 import { AppLogService } from '@src/common/shared/services/app-log.service';
+import { nowVn } from '@src/common/utils/time.util';
 import { AuditLogService } from '@src/modules/audit-log/audit-log.service';
 import { CleaningCronService } from '@src/modules/schedule/services/cleaning-cron.service';
 import { OpentalkCronService } from '@src/modules/schedule/services/opentalk-cron.service';
@@ -15,60 +17,49 @@ export class CronService {
     private readonly opentalkCronService: OpentalkCronService,
     private readonly auditLogService: AuditLogService,
     private readonly appLogService: AppLogService,
-    // private readonly mezonClient: MezonClient,
-  ) {
-    // this.mezonClient.on('ready', () => {
-    //   this.checkOpentalkSlideSubmission();
-    // });
-  }
+  ) {}
 
-  @Cron('0 0 * * 2-6', {
-    name: 'mark-cleaning-events-completed',
-    timeZone: 'Asia/Bangkok',
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
+    name: 'mark-events-completed',
+    timeZone: APP_TIMEZONE,
   })
-  async markCleaningEventsCompleted(): Promise<void> {
-    const journeyId = `mark-cleaning-events-completed-${uuidv4()}`;
-    const executionTime = new Date();
+  async markEventsCompleted(): Promise<void> {
+    const journeyId = `mark-events-completed-${uuidv4()}`;
+    const executionTime = nowVn();
+    const dayOfWeek = executionTime.getDay();
 
-    this.appLogService.journeyLog(
-      journeyId,
-      'Starting cleaning events completion cron job (Tuesday-Saturday)',
-      'CronService',
-      {
-        cronJob: 'mark-cleaning-events-completed',
-        dayOfWeek: executionTime.getDay(),
-        executionTime: executionTime.toISOString(),
-      },
-    );
+    if (dayOfWeek >= 2 && dayOfWeek <= 6) {
+      this.appLogService.journeyLog(
+        journeyId,
+        'Starting cleaning events completion cron job (Tuesday-Saturday)',
+        'CronService',
+        {
+          cronJob: 'mark-cleaning-events-completed',
+          dayOfWeek,
+          executionTime: executionTime.toISOString(),
+        },
+      );
 
-    await this.cleaningCronService.markPastEventsCompleted(journeyId);
-  }
+      await this.cleaningCronService.markPastEventsCompleted(journeyId);
+    } else if (dayOfWeek === 0) {
+      this.appLogService.journeyLog(
+        journeyId,
+        'Starting opentalk events completion cron job (Sunday)',
+        'CronService',
+        {
+          cronJob: 'mark-opentalk-events-completed',
+          dayOfWeek,
+          executionTime: executionTime.toISOString(),
+        },
+      );
 
-  @Cron('0 0 * * 0', {
-    name: 'mark-opentalk-events-completed',
-    timeZone: 'Asia/Bangkok',
-  })
-  async markOpentalkEventsCompleted(): Promise<void> {
-    const journeyId = `mark-opentalk-events-completed-${uuidv4()}`;
-    const executionTime = new Date();
-
-    this.appLogService.journeyLog(
-      journeyId,
-      'Starting opentalk events completion cron job (Sunday)',
-      'CronService',
-      {
-        cronJob: 'mark-opentalk-events-completed',
-        dayOfWeek: executionTime.getDay(),
-        executionTime: executionTime.toISOString(),
-      },
-    );
-
-    await this.opentalkCronService.markPastEventsCompleted(journeyId);
+      await this.opentalkCronService.markPastEventsCompleted(journeyId);
+    }
   }
 
   @Cron('0 2 1 * *', {
     name: 'cleanup-old-audit-logs',
-    timeZone: 'Asia/Bangkok',
+    timeZone: APP_TIMEZONE,
   })
   async cleanupOldAuditLogs(): Promise<void> {
     const journeyId = `cleanup-old-audit-logs-${uuidv4()}`;
@@ -97,7 +88,6 @@ export class CronService {
         { deletedCount },
       );
     } catch (error) {
-      this.logger.error('❌ Error cleaning up old audit logs', error);
       this.appLogService.journeyError(
         journeyId,
         '❌ Error cleaning up old audit logs',
@@ -110,13 +100,11 @@ export class CronService {
 
   @Cron('0 8 * * 1-5', {
     name: 'cleaning-morning-reminder',
-    timeZone: 'Asia/Bangkok',
+    timeZone: APP_TIMEZONE,
   })
   async sendCleaningMorningReminder(): Promise<void> {
     const journeyId = `cleaning-morning-reminder-${uuidv4()}`;
-    const executionTime = new Date();
-
-    this.logger.log('=== CRON: Cleaning Morning Reminder (08:00 UTC+7) ===');
+    const executionTime = nowVn();
 
     this.appLogService.journeyLog(
       journeyId,
@@ -134,16 +122,11 @@ export class CronService {
 
   @Cron('0 9 * * *', {
     name: 'opentalk-slide-check',
-    timeZone: 'Asia/Bangkok',
+    timeZone: APP_TIMEZONE,
   })
   async checkOpentalkSlideSubmission(): Promise<void> {
     const journeyId = `opentalk-slide-check-${uuidv4()}`;
-    const executionTime = new Date();
-
-    this.logger.log(
-      '=== CRON: Opentalk Slide Submission Check (09:00 UTC+7) ===',
-    );
-
+    const executionTime = nowVn();
     this.appLogService.journeyLog(
       journeyId,
       'Starting opentalk slide submission check cron job (Daily)',
@@ -154,17 +137,16 @@ export class CronService {
         executionTime: executionTime.toISOString(),
       },
     );
-
     await this.opentalkCronService.checkSlideSubmission(journeyId);
   }
 
   @Cron('0 17 * * 1-5', {
     name: 'cleaning-afternoon-reminder',
-    timeZone: 'Asia/Bangkok',
+    timeZone: APP_TIMEZONE,
   })
   async sendCleaningAfternoonReminder(): Promise<void> {
     const afternoonJourneyId = `cleaning-afternoon-reminder-${uuidv4()}`;
-    const executionTime = new Date();
+    const executionTime = nowVn();
 
     this.appLogService.journeyLog(
       afternoonJourneyId,
@@ -196,10 +178,10 @@ export class CronService {
 
   @Cron('0 6 * * *', {
     name: 'daily-schedule-cycle-check',
-    timeZone: 'Asia/Bangkok',
+    timeZone: APP_TIMEZONE,
   })
   async handleDailyCycleCheck(): Promise<void> {
-    const executionTime = new Date();
+    const executionTime = nowVn();
     const cleaningJourneyId = `daily-cleaning-cycle-check-${uuidv4()}`;
     this.appLogService.journeyLog(
       cleaningJourneyId,

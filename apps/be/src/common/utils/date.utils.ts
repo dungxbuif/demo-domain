@@ -1,14 +1,12 @@
 import { TZDate } from '@date-fns/tz';
+import { APP_TIMEZONE } from '@src/common/constants';
 import { format } from 'date-fns';
-
-// Asia/Bangkok is UTC+7
-export const TIMEZONE = 'Asia/Bangkok';
 
 /**
  * Get current date in UTC+7 timezone as YYYY-MM-DD string
  */
 export function getCurrentDateString(): string {
-  const now = new TZDate(new Date(), TIMEZONE);
+  const now = new TZDate(new Date(), APP_TIMEZONE);
   return format(now, 'yyyy-MM-dd');
 }
 
@@ -16,7 +14,7 @@ export function getCurrentDateString(): string {
  * Get date string from a Date object in UTC+7 timezone
  */
 export function toDateString(date: Date): string {
-  const tzDate = new TZDate(date, TIMEZONE);
+  const tzDate = new TZDate(date, APP_TIMEZONE);
   return format(tzDate, 'yyyy-MM-dd');
 }
 
@@ -26,7 +24,7 @@ export function toDateString(date: Date): string {
 export function fromDateString(dateString: string): Date {
   // Parse as UTC+7 midnight
   const [year, month, day] = dateString.split('-').map(Number);
-  return new TZDate(year, month - 1, day, 0, 0, 0, 0, TIMEZONE);
+  return new TZDate(year, month - 1, day, 0, 0, 0, 0, APP_TIMEZONE);
 }
 
 /**

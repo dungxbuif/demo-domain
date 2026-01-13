@@ -1,22 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { TZDate } from '@date-fns/tz';
+import { APP_TIMEZONE } from '@src/common/constants';
+import { format } from 'date-fns';
 import { Between } from 'typeorm';
 
-const vnTimeZone = 'Asia/Ho_Chi_Minh';
+export const nowVn = (): Date => new TZDate(new Date(), APP_TIMEZONE);
 
-const startDayVnTime = () => {
-  const currentTime = new TZDate(new Date(), vnTimeZone);
-  return new TZDate(currentTime.setHours(0, 0, 0, 0), vnTimeZone);
+export const toVnTime = (date: Date | string | number): Date => new TZDate(new Date(date), APP_TIMEZONE);
+
+export const startDayVn = (date: Date | string | number = new Date()): Date => {
+  const d = new TZDate(new Date(date), APP_TIMEZONE);
+  d.setHours(0, 0, 0, 0);
+  return d;
 };
 
-const endDayVnTime = () => {
-  const currentTime = new TZDate(new Date(), vnTimeZone);
-  return new TZDate(currentTime.setHours(23, 59, 59, 999), vnTimeZone);
+export const endDayVn = (date: Date | string | number = new Date()): Date => {
+  const d = new TZDate(new Date(date), APP_TIMEZONE);
+  d.setHours(23, 59, 59, 999);
+  return d;
+};
+
+export const formatVn = (date: Date | string | number, formatStr = 'yyyy-MM-dd HH:mm:ss'): string => {
+  return format(toVnTime(date), formatStr);
 };
 
 export const vnLocalDateTime = (date: Date) =>
-  `${new TZDate(date, 'Asia/Ho_Chi_Minh').toLocaleDateString()} ${new TZDate(date, 'Asia/Ho_Chi_Minh').toLocaleTimeString()}`;
+  `${toVnTime(date).toLocaleDateString()} ${toVnTime(date).toLocaleTimeString()}`;
 
-export function withinVnDayTypeOrmQuery() {
-  return Between(startDayVnTime(), endDayVnTime());
+export function withinVnDayTypeOrmQuery(date: Date | string | number = new Date()) {
+  return Between(startDayVn(date), endDayVn(date));
 }
