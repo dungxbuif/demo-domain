@@ -13,6 +13,15 @@ RUN yarn install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
+
+# Accept build arguments
+ARG NEXT_PUBLIC_FRONTEND_URL
+ARG BACKEND_BASE_URL
+
+# Set them as environment variables for Next.js build
+ENV NEXT_PUBLIC_FRONTEND_URL=$NEXT_PUBLIC_FRONTEND_URL
+ENV BACKEND_BASE_URL=$BACKEND_BASE_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
