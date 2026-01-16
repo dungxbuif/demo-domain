@@ -45,7 +45,6 @@ interface CycleCardProps {
 
   onSlideClick: (event: ScheduleEvent<IOpentalkSlide>) => void;
   onSelectEvent: (eventId: number) => void;
-  formatDate: (date: string) => string;
   lockedEvents?: number[];
 }
 // hoặc file hiện tại
@@ -70,7 +69,6 @@ export function CycleCard({
 
   onSlideClick,
   onSelectEvent,
-  formatDate,
   lockedEvents = [],
 }: CycleCardProps) {
   const sortedEvents = useMemo(() => {
@@ -170,7 +168,6 @@ export function CycleCard({
                         onEditCancel={onEditCancel}
                         onSlideClick={() => onSlideClick(event)}
                         onSelect={() => onSelectEvent(event.id)}
-                        formatDate={formatDate}
                       />
                     );
                   })}

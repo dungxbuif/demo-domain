@@ -2,34 +2,34 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
 } from '@/components/ui/command';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebouncedValue } from '@/shared/hooks/use-debounce-value';
@@ -39,10 +39,10 @@ import staffService from '@/shared/services/client/staff.service';
 import { cn } from '@/shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  ApiResponse,
-  ICreatePenaltyDto,
-  PenaltyType,
-  Staff,
+    ApiResponse,
+    ICreatePenaltyDto,
+    PenaltyType,
+    Staff,
 } from '@qnoffice/shared';
 import { Check, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -516,7 +516,7 @@ export function CreatePenaltyForm({
             />
 
             <div className="space-y-2">
-              <FormLabel>Minh chứng (Ảnh)</FormLabel>
+              <FormLabel>Bằng chứng (Ảnh)</FormLabel>
               <div className="flex flex-col gap-2">
                 <Button
                   type="button"
@@ -527,7 +527,7 @@ export function CreatePenaltyForm({
                   className="w-full"
                 >
                   <ImagePlus className="h-4 w-4 mr-2" />
-                  Thêm ảnh minh chứng
+                  Thêm ảnh bằng chứng
                 </Button>
                 <input
                   id="evidence-upload"
@@ -545,7 +545,7 @@ export function CreatePenaltyForm({
                     <div key={index} className="relative group">
                       <img
                         src={URL.createObjectURL(file)}
-                        alt={`Minh chứng ${index + 1}`}
+                        alt={`Bằng chứng ${index + 1}`}
                         className="w-full h-24 object-cover rounded border"
                       />
                       <Button

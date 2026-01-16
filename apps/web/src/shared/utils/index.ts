@@ -22,3 +22,29 @@ export function getStatusBadgeProps(status: string) {
     children: status,
   };
 }
+
+export function formatDateVN(date: string | Date | undefined | null): string {
+  if (!date) return '';
+  const d = new Date(date);
+  return new Intl.DateTimeFormat('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d);
+}
+
+export function formatDateTimeVN(
+  date: string | Date | undefined | null,
+): string {
+  if (!date) return '';
+  const d = new Date(date);
+  return new Intl.DateTimeFormat('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d);
+}

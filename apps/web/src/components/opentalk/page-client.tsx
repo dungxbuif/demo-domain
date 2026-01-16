@@ -36,8 +36,8 @@ export function OpentalkPageClient({ cycles, error }: OpentalkPageClientProps) {
         className="space-y-4"
       >
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="schedules">Schedule Management</TabsTrigger>
-          <TabsTrigger value="requests">Swap Requests</TabsTrigger>
+          <TabsTrigger value="schedules">Quản lý lịch</TabsTrigger>
+          <TabsTrigger value="requests">Yêu cầu đổi lịch</TabsTrigger>
         </TabsList>
 
         <TabsContent value="schedules" className="space-y-4">
@@ -45,7 +45,7 @@ export function OpentalkPageClient({ cycles, error }: OpentalkPageClientProps) {
         </TabsContent>
 
         <TabsContent value="requests" className="space-y-4">
-          <SwapRequestManagement mode={mode} user={user || undefined} />
+          <SwapRequestManagement  />
         </TabsContent>
       </Tabs>
     </div>

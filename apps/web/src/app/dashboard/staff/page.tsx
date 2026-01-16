@@ -2,8 +2,8 @@ import { StaffDataTable } from '@/components/staff/staff-data-table';
 import { StaffPageActions } from '@/components/staff/staff-page-actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  getServerPaginationParams,
-  SearchParams,
+    getServerPaginationParams,
+    SearchParams,
 } from '@/shared/lib/base-paginated-service';
 import { branchServerService } from '@/shared/services/server/branch-server-service';
 import { staffServerService } from '@/shared/services/server/staff-server-service';
@@ -37,7 +37,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Staff</CardTitle>
+          <CardTitle>Tất cả nhân viên</CardTitle>
           <StaffPageActions branches={branches} />
         </CardHeader>
         <CardContent>

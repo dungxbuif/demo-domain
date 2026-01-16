@@ -98,11 +98,11 @@ export function OpentalkSpreadsheetView({
       await opentalkClientService.updateEvent(eventId, {
         title: editedValue,
       });
-      toast.success('Topic updated');
+      toast.success('Đã cập nhật chủ đề');
       setEditingField(null);
       window.location.reload();
     } catch {
-      toast.error('Failed to update topic');
+      toast.error('Cập nhật chủ đề thất bại');
     }
   };
 
@@ -111,14 +111,6 @@ export function OpentalkSpreadsheetView({
     setEditedValue('');
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const handleSelectEvent = (eventId: number) => {
     if (lockedEvents.includes(eventId)) {
@@ -241,11 +233,11 @@ export function OpentalkSpreadsheetView({
       await opentalkClientService.updateEvent(eventId, {
         eventDate: editedValue,
       });
-      toast.success('Date updated');
+      toast.success('Đã cập nhật ngày');
       setEditingField(null);
       window.location.reload();
     } catch {
-      toast.error('Failed to update date');
+      toast.error('Cập nhật ngày thất bại');
     }
   };
 
@@ -267,7 +259,6 @@ export function OpentalkSpreadsheetView({
             onEditChange={setEditedValue}
             onSlideClick={handleSlideClick}
             onSelectEvent={handleSelectEvent}
-            formatDate={formatDate}
             lockedEvents={lockedEvents}
             onDateEdit={handleDateEdit}
             onEditSave={

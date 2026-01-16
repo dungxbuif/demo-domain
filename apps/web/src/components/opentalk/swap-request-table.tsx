@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatDateVN } from '@/shared/utils';
 import { SwapRequest, SwapRequestStatus } from '@qnoffice/shared';
 import { ArrowRightLeft, Check, User, X } from 'lucide-react';
 
@@ -50,18 +51,11 @@ export function SwapRequestTable({
     }
   };
 
-  const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
 
   const getPresenterInfo = (event: any) => {
     if (!event?.eventParticipants?.length) return null;
     const staff = event.eventParticipants[0]?.staff;
-    return staff?.user?.name || staff?.email || 'Unknown';
+    return staff?.user?.name || staff?.email || 'Không xác định';
   };
 
   if (requests.length === 0) {
@@ -100,7 +94,7 @@ export function SwapRequestTable({
                     <div className="font-medium">
                       {request.requester?.user?.name ||
                         request.requester?.user?.email ||
-                        'Unknown'}
+                        'Không xác định'}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {request.requester?.email}
@@ -111,27 +105,27 @@ export function SwapRequestTable({
               <TableCell>
                 <div className="text-sm">
                   {request.fromEvent
-                    ? formatDate(request.fromEvent.eventDate)
+                    ? formatDateVN(request.fromEvent.eventDate)
                     : 'N/A'}
                 </div>
                 <div className="text-xs font-medium text-blue-600">
                   {getPresenterInfo(request.fromEvent)}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {request.fromEvent?.title || 'No Title'}
+                  {request.fromEvent?.title || 'Không có tiêu đề'}
                 </div>
               </TableCell>
               <TableCell>
                 <div className="text-sm">
                   {request.toEvent
-                    ? formatDate(request.toEvent.eventDate)
+                    ? formatDateVN(request.toEvent.eventDate)
                     : 'N/A'}
                 </div>
                 <div className="text-xs font-medium text-blue-600">
                   {getPresenterInfo(request.toEvent)}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {request.toEvent?.title || 'No Title'}
+                  {request.toEvent?.title || 'Không có tiêu đề'}
                 </div>
               </TableCell>
               <TableCell className="max-w-xs truncate" title={request.reason}>
@@ -139,7 +133,7 @@ export function SwapRequestTable({
               </TableCell>
               <TableCell>{getStatusBadge(request.status)}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {formatDate(request.createdAt)}
+                {formatDateVN(request.createdAt)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex gap-2 justify-end">
@@ -173,7 +167,7 @@ export function SwapRequestTable({
                   {/* For readonly or reviewed, maybe show Review Details button if onView provided */}
                   {onView && (request.reviewNote || readonly) && (
                      <Button variant="ghost" size="sm" onClick={() => onView(request)}>
-                        Review
+                        Xem chi tiết
                      </Button>
                   )}
                 </div>

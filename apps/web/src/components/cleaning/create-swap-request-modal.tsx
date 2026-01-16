@@ -2,27 +2,28 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
+import { formatDateVN } from '@/shared/utils';
 import {
-  ICreateSwapRequestDto,
-  ScheduleEvent,
-  ScheduleType,
+    ICreateSwapRequestDto,
+    ScheduleEvent,
+    ScheduleType,
 } from '@qnoffice/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -153,7 +154,7 @@ export function CreateSwapRequestModal({
                               Không có người tham gia
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(event.eventDate).toLocaleDateString()}
+                              {formatDateVN(event.eventDate)}
                             </span>
                           </div>
                         </SelectItem>
@@ -172,7 +173,7 @@ export function CreateSwapRequestModal({
                               'Không rõ'}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(event.eventDate).toLocaleDateString()}
+                            {formatDateVN(event.eventDate)}
                           </span>
                         </div>
                       </SelectItem>

@@ -7,7 +7,7 @@ async function bootstrap() {
   const seeder = app.get(DatabaseSeeder);
   await seeder.seed();
   app.close();
-  process.exit(1);
+  process.exit(0);
 }
 
 bootstrap();

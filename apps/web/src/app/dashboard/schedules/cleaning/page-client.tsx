@@ -3,11 +3,9 @@
 import { CleaningSpreadsheetView } from '@/components/cleaning/cleaning-spreadsheet-view';
 import { SwapRequestManagement } from '@/components/cleaning/swap-request-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/shared/contexts/auth-context';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { UserRole } from '@qnoffice/shared';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface CleaningPageClientProps {
@@ -16,7 +14,6 @@ interface CleaningPageClientProps {
 }
 
 export function CleaningPageClient({ cycles, error }: CleaningPageClientProps) {
-  const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -36,7 +33,6 @@ export function CleaningPageClient({ cycles, error }: CleaningPageClientProps) {
 
   const events = cycles.flatMap((cycle) => cycle.events || []);
 
-  const mode = user?.role === UserRole.STAFF ? 'user' : 'hr';
 
   return (
     <div className="space-y-6">
@@ -55,7 +51,7 @@ export function CleaningPageClient({ cycles, error }: CleaningPageClientProps) {
         </TabsContent>
 
         <TabsContent value="requests" className="space-y-4">
-          <SwapRequestManagement mode={mode} user={user || undefined} />
+          <SwapRequestManagement  />
         </TabsContent>
       </Tabs>
     </div>

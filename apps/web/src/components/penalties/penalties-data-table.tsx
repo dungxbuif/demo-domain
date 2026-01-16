@@ -13,8 +13,9 @@ import { usePagination } from '@/shared/hooks/use-pagination';
 import { PaginationState, Penalty, PenaltyStatus } from '@qnoffice/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, FileText, ImageIcon } from 'lucide-react';
 import { useState } from 'react';
+import { FilePreviewDialog } from '../opentalk/file-preview-dialog';
 
 interface PenaltiesDataTableProps {
   initialData: Penalty[];
@@ -26,6 +27,8 @@ export function PenaltiesDataTable({
   initialPagination,
 }: PenaltiesDataTableProps) {
   const [selectedPenalty, setSelectedPenalty] = useState<Penalty | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const pagination = usePagination({
     defaultPage: 1,
@@ -181,17 +184,46 @@ export function PenaltiesDataTable({
                 selectedPenalty.evidenceUrls.length > 0 && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">
-                      Minh chứng
+                      Bằng chứng
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedPenalty.evidenceUrls.map((url, index) => (
-                        <img
-                          key={index}
-                          src={url}
-                          alt={`Minh chứng ${index + 1}`}
-                          className="rounded-md border"
-                        />
-                      ))}
+                    <div className="grid grid-cols-1 gap-2">
+                      {selectedPenalty.evidenceUrls.map((url, index) => {
+                        const isImage = url.match(/\.(jpeg|jpg|gif|png)$/i) != null;
+                        const fileName = url.split('/').pop() || `Evidence ${index + 1}`;
+                        
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
+                          >
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              <div className="h-10 w-10 flex items-center justify-center bg-primary/10 rounded-lg text-xl text-primary">
+                                {isImage ? <ImageIcon className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium truncate" title={fileName}>
+                                  {fileName}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {isImage ? 'Hình ảnh' : 'Tài liệu'}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2"
+                              onClick={() => {
+                                setPreviewUrl(url);
+                                setShowPreview(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                              Xem
+                            </Button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -199,6 +231,14 @@ export function PenaltiesDataTable({
           </DialogContent>
         </Dialog>
       )}
+
+      <FilePreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        url={previewUrl}
+        fileName={previewUrl?.split('/').pop() || 'Bằng chứng'}
+        fileType={previewUrl?.split('.').pop()}
+      />
     </>
   );
 }

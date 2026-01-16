@@ -3,10 +3,10 @@
 import { ActionPanel } from '@/components/ui/action-panel';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle
+    Card,
+    CardDescription,
+    CardHeader,
+    CardTitle
 } from '@/components/ui/card';
 import { useAuth } from '@/shared/contexts/auth-context';
 import { cleaningClientService } from '@/shared/services/client/cleaning-client-service';
@@ -39,6 +39,7 @@ export function CleaningSpreadsheetView({
     const date = new Date(year, month - 1, day);
 
     return new Intl.DateTimeFormat('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
       weekday: 'long',
       month: 'numeric',
       day: 'numeric',
@@ -54,14 +55,14 @@ export function CleaningSpreadsheetView({
         (participant) =>
           participant.staff?.user?.email ||
           participant.staff?.email ||
-          'Unknown',
+          'Không xác định',
       )
       .join(' & ');
   };
 
   const handleExportData = () => {
     // Create CSV content
-    const headers = ['Date', 'Day', 'Participants', 'Status', 'Notes'];
+    const headers = ['Ngày', 'Thứ', 'Người tham gia', 'Trạng thái', 'Ghi chú'];
     const csvContent = [
       headers.join(','),
       ...events
@@ -196,7 +197,7 @@ export function CleaningSpreadsheetView({
 
   const getCycleName = (cycleId: number) => {
     const cycle = cycles.find((c) => c.id === cycleId);
-    return cycle?.name || `Cycle ${cycleId}`;
+    return cycle?.name || `Chu kỳ ${cycleId}`;
   };
 
   return (

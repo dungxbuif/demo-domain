@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
+import { formatDateVN } from '@/shared/utils';
 import {
     ICreateSwapRequestDto,
     ScheduleEvent,
@@ -58,7 +59,7 @@ export function CreateSwapRequestModal({
       }
     } catch (error) {
       console.error('Error fetching available events for swap:', error);
-      toast.error('Failed to load available events');
+      toast.error('Không thể tải danh sách sự kiện');
     }
   }, [scheduleId]);
 
@@ -74,7 +75,7 @@ export function CreateSwapRequestModal({
     e.preventDefault();
 
     if (!selectedEvent) {
-      toast.error('Please select an event to swap to');
+      toast.error('Vui lòng chọn sự kiện để đổi');
       return;
     }
 
@@ -90,7 +91,7 @@ export function CreateSwapRequestModal({
 
       await swapRequestClientService.createSwapRequest(requestData);
 
-      toast.success('Swap request created successfully');
+      toast.success('Tạo yêu cầu đổi lịch thành công');
       setReason('');
       setSelectedEvent(null);
       onOpenChange(false);
@@ -106,22 +107,21 @@ export function CreateSwapRequestModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Request Schedule Swap</DialogTitle>
+          <DialogTitle>Gửi yêu cầu đổi lịch</DialogTitle>
           <DialogDescription>
-            Select which OpenTalk event you&apos;d like to swap your schedule
-            with
+            Chọn lịch OpenTalk mà bạn muốn đổi.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="targetEvent">Swap with Event</Label>
+              <Label htmlFor="targetEvent">Đổi với sự kiện</Label>
               <Select
                 value={selectedEvent?.toString() || ''}
                 onValueChange={(value) => setSelectedEvent(parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select event to swap with" />
+                  <SelectValue placeholder="Chọn sự kiện để đổi" />
                 </SelectTrigger>
                 <SelectContent>
                   {availableEvents.map((event) => {
@@ -132,8 +132,8 @@ export function CreateSwapRequestModal({
                         value={event.id.toString()}
                         disabled={isLocked}
                       >
-                        {event.title || 'OpenTalk'} -{' '}
-                        {new Date(event.eventDate).toLocaleDateString()}
+                        {event.title || 'Lịch OpenTalk'} -{' '}
+                        {formatDateVN(event.eventDate)}
                         {event.eventParticipants &&
                           event.eventParticipants.length > 0 && (
                             <span className="text-muted-foreground ml-2">
@@ -155,12 +155,12 @@ export function CreateSwapRequestModal({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason</Label>
+              <Label htmlFor="reason">Lý do</Label>
               <Textarea
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Explain why you need to swap your schedule..."
+                placeholder="Giải thích lý do bạn cần đổi lịch..."
                 rows={4}
                 required
               />
@@ -172,10 +172,10 @@ export function CreateSwapRequestModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isLoading || !selectedEvent}>
-              {isLoading ? 'Submitting...' : 'Submit Request'}
+              {isLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
             </Button>
           </DialogFooter>
         </form>

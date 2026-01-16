@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { getStatusBadgeProps } from '@/shared/utils';
+import { formatDateTimeVN, getStatusBadgeProps } from '@/shared/utils';
 import { IOpentalkSlide, ScheduleEvent } from '@qnoffice/shared';
 import { Calendar, FileText, User } from 'lucide-react';
 
@@ -30,7 +30,6 @@ interface EventTableRowProps {
 
   onSlideClick: () => void;
   onSelect: (checked: boolean) => void;
-  formatDate: (date: string) => string;
 }
 
 export function EventTableRow({
@@ -54,7 +53,7 @@ export function EventTableRow({
 
   onSlideClick,
   onSelect,
-  formatDate,
+  
 }: EventTableRowProps) {
   const renderPresenter = () => {
     if (event.eventParticipants && event.eventParticipants.length > 0) {
@@ -121,7 +120,7 @@ export function EventTableRow({
             <div className="flex gap-1 items-center">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">
-                {formatDate(event.eventDate)}
+                {formatDateTimeVN(event.eventDate)}
               </span>
             </div>
             {canManageOpentalk && !isCheckboxDisabled && (
