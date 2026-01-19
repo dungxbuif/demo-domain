@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-domain-ingress
+  namespace: demo-domain
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - test.nccquynhon.edu.vn
+    secretName: nccquynhon-tls
+  rules:
+  - host: test.nccquynhon.edu.vn
+    http:
+      paths:
+      # CHỈ EXPOSE FRONTEND - Backend không expose
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80

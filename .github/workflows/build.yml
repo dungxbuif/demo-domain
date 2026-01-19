@@ -1,0 +1,104 @@
+name: Build and Push Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_target:
+        description: 'What to build?'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
+
+env:
+  HARBOR_REGISTRY: registry.dungxbuif.com
+  HARBOR_PROJECT: qn-office
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.build_target == 'all' || github.event.inputs.build_target == 'backend' }}
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set image tag
+      id: meta
+      run: echo "tags=${{ github.sha }}" >> $GITHUB_OUTPUT
+    
+    - name: Log in to Harbor Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.HARBOR_REGISTRY }}
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_PASSWORD }}
+    
+    - name: Build and push backend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./apps/backend
+        push: true
+        tags: |
+          ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/backend:${{ steps.meta.outputs.tags }}
+          ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/backend:latest
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.build_target == 'all' || github.event.inputs.build_target == 'frontend' }}
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set image tag
+      id: meta
+      run: echo "tags=${{ github.sha }}" >> $GITHUB_OUTPUT
+    
+    - name: Log in to Harbor Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.HARBOR_REGISTRY }}
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_PASSWORD }}
+    
+    - name: Build and push frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./apps/frontend
+        push: true
+        tags: |
+          ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/frontend:${{ steps.meta.outputs.tags }}
+          ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/frontend:latest
+
+  update-manifests:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: |
+      always() && 
+      (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Update backend image tag
+      if: needs.build-backend.result == 'success'
+      run: |
+        sed -i "s|image: ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/backend:.*|image: ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/backend:${{ needs.build-backend.outputs.image_tag }}|g" kubernetes/base/backend.yml
+    
+    - name: Update frontend image tag
+      if: needs.build-frontend.result == 'success'
+      run: |
+        sed -i "s|image: ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/frontend:.*|image: ${{ env.HARBOR_REGISTRY }}/${{ env.HARBOR_PROJECT }}/frontend:${{ needs.build-frontend.outputs.image_tag }}|g" kubernetes/base/frontend.yml
+    
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add kubernetes/base/*.yml
+        git diff --staged --quiet || git commit -m "chore: update image tags to ${{ github.sha }}"
+        git push
