@@ -4,21 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/shared/contexts/auth-context';
 import {
   cleaningClientService,
@@ -26,31 +17,17 @@ import {
 } from '@/shared/services/client/cleaning-client-service';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
 import { formatDateVN } from '@/shared/utils';
-import {
-  ScheduleType,
-  SwapRequest
-} from '@qnoffice/shared';
-import {
-  ArrowRightLeft,
-  Calendar,
-  Plus
-} from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { ScheduleType, SwapRequest, SwapRequestStatus } from '@qnoffice/shared';
+import { ArrowRightLeft, Calendar, Plus } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CreateSwapRequestModal } from './create-swap-request-modal';
-
-
 
 export function SwapRequestManagement() {
   const { user } = useAuth();
   const [swapRequests, setSwapRequests] = useState<SwapRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<SwapRequest | null>(
-    null,
-  );
-  const [reviewNote, setReviewNote] = useState('');
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   );
@@ -58,17 +35,22 @@ export function SwapRequestManagement() {
 
   const userStaffId = user?.staffId;
 
+  const lockedEventIds = useMemo(() => {
+    return swapRequests
+      .filter((req) => req.status === SwapRequestStatus.PENDING)
+      .flatMap((req) => [req.fromEventId, req.toEventId]);
+  }, [swapRequests]);
+
   const loadSwapRequests = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      // Load all swap requests for everyone (no filtering by requester)
       const response = await swapRequestClientService.getSwapRequests({
         type: ScheduleType.CLEANING,
       });
       setSwapRequests(response?.data?.data || []);
 
-      if ( userStaffId) {
+      if (userStaffId) {
         try {
           const schedulesResponse =
             await cleaningClientService.getUserSchedules(userStaffId);
@@ -87,14 +69,13 @@ export function SwapRequestManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [ userStaffId]);
+  }, [userStaffId]);
 
   useEffect(() => {
     if (user?.staffId) {
       loadSwapRequests();
     }
   }, [user?.staffId, loadSwapRequests]);
-  // Early return if no user
   if (!user) {
     return (
       <div className="text-center text-muted-foreground py-8">
@@ -102,7 +83,6 @@ export function SwapRequestManagement() {
       </div>
     );
   }
-
 
   const handleCreateSuccess = async () => {
     setCreateModalOpen(false);
@@ -123,7 +103,9 @@ export function SwapRequestManagement() {
     }
   };
 
-  const filteredRequests =swapRequests.filter((req) => req.requesterId === user?.staffId);
+  const filteredRequests = swapRequests.filter(
+    (req) => req.requesterId === user?.staffId,
+  );
 
   if (isLoading) {
     return (
@@ -141,10 +123,8 @@ export function SwapRequestManagement() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          Yêu cầu đổi lịch của tôi
-        </h2>
-        { (
+        <h2 className="text-xl font-semibold">Yêu cầu đổi lịch của tôi</h2>
+        {
           <>
             {isLoading ? (
               <p className="text-sm text-muted-foreground">
@@ -162,15 +142,19 @@ export function SwapRequestManagement() {
                     <SelectValue placeholder="Chọn lịch trực để đổi" />
                   </SelectTrigger>
                   <SelectContent>
-                    {userSchedules.map((schedule) => (
-                      <SelectItem
-                        key={schedule.id}
-                        value={schedule.id.toString()}
-                      >
-                        {schedule.title || 'Lịch trực nhật'} -{' '}
-                        {formatDateVN(schedule.eventDate)}
-                      </SelectItem>
-                    ))}
+                    {userSchedules.map((schedule) => {
+                      const isLocked = lockedEventIds.includes(schedule.id);
+                      return (
+                        <SelectItem
+                          key={schedule.id}
+                          value={schedule.id.toString()}
+                          disabled={isLocked}
+                        >
+                          {schedule.title || 'Lịch trực nhật'} -{' '}
+                          {formatDateVN(schedule.eventDate)}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <Button
@@ -201,7 +185,7 @@ export function SwapRequestManagement() {
               />
             )}
           </>
-        )}
+        }
       </div>
 
       <div className="space-y-4">
@@ -210,9 +194,7 @@ export function SwapRequestManagement() {
             <CardContent className="pt-6">
               <div className="text-center py-8 text-muted-foreground">
                 <ArrowRightLeft className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>
-                  Bạn chưa gửi yêu cầu đổi lịch nào
-                </p>
+                <p>Bạn chưa gửi yêu cầu đổi lịch nào</p>
               </div>
             </CardContent>
           </Card>
@@ -293,46 +275,6 @@ export function SwapRequestManagement() {
           ))
         )}
       </div>
-
-      {/* Review Modal */}
-      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Duyệt yêu cầu đổi lịch</DialogTitle>
-            <DialogDescription>
-              Duyệt và chấp nhận hoặc từ chối yêu cầu đổi lịch này.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">Chi tiết yêu cầu:</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedRequest.reason}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">
-                  Ghi chú duyệt (không bắt buộc)
-                </label>
-                <Textarea
-                  value={reviewNote}
-                  onChange={(e) => setReviewNote(e.target.value)}
-                  placeholder="Thêm ghi chú về quyết định của bạn..."
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewModalOpen(false)}>
-              Hủy
-            </Button>
- 
-
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

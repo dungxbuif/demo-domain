@@ -1,21 +1,52 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
-} from '@/components/ui/table';
+import { SwapRequestTable } from '@/components/cleaning/swap-request-table';
 import { PERMISSIONS, ProtectedComponent } from '@/shared/auth';
-import { Calendar, User } from 'lucide-react';
+import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
+import { SwapRequest, SwapRequestStatus } from '@qnoffice/shared';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-export function CleaningSwapsManagementClient() {
+interface CleaningSwapsManagementClientProps {
+  initialData: SwapRequest[];
+}
+
+export function CleaningSwapsManagementClient({
+  initialData = [],
+}: CleaningSwapsManagementClientProps) {
   // Placeholder data structure for when API is ready
-  const swapRequests: any[] = [];
+  const [requests, setRequests] = useState<SwapRequest[]>(initialData);
+  const [isProcessing, setIsProcessing] = useState<number | null>(null);
+
+  const pendingCount = requests.filter(
+    (r) => r.status === SwapRequestStatus.PENDING,
+  ).length;
+
+  const handleReview = async (id: number, status: SwapRequestStatus) => {
+    setIsProcessing(id);
+    try {
+      await swapRequestClientService.reviewSwapRequest(id, {
+        status,
+        reviewNote:
+          status === SwapRequestStatus.APPROVED ? 'Approved' : 'Rejected',
+      });
+
+      setRequests((prev) =>
+        prev.map((req) => (req.id === id ? { ...req, status } : req)),
+      );
+
+      toast.success(
+        status === SwapRequestStatus.APPROVED
+          ? 'Đã phê duyệt yêu cầu'
+          : 'Đã từ chối yêu cầu',
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra khi xử lý yêu cầu');
+    } finally {
+      setIsProcessing(null);
+    }
+  };
 
   return (
     <ProtectedComponent permission={PERMISSIONS.MANAGE_CLEANING_SWAP_REQUESTS}>
@@ -29,66 +60,19 @@ export function CleaningSwapsManagementClient() {
           </div>
           <div className="flex gap-4 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">0</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {pendingCount}
+              </div>
               <div className="text-muted-foreground">Chờ duyệt</div>
             </div>
           </div>
         </div>
 
-        {swapRequests.length === 0 ? (
-          <div className="text-center py-12 border rounded-lg bg-muted/20">
-            <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium">Không có yêu cầu đổi lịch</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Yêu cầu đổi lịch trực nhật sẽ hiển thị ở đây khi nhân viên gửi yêu cầu
-            </p>
-          </div>
-        ) : (
-          <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Người yêu cầu</TableHead>
-                  <TableHead>Từ ngày</TableHead>
-                  <TableHead>Đến ngày</TableHead>
-                  <TableHead>Lý do</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày yêu cầu</TableHead>
-                  <TableHead className="text-right">Hành động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {swapRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        {request.requester}
-                      </div>
-                    </TableCell>
-                    <TableCell>{request.fromDate}</TableCell>
-                    <TableCell>{request.toDate}</TableCell>
-                    <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">Chờ duyệt</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {request.createdAt}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button variant="outline" size="sm">
-                          Từ chối
-                        </Button>
-                        <Button size="sm">Phê duyệt</Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+        <SwapRequestTable
+          requests={requests}
+          onReview={handleReview}
+          isProcessingId={isProcessing}
+        />
       </div>
     </ProtectedComponent>
   );

@@ -244,6 +244,33 @@ export class OpentalkService {
     });
   }
 
+  async getAvailableEventsByCycle(
+    cycleId: number,
+    participantId?: number,
+  ): Promise<ScheduleEventEntity[]> {
+    const now = new Date();
+
+    const qb = this.eventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.cycle', 'cycle')
+      .leftJoinAndSelect('event.eventParticipants', 'eventParticipants')
+      .leftJoinAndSelect('eventParticipants.staff', 'staff')
+      .leftJoinAndSelect('staff.user', 'user')
+      .where('event.cycleId = :cycleId', { cycleId })
+      .andWhere('event.type = :type', { type: 'OPENTALK' })
+      .andWhere('event.status = :status', { status: EventStatus.PENDING })
+      .andWhere('event.eventDate > :now', { now });
+
+    if (participantId) {
+      qb.andWhere(
+        '(eventParticipants.staffId IS NULL OR eventParticipants.staffId != :participantId)',
+        { participantId },
+      );
+    }
+
+    return qb.orderBy('event.eventDate', 'ASC').getMany();
+  }
+
   async getCycleEventsByEventId(
     eventId: number,
     query: { participantId?: number },
@@ -256,29 +283,7 @@ export class OpentalkService {
     if (!event) {
       throw new Error('Event not found');
     }
-
-    const qb = this.eventRepository
-      .createQueryBuilder('event')
-      .leftJoinAndSelect('event.cycle', 'cycle')
-      .leftJoinAndSelect('event.eventParticipants', 'eventParticipants')
-      .leftJoinAndSelect('eventParticipants.staff', 'staff')
-      .leftJoinAndSelect('staff.user', 'user')
-      .where('event.cycleId = :cycleId', { cycleId: event.cycleId })
-      .andWhere('event.type = :type', {
-        type: ScheduleType.OPENTALK,
-      })
-      .orderBy('event.eventDate', 'ASC');
-
-    if (query.participantId) {
-      qb.leftJoin(
-        'event.eventParticipants',
-        'filteredParticipant',
-        'filteredParticipant.participantId = :participantId',
-        { participantId: query.participantId },
-      ).andWhere('filteredParticipant.id IS NULL');
-    }
-
-    return qb.getMany();
+    return this.getAvailableEventsByCycle(event.cycleId, query.participantId);
   }
 
   async getEventById(id: number): Promise<ScheduleEventEntity | null> {

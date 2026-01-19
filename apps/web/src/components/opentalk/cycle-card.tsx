@@ -34,7 +34,6 @@ interface CycleCardProps {
   canManageOpentalk: boolean;
 
   canEditTopic: (event: ScheduleEvent<IOpentalkSlide>) => boolean;
-  canEditSlide: (event: ScheduleEvent<IOpentalkSlide>) => boolean;
 
   onTopicEdit: (eventId: number, currentTopic: string) => void;
   onDateEdit: (eventId: number, date: string) => void;
@@ -58,7 +57,6 @@ export function CycleCard({
   canManageOpentalk,
 
   canEditTopic,
-  canEditSlide,
 
   onTopicEdit,
   onDateEdit,
@@ -158,7 +156,6 @@ export function CycleCard({
                         isEditingDate={isEditingDate}
                         canManageOpentalk={canManageOpentalk}
                         canEditTopic={canEditTopic(event)}
-                        canEditSlide={canEditSlide(event)}
                         isSelected={selectedEvents.includes(event.id)}
                         isLocked={lockedEvents.includes(event.id)}
                         onTopicEdit={(id, topic) => onTopicEdit(id, topic)}

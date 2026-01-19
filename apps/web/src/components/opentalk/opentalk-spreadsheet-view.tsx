@@ -41,6 +41,7 @@ export function OpentalkSpreadsheetView({
   const [selectedEvents, setSelectedEvents] = useState<number[]>([]);
   const [lockedEvents, setLockedEvents] = useState<number[]>([]);
   const [isSwapping, setIsSwapping] = useState(false);
+  const [slideReadonly, setSlideReadonly] = useState(false);
 
   useEffect(() => {
     const fetchPendingRequests = async () => {
@@ -82,12 +83,6 @@ export function OpentalkSpreadsheetView({
     );
   };
 
-  const canEditSlide = (event: ScheduleEvent<IOpentalkSlide>) => {
-    return (
-      event.eventParticipants?.some((p) => p.staffId === userStaffId) || false
-    );
-  };
-
   const handleTopicEdit = (eventId: number, currentTopic: string) => {
     setEditingField({ eventId, field: 'topic' });
     setEditedValue(currentTopic || '');
@@ -110,7 +105,6 @@ export function OpentalkSpreadsheetView({
     setEditingField(null);
     setEditedValue('');
   };
-
 
   const handleSelectEvent = (eventId: number) => {
     if (lockedEvents.includes(eventId)) {
@@ -202,6 +196,7 @@ export function OpentalkSpreadsheetView({
 
   const handleSlideClick = (event: ScheduleEvent<IOpentalkSlide>) => {
     setSelectedEventForSlide(event);
+    setSlideReadonly(isEventCheckboxDisabled(event));
     setSlideDialogOpen(true);
   };
 
@@ -241,6 +236,14 @@ export function OpentalkSpreadsheetView({
     }
   };
 
+  const isEventCheckboxDisabled = (event: ScheduleEvent<IOpentalkSlide>) => {
+    const isPast = new Date(event.eventDate).getTime() < Date.now();
+    const isCompleted =
+      event.status === 'COMPLETED' || event.status === 'CANCELLED';
+
+    return lockedEvents.includes(event.id) || isPast || isCompleted;
+  };
+
   return (
     <div className="h-[calc(100vh-240px)] flex flex-col">
       <div className="flex-1 overflow-y-auto pr-4 space-y-6">
@@ -253,7 +256,6 @@ export function OpentalkSpreadsheetView({
             selectedEvents={selectedEvents}
             canManageOpentalk={canManageOpentalk}
             canEditTopic={canEditTopic}
-            canEditSlide={canEditSlide}
             onTopicEdit={handleTopicEdit}
             onEditCancel={handleEditCancel}
             onEditChange={setEditedValue}
@@ -275,30 +277,16 @@ export function OpentalkSpreadsheetView({
         onClear={handleClearSelection}
       />
 
-      {selectedEventForSlide &&
-        selectedEventForSlide.id &&
-        canEditSlide(selectedEventForSlide) && (
-          <SlideDialog
-            mode="edit"
-            canEdit={true}
-            event={selectedEventForSlide}
-            open={slideDialogOpen}
-            onOpenChange={setSlideDialogOpen}
-            onSuccess={() => window.location.reload()}
-          />
-        )}
-
-      {selectedEventForSlide &&
-        selectedEventForSlide.id &&
-        !canEditSlide(selectedEventForSlide) && (
-          <SlideDialog
-            mode="view"
-            canEdit={false}
-            event={selectedEventForSlide}
-            open={slideDialogOpen}
-            onOpenChange={setSlideDialogOpen}
-          />
-        )}
+      {selectedEventForSlide && selectedEventForSlide.id && (
+        <SlideDialog
+          mode={slideReadonly ? 'view' : 'edit'}
+          canEdit={!slideReadonly && canEditTopic(selectedEventForSlide)}
+          event={selectedEventForSlide}
+          open={slideDialogOpen}
+          onOpenChange={setSlideDialogOpen}
+          onSuccess={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 }
