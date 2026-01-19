@@ -1,8 +1,9 @@
 import { PenaltyStatus } from '@qnoffice/shared';
 import { AbstractEntity } from '@src/common/database/abstract.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { PenaltyType } from '../penalty-type/penalty-type.entity';
 import Staff from '../staff/staff.entity';
+import { PenaltyProofEntity } from './entities/penalty-proof.entity';
 
 @Entity('penalties')
 export class Penalty extends AbstractEntity {
@@ -21,9 +22,6 @@ export class Penalty extends AbstractEntity {
   @Column()
   reason: string;
 
-  @Column({ type: 'json', nullable: true })
-  evidenceUrls: string[]; // Array of image URLs
-
   @Column({
     type: 'enum',
     enum: PenaltyStatus,
@@ -38,4 +36,10 @@ export class Penalty extends AbstractEntity {
   @ManyToOne(() => PenaltyType, (penaltyType) => penaltyType.penalties)
   @JoinColumn({ name: 'penalty_type_id' })
   penaltyType: PenaltyType;
+
+  @OneToMany(() => PenaltyProofEntity, (proof) => proof.penalty, {
+    cascade: true,
+    eager: false,
+  })
+  proofs?: PenaltyProofEntity[];
 }

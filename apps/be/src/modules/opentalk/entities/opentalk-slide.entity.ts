@@ -5,7 +5,7 @@ import { Column, Entity } from 'typeorm';
 @Entity('opentalk_slides')
 export default class OpentalkSlideEntity extends AbstractEntity {
   @Column({ name: 'event_id' })
-  eventId: number; 
+  eventId: number;
 
   @Column({ nullable: true })
   topic?: string;
@@ -14,7 +14,7 @@ export default class OpentalkSlideEntity extends AbstractEntity {
   slideUrl?: string;
 
   @Column({ name: 'slide_key', nullable: true })
-  slideKey?: string; 
+  slideKey?: string;
 
   @Column({
     type: 'enum',
@@ -43,4 +43,7 @@ export default class OpentalkSlideEntity extends AbstractEntity {
 
   @Column({ name: 'rejected_at', type: 'timestamp', nullable: true })
   rejectedAt?: Date;
+
+  @Column({ name: 'mime_type', nullable: true })
+  mimeType?: string;
 }

@@ -302,6 +302,7 @@ export class OpentalkService {
     let slideUrl = payload.slidesUrl;
     let slideKey: string | undefined;
     let type = payload.type || OpentalkSlideType.LINK;
+    let mimeType = payload.fileType || undefined;
 
     if (!payload.type) {
       if (slideUrl.includes('amazonaws.com') || !slideUrl.startsWith('http')) {
@@ -330,6 +331,7 @@ export class OpentalkService {
       slide.slideUrl = type === OpentalkSlideType.LINK ? slideUrl : undefined;
       slide.slideKey = slideKey;
       slide.type = type;
+      slide.mimeType = mimeType;
       slide.status = OpentalkSlideStatus.PENDING;
       slide.approvedBy = undefined;
       slide.approvedAt = undefined;
@@ -342,6 +344,7 @@ export class OpentalkService {
         slideUrl: type === OpentalkSlideType.LINK ? slideUrl : undefined,
         slideKey,
         type,
+        mimeType,
         status: OpentalkSlideStatus.PENDING,
       });
     }

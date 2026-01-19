@@ -2,34 +2,34 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
 } from '@/components/ui/command';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebouncedValue } from '@/shared/hooks/use-debounce-value';
@@ -39,10 +39,11 @@ import staffService from '@/shared/services/client/staff.service';
 import { cn } from '@/shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    ApiResponse,
-    ICreatePenaltyDto,
-    PenaltyType,
-    Staff,
+  ApiResponse,
+  CreatePenaltyProofDTO,
+  ICreatePenaltyDto,
+  PenaltyType,
+  Staff,
 } from '@qnoffice/shared';
 import { Check, ChevronsUpDown, ImagePlus, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -56,7 +57,14 @@ const formSchema = z.object({
   date: z.string().min(1, 'Ngày là bắt buộc'),
   amount: z.number().optional(),
   reason: z.string().min(1, 'Lý do là bắt buộc'),
-  evidenceUrls: z.array(z.string()).optional(),
+  proofs: z
+    .array(
+      z.object({
+        imageKey: z.string(),
+        mimeType: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 interface CreatePenaltyFormProps {
@@ -98,7 +106,6 @@ export function CreatePenaltyForm({
       penaltyTypeId: 0,
       date: new Date().toISOString().split('T')[0],
       reason: '',
-      evidenceUrls: [],
     },
   });
 
@@ -173,7 +180,7 @@ export function CreatePenaltyForm({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsUploading(true);
-      let uploadedUrls: string[] = [];
+      let proofs: CreatePenaltyProofDTO[] = [];
 
       if (evidenceFiles.length > 0) {
         const response = await fetch('/api/upload/presigned-urls', {
@@ -194,9 +201,10 @@ export function CreatePenaltyForm({
         }
 
         const apiResponse: ApiResponse<
-          Array<{ uploadUrl: string; fileUrl: string }>
+          Array<{ key: string; fileUrl: string; uploadUrl: string }>
         > = await response.json();
         const presignedUrls = apiResponse.data;
+        console.log(JSON.stringify(presignedUrls, null, 2));
 
         await Promise.all(
           presignedUrls.map(async (urlData, index: number) => {
@@ -229,13 +237,22 @@ export function CreatePenaltyForm({
           }),
         );
 
-        uploadedUrls = presignedUrls.map((urlData) => urlData.fileUrl);
+        proofs =
+          evidenceFiles.length > 0
+            ? presignedUrls.map((urlData, index) => ({
+                imageKey: urlData.key,
+                mimeType: evidenceFiles[index].type,
+              }))
+            : [];
       }
 
       const payload: ICreatePenaltyDto = {
-        ...values,
-        amount: values.amount || selectedType?.amount,
-        evidenceUrls: uploadedUrls,
+        staffId: values.staffId,
+        penaltyTypeId: values.penaltyTypeId,
+        date: values.date,
+        amount: values.amount ?? selectedType?.amount,
+        reason: values.reason,
+        proofs,
       };
 
       await penaltyService.create(payload);

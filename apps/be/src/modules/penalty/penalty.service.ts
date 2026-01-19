@@ -8,6 +8,7 @@ import { PenaltyTypeService } from '../penalty-type/penalty-type.service';
 import { CreatePenaltyDto } from './dto/create-penalty.dto';
 import { UpdatePenaltyEvidenceDto } from './dto/update-penalty-evidence.dto';
 import { UpdatePenaltyDto } from './dto/update-penalty.dto';
+import { PenaltyProofEntity } from './entities/penalty-proof.entity';
 import { Penalty } from './penalty.entity';
 
 @Injectable()
@@ -16,6 +17,8 @@ export class PenaltyService {
     @InjectRepository(Penalty)
     private readonly penaltyRepository: Repository<Penalty>,
     private readonly penaltyTypeService: PenaltyTypeService,
+    @InjectRepository(PenaltyProofEntity)
+    private readonly penaltyProofRepository: Repository<PenaltyProofEntity>,
   ) {}
 
   async create(createPenaltyDto: CreatePenaltyDto): Promise<Penalty> {
@@ -24,8 +27,16 @@ export class PenaltyService {
     );
 
     const penalty = this.penaltyRepository.create({
-      ...createPenaltyDto,
+      staffId: createPenaltyDto.staffId,
+      penaltyTypeId: createPenaltyDto.penaltyTypeId,
+      date: new Date(createPenaltyDto.date),
+      reason: createPenaltyDto.reason,
       amount: createPenaltyDto.amount ?? penaltyType.amount,
+
+      proofs: createPenaltyDto.proofs?.map((p) => ({
+        imageKey: p.imageKey,
+        mimeType: p.mimeType,
+      })),
     });
 
     return this.penaltyRepository.save(penalty);
@@ -37,7 +48,7 @@ export class PenaltyService {
     const [data, total] = await this.penaltyRepository.findAndCount({
       skip: queries.skip,
       take: queries.take,
-      relations: ['penaltyType', 'staff', 'staff.user'],
+      relations: ['penaltyType', 'staff', 'staff.user', 'proofs'],
       order: { createdAt: SearchOrder.DESC },
     });
     return {
@@ -51,7 +62,7 @@ export class PenaltyService {
   async findOne(id: number): Promise<Penalty> {
     const penalty = await this.penaltyRepository.findOne({
       where: { id },
-      relations: ['penaltyType', 'staff', 'staff.user'],
+      relations: ['penaltyType', 'staff', 'staff.user', 'proofs'],
     });
 
     if (!penalty) {
@@ -82,12 +93,26 @@ export class PenaltyService {
     id: number,
     updateEvidenceDto: UpdatePenaltyEvidenceDto,
   ): Promise<Penalty> {
-    const penalty = await this.findOne(id);
+    const penalty = await this.penaltyRepository.findOne({
+      where: { id },
+      relations: ['proofs'],
+    });
 
-    penalty.evidenceUrls = updateEvidenceDto.evidenceUrls;
+    if (!penalty) {
+      throw new NotFoundException('Penalty not found');
+    }
 
-    if (updateEvidenceDto.reason) {
+    if (updateEvidenceDto.reason !== undefined) {
       penalty.reason = updateEvidenceDto.reason;
+    }
+
+    if (updateEvidenceDto.proofs) {
+      penalty.proofs = updateEvidenceDto.proofs.map((p) =>
+        this.penaltyProofRepository.create({
+          imageKey: p.imageKey,
+          mimeType: p.mimeType,
+        }),
+      );
     }
 
     return this.penaltyRepository.save(penalty);

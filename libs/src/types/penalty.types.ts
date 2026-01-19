@@ -8,12 +8,17 @@ export interface Penalty {
   date: string | Date;
   amount: number;
   reason: string;
-  evidenceUrls: string[];
   status: PenaltyStatus;
   penaltyType?: PenaltyType;
   staff?: Staff;
   createdAt: string | Date;
   updatedAt: string | Date;
+  proofs?: CreatePenaltyProofDTO[];
+}
+
+export interface CreatePenaltyProofDTO {
+  imageKey: string;
+  mimeType: string;
 }
 
 export interface PenaltyType {
@@ -31,7 +36,7 @@ export interface ICreatePenaltyDto {
   date: string;
   amount?: number;
   reason: string;
-  evidenceUrls?: string[];
+  proofs?: CreatePenaltyProofDTO[];
 }
 
 export interface IUpdatePenaltyDto {
@@ -40,13 +45,13 @@ export interface IUpdatePenaltyDto {
   date?: string;
   amount?: number;
   reason?: string;
-  evidenceUrls?: string[];
   status?: PenaltyStatus;
+  proofs?: CreatePenaltyProofDTO[];
 }
 
 export interface IUpdatePenaltyEvidenceDto {
-  evidenceUrls: string[];
   reason?: string;
+  proofs?: CreatePenaltyProofDTO[];
 }
 
 export interface ICreatePenaltyTypeDto {
