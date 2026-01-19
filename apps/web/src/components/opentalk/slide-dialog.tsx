@@ -17,7 +17,7 @@ import {
   IOpentalkSlide,
   OpentalkSlideStatus,
   OpentalkSlideType,
-  ScheduleEvent
+  ScheduleEvent,
 } from '@qnoffice/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import { ExternalLink, Upload, X } from 'lucide-react';
@@ -113,20 +113,27 @@ export function SlideDialog({
     }
 
     try {
-      console.log('[fetchPresignedUrl] Calling uploadClientService.getOpentalkViewPresignedUrl');
-      const response = await uploadClientService.getOpentalkViewPresignedUrl(key);
+      console.log(
+        '[fetchPresignedUrl] Calling uploadClientService.getOpentalkViewPresignedUrl',
+      );
+      const response =
+        await uploadClientService.getOpentalkViewPresignedUrl(key);
       console.log('[fetchPresignedUrl] Response:', response);
       console.log('[fetchPresignedUrl] Response.data:', response.data);
-      
+
       // The backend wraps responses in {statusCode, data}, so we need response.data.data
-      const downloadUrl = (response.data as any).data?.downloadUrl || response.data.downloadUrl;
+      const downloadUrl =
+        (response.data as any).data?.downloadUrl || response.data.downloadUrl;
       console.log('[fetchPresignedUrl] Download URL:', downloadUrl);
-      
+
       if (downloadUrl) {
         setPresignedUrl(downloadUrl);
       }
     } catch (error) {
-      console.error('[fetchPresignedUrl] Failed to fetch presigned URL:', error);
+      console.error(
+        '[fetchPresignedUrl] Failed to fetch presigned URL:',
+        error,
+      );
       toast.error('Không thể tải xem trước file');
     }
   };
@@ -146,7 +153,11 @@ export function SlideDialog({
         toast.error('Vui lòng chọn file để tải lên');
         return;
       }
-      console.log('[handleSubmit] Selected file:', selectedFile.name, selectedFile.type);
+      console.log(
+        '[handleSubmit] Selected file:',
+        selectedFile.name,
+        selectedFile.type,
+      );
 
       setIsUploading(true);
       try {
@@ -165,15 +176,17 @@ export function SlideDialog({
         console.log('[handleSubmit] File key:', presignedData.key);
 
         console.log('[handleSubmit] Uploading file to S3...');
-        await uploadClientService.uploadFileToS3(presignedData.uploadUrl, selectedFile);
+        await uploadClientService.uploadFileToS3(
+          presignedData.uploadUrl,
+          selectedFile,
+        );
         console.log('[handleSubmit] File uploaded successfully');
 
-        finalUrl = presignedData.key; 
+        finalUrl = presignedData.key;
         submissionType = OpentalkSlideType.FILE;
         fileType = selectedFile.type;
         fileName = selectedFile.name;
         console.log('[handleSubmit] Final URL (key):', finalUrl);
-
       } catch (error) {
         console.error('[handleSubmit] Upload failed:', error);
         toast.error('Tải file lên thất bại');
@@ -201,7 +214,7 @@ export function SlideDialog({
         fileType,
         fileName,
       });
-      
+
       await opentalkClientService.submitSlide({
         eventId: event.id,
         slidesUrl: finalUrl,
@@ -212,24 +225,27 @@ export function SlideDialog({
       console.log('[handleSubmit] Slide submitted successfully');
 
       toast.success('Đã nộp slide thành công');
-      
+
       if (submissionType === OpentalkSlideType.FILE && finalUrl) {
-         console.log('[handleSubmit] Fetching view URL for uploaded file');
-         try {
-             const response = await uploadClientService.getOpentalkViewPresignedUrl(finalUrl);
-             console.log('[handleSubmit] View URL response:', response.data);
-             
-             // The backend wraps responses in {statusCode, data}, so we need response.data.data
-             const downloadUrl = (response.data as any).data?.downloadUrl || response.data.downloadUrl;
-             console.log('[handleSubmit] Download URL:', downloadUrl);
-             
-             if (downloadUrl) {
-                 console.log('[handleSubmit] Setting presigned URL:', downloadUrl);
-                 setPresignedUrl(downloadUrl);
-             }
-         } catch (e) {
-             console.error('[handleSubmit] Failed to refresh preview url:', e);
-         }
+        console.log('[handleSubmit] Fetching view URL for uploaded file');
+        try {
+          const response =
+            await uploadClientService.getOpentalkViewPresignedUrl(finalUrl);
+          console.log('[handleSubmit] View URL response:', response.data);
+
+          // The backend wraps responses in {statusCode, data}, so we need response.data.data
+          const downloadUrl =
+            (response.data as any).data?.downloadUrl ||
+            response.data.downloadUrl;
+          console.log('[handleSubmit] Download URL:', downloadUrl);
+
+          if (downloadUrl) {
+            console.log('[handleSubmit] Setting presigned URL:', downloadUrl);
+            setPresignedUrl(downloadUrl);
+          }
+        } catch (e) {
+          console.error('[handleSubmit] Failed to refresh preview url:', e);
+        }
       }
 
       console.log('[handleSubmit] Calling onSuccess callback');
@@ -252,11 +268,13 @@ export function SlideDialog({
         'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
         'application/vnd.google-apps.presentation', // google slides (unlikely to be uploaded as file but possible export)
       ];
-      
+
       if (!validTypes.includes(file.type) && !file.type.includes('pdf')) {
-         // Just a warning or strict? lets be strict for now to avoid garbage
-         // checking file.type might vary. 
+        // Just a warning or strict? lets be strict for now to avoid garbage
+        // checking file.type might vary.
       }
+      console.log(file);
+
       setSelectedFile(file);
     }
   };
@@ -273,14 +291,14 @@ export function SlideDialog({
 
   const getFileIcon = (mimeType?: string) => {
     if (mimeType?.includes('pdf')) return '📄';
-    if (mimeType?.includes('presentation') || mimeType?.includes('powerpoint')) return '📊';
+    if (mimeType?.includes('presentation') || mimeType?.includes('powerpoint'))
+      return '📊';
     return '📁';
   };
 
-
   const handleApprove = async () => {
     if (!event?.id) return;
-    
+
     setIsApproving(true);
     try {
       await opentalkClientService.approveSlide(event.id);
@@ -300,7 +318,7 @@ export function SlideDialog({
       toast.error('Vui lòng nhập lý do từ chối');
       return;
     }
-    
+
     setIsRejecting(true);
     try {
       await opentalkClientService.rejectSlide(event.id, rejectionReason);
@@ -319,48 +337,54 @@ export function SlideDialog({
   const handlePreview = async () => {
     console.log('[handlePreview] Preview button clicked');
     console.log('[handlePreview] Current presignedUrl:', presignedUrl);
-    
+
     if (presignedUrl) {
-        console.log('[handlePreview] Using existing presigned URL, opening preview');
-        setShowPreview(true);
-        return;
+      console.log(
+        '[handlePreview] Using existing presigned URL, opening preview',
+      );
+      setShowPreview(true);
+      return;
     }
 
     const key = slide?.slideKey || slide?.slideUrl;
     console.log('[handlePreview] Fetching new presigned URL for key:', key);
     console.log('[handlePreview] Slide:', slide);
-    
+
     if (!key) {
-        console.error('[handlePreview] No file key found');
-        toast.error('Không tìm thấy file key');
-        return;
+      console.error('[handlePreview] No file key found');
+      toast.error('Không tìm thấy file key');
+      return;
     }
 
     try {
-        setIsLoading(true); 
-        console.log('[handlePreview] Calling uploadClientService.getOpentalkViewPresignedUrl');
-        const response = await uploadClientService.getOpentalkViewPresignedUrl(key);
-        console.log('[handlePreview] Response:', response);
-        console.log('[handlePreview] Response.data:', response.data);
-        
-        // The backend wraps responses in {statusCode, data}, so we need response.data.data
-        const downloadUrl = (response.data as any).data?.downloadUrl || response.data.downloadUrl;
-        console.log('[handlePreview] Download URL:', downloadUrl);
-        
-        if (downloadUrl) {
-            setPresignedUrl(downloadUrl);
-            setShowPreview(true);
-            console.log('[handlePreview] Preview dialog opened');
-        } else {
-            console.error('[handlePreview] No downloadUrl in response');
-            console.error('[handlePreview] Full response.data:', response.data);
-            toast.error('Failed to get preview URL');
-        }
+      setIsLoading(true);
+      console.log(
+        '[handlePreview] Calling uploadClientService.getOpentalkViewPresignedUrl',
+      );
+      const response =
+        await uploadClientService.getOpentalkViewPresignedUrl(key);
+      console.log('[handlePreview] Response:', response);
+      console.log('[handlePreview] Response.data:', response.data);
+
+      // The backend wraps responses in {statusCode, data}, so we need response.data.data
+      const downloadUrl =
+        (response.data as any).data?.downloadUrl || response.data.downloadUrl;
+      console.log('[handlePreview] Download URL:', downloadUrl);
+
+      if (downloadUrl) {
+        setPresignedUrl(downloadUrl);
+        setShowPreview(true);
+        console.log('[handlePreview] Preview dialog opened');
+      } else {
+        console.error('[handlePreview] No downloadUrl in response');
+        console.error('[handlePreview] Full response.data:', response.data);
+        toast.error('Failed to get preview URL');
+      }
     } catch (error) {
-        console.error('[handlePreview] Error:', error);
-        toast.error('Error loading preview');
+      console.error('[handlePreview] Error:', error);
+      toast.error('Error loading preview');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -371,7 +395,9 @@ export function SlideDialog({
           <DialogHeader>
             <DialogTitle>{isViewMode ? 'Xem Slide' : 'Nộp Slide'}</DialogTitle>
             <DialogDescription>
-              {isViewMode ? 'Xem tài liệu cho' : 'Tải lên hoặc liên kết tài liệu cho'}{' '}
+              {isViewMode
+                ? 'Xem tài liệu cho'
+                : 'Tải lên hoặc liên kết tài liệu cho'}{' '}
               <span className="font-medium text-foreground">{event.title}</span>
             </DialogDescription>
           </DialogHeader>
@@ -384,67 +410,79 @@ export function SlideDialog({
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xl">
-                           {existingType === OpentalkSlideType.FILE ? getFileIcon(slide?.type) : '🔗'}
+                          {existingType === OpentalkSlideType.FILE
+                            ? getFileIcon(slide?.type)
+                            : '🔗'}
                         </div>
                         <div>
                           <p className="font-medium leading-none">
-                            {slide?.slideKey || (existingType === OpentalkSlideType.FILE ? 'File đính kèm' : 'Liên kết ngoài')}
+                            {slide?.slideKey ||
+                              (existingType === OpentalkSlideType.FILE
+                                ? 'File đính kèm'
+                                : 'Liên kết ngoài')}
                           </p>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {existingType === OpentalkSlideType.FILE 
-                               ? 'Tài liệu đã tải lên' 
-                               : 'Google Slides / Liên kết Web'}
+                            {existingType === OpentalkSlideType.FILE
+                              ? 'Tài liệu đã tải lên'
+                              : 'Google Slides / Liên kết Web'}
                           </p>
                         </div>
                       </div>
                       {slide?.status && (
-                         <div className="px-2 py-1 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
-                           {slide.status}
-                         </div>
+                        <div className="px-2 py-1 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
+                          {slide.status}
+                        </div>
                       )}
                     </div>
                   </div>
 
                   <div className="flex justify-between gap-2">
                     <div className="flex gap-2">
-                      {canApprove && slide?.status === OpentalkSlideStatus.PENDING && (
-                        <>
-                          <Button 
-                            variant="default"
-                            onClick={handleApprove}
-                            disabled={isApproving || isRejecting}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            {isApproving ? 'Đang duyệt...' : 'Phê duyệt'}
-                          </Button>
-                          <Button 
-                            variant="destructive"
-                            onClick={() => setShowRejectDialog(true)}
-                            disabled={isApproving || isRejecting}
-                          >
-                            Từ chối
-                          </Button>
-                        </>
-                      )}
+                      {canApprove &&
+                        slide?.status === OpentalkSlideStatus.PENDING && (
+                          <>
+                            <Button
+                              variant="default"
+                              onClick={handleApprove}
+                              disabled={isApproving || isRejecting}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              {isApproving ? 'Đang duyệt...' : 'Phê duyệt'}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => setShowRejectDialog(true)}
+                              disabled={isApproving || isRejecting}
+                            >
+                              Từ chối
+                            </Button>
+                          </>
+                        )}
                     </div>
-                    
+
                     <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => onOpenChange(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                      >
                         Đóng
                       </Button>
-                      
+
                       {existingType === OpentalkSlideType.FILE ? (
-                        <Button 
+                        <Button
                           onClick={handlePreview}
                           className="gap-2"
                           type="button"
                         >
-                          <Upload className="h-4 w-4 rotate-180" /> 
+                          <Upload className="h-4 w-4 rotate-180" />
                           Xem trước File
                         </Button>
                       ) : (
-                        <Button 
-                          onClick={() => slide?.slideUrl && window.open(slide.slideUrl, '_blank')}
+                        <Button
+                          onClick={() =>
+                            slide?.slideUrl &&
+                            window.open(slide.slideUrl, '_blank')
+                          }
                           className="gap-2"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -455,18 +493,20 @@ export function SlideDialog({
                   </div>
                 </div>
               ) : (
-                 <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-                   <div className="mb-2 rounded-full bg-muted p-3">
-                     <Upload className="h-6 w-6 opacity-50" />
-                   </div>
-                   <p>Chưa có slide nào được nộp cho sự kiện này.</p>
-                 </div>
+                <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+                  <div className="mb-2 rounded-full bg-muted p-3">
+                    <Upload className="h-6 w-6 opacity-50" />
+                  </div>
+                  <p>Chưa có slide nào được nộp cho sự kiện này.</p>
+                </div>
               )}
-               {!hasExistingSlide && (
-                   <DialogFooter>
-                       <Button variant="ghost" onClick={() => onOpenChange(false)}>Đóng</Button>
-                   </DialogFooter>
-               )}
+              {!hasExistingSlide && (
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => onOpenChange(false)}>
+                    Đóng
+                  </Button>
+                </DialogFooter>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
@@ -474,49 +514,59 @@ export function SlideDialog({
                 {hasExistingSlide && (
                   <div className="rounded-lg border bg-muted/50 p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm font-semibold">Slide hiện tại</Label>
+                      <Label className="text-sm font-semibold">
+                        Slide hiện tại
+                      </Label>
                       {slide?.status && (
                         <span className="text-xs text-muted-foreground capitalize">
                           {slide.status.toLowerCase()}
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-3 border rounded-md bg-background">
-                       <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-lg">
-                             {existingType === OpentalkSlideType.FILE ? getFileIcon(slide?.type) : '🔗'}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium leading-none">
-                              {slide?.slideKey || (existingType === OpentalkSlideType.FILE ? 'File đính kèm' : 'Liên kết ngoài')}
-                            </p>
-                          </div>
-                       </div>
-                       
-                       {existingType === OpentalkSlideType.FILE ? (
-                          <Button 
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={handlePreview}
-                            className="gap-2 h-8"
-                          >
-                            <Upload className="h-3 w-3 rotate-180" /> 
-                            Xem trước
-                          </Button>
-                       ) : (
-                          <Button 
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => slide?.slideUrl && window.open(slide.slideUrl, '_blank')}
-                            className="gap-2 h-8"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Mở
-                          </Button>
-                       )}
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-lg">
+                          {existingType === OpentalkSlideType.FILE
+                            ? getFileIcon(slide?.type)
+                            : '🔗'}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium leading-none">
+                            {slide?.slideKey ||
+                              (existingType === OpentalkSlideType.FILE
+                                ? 'File đính kèm'
+                                : 'Liên kết ngoài')}
+                          </p>
+                        </div>
+                      </div>
+
+                      {existingType === OpentalkSlideType.FILE ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handlePreview}
+                          className="gap-2 h-8"
+                        >
+                          <Upload className="h-3 w-3 rotate-180" />
+                          Xem trước
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            slide?.slideUrl &&
+                            window.open(slide.slideUrl, '_blank')
+                          }
+                          className="gap-2 h-8"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Mở
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -543,7 +593,8 @@ export function SlideDialog({
                         onChange={(e) => setSlidesUrl(e.target.value)}
                       />
                       <p className="text-[0.8rem] text-muted-foreground">
-                        Dán liên kết tới Google Slides, Canva, hoặc bất kỳ bài thuyết trình trên web nào.
+                        Dán liên kết tới Google Slides, Canva, hoặc bất kỳ bài
+                        thuyết trình trên web nào.
                       </p>
                     </div>
                   </TabsContent>
@@ -551,44 +602,55 @@ export function SlideDialog({
                   <TabsContent value="file" className="mt-4 space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="file-upload">File</Label>
-                      
+
                       {!selectedFile ? (
-                          <div 
-                            className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition-colors cursor-pointer"
-                            onClick={() => document.getElementById('file-upload')?.click()}
-                          >
-                              <Upload className="h-8 w-8 mb-2 text-muted-foreground" />
-                              <p className="text-sm font-medium">Nhấp để chọn file</p>
-                              <p className="text-xs text-muted-foreground mt-1">PDF, PowerPoint (PPTX)</p>
-                              <Input
-                                id="file-upload"
-                                type="file"
-                                className="hidden"
-                                accept=".pdf,.ppt,.pptx"
-                                onChange={handleFileSelect}
-                              />
-                          </div>
+                        <div
+                          className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() =>
+                            document.getElementById('file-upload')?.click()
+                          }
+                        >
+                          <Upload className="h-8 w-8 mb-2 text-muted-foreground" />
+                          <p className="text-sm font-medium">
+                            Nhấp để chọn file
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            PDF, PowerPoint (PPTX)
+                          </p>
+                          <Input
+                            id="file-upload"
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.ppt,.pptx"
+                            onChange={handleFileSelect}
+                          />
+                        </div>
                       ) : (
-                          <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
-                              <div className="flex items-center gap-3 overflow-hidden">
-                                  <div className="h-8 w-8 flex items-center justify-center bg-primary/10 rounded text-lg">
-                                      {getFileIcon(selectedFile.type)}
-                                  </div>
-                                  <div className="min-w-0">
-                                      <p className="text-sm font-medium truncate">{selectedFile.name}</p>
-                                      <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                                  </div>
-                              </div>
-                              <Button
-                                  type="button" 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={removeFile}
-                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                              >
-                                  <X className="h-4 w-4" />
-                              </Button>
+                        <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="h-8 w-8 flex items-center justify-center bg-primary/10 rounded text-lg">
+                              {getFileIcon(selectedFile.type)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {selectedFile.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {(selectedFile.size / 1024 / 1024).toFixed(2)}{' '}
+                                MB
+                              </p>
+                            </div>
                           </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={removeFile}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </TabsContent>
@@ -600,7 +662,11 @@ export function SlideDialog({
                   Hủy
                 </Button>
                 <Button type="submit" disabled={isLoading || isUploading}>
-                  {isUploading ? 'Đang tải lên...' : isLoading ? 'Đang lưu...' : 'Nộp'}
+                  {isUploading
+                    ? 'Đang tải lên...'
+                    : isLoading
+                      ? 'Đang lưu...'
+                      : 'Nộp'}
                 </Button>
               </DialogFooter>
             </form>
@@ -613,7 +679,7 @@ export function SlideDialog({
         onOpenChange={setShowPreview}
         url={presignedUrl}
         fileName={slide?.slideKey || 'Slide'}
-        fileType={slide?.type}
+        fileType={slide?.mimeType}
       />
 
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>

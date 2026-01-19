@@ -1,5 +1,6 @@
 'use client';
 
+import { FilePreviewDialog } from '@/components/opentalk/file-preview-dialog';
 import { Badge } from '@/components/ui/badge';
 import { BaseDataTable } from '@/components/ui/base-data-table';
 import { Button } from '@/components/ui/button';
@@ -10,12 +11,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { usePagination } from '@/shared/hooks/use-pagination';
+import { uploadClientService } from '@/shared/services/client/upload-client-service';
 import { PaginationState, Penalty, PenaltyStatus } from '@qnoffice/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { AlertCircle, CheckCircle2, Eye, FileText, ImageIcon } from 'lucide-react';
-import { useState } from 'react';
-import { FilePreviewDialog } from '../opentalk/file-preview-dialog';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  FileText,
+  ImageIcon,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface PenaltiesDataTableProps {
   initialData: Penalty[];
@@ -29,6 +37,9 @@ export function PenaltiesDataTable({
   const [selectedPenalty, setSelectedPenalty] = useState<Penalty | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const previewCache = useRef<Map<string, string>>(new Map());
+  const [previewFileName, setPreviewFileName] = useState<string>('Bằng chứng');
+  const [previewFileType, setPreviewFileType] = useState<string | undefined>();
 
   const pagination = usePagination({
     defaultPage: 1,
@@ -65,13 +76,62 @@ export function PenaltiesDataTable({
     }).format(amount);
   };
 
+  const getFileNameFromKey = (key: string) =>
+    key.split('/').pop() || 'Bằng chứng';
+
+  const getFileTypeFromMime = (mimeType?: string) => {
+    if (!mimeType) return undefined;
+    return mimeType.split('/')[1];
+  };
+
+  const handlePreview = async (proof: {
+    imageKey: string;
+    mimeType?: string;
+  }) => {
+    const key = proof.imageKey;
+
+    const fileName = getFileNameFromKey(key);
+    const fileType = getFileTypeFromMime(proof.mimeType);
+
+    // cache
+    if (previewCache.current.has(key)) {
+      setPreviewUrl(previewCache.current.get(key)!);
+      setPreviewFileName(fileName);
+      setPreviewFileType(fileType);
+      setShowPreview(true);
+      return;
+    }
+
+    try {
+      const response =
+        await uploadClientService.getOpentalkViewPresignedUrl(key);
+
+      const downloadUrl =
+        (response.data as any)?.data?.downloadUrl || response.data?.downloadUrl;
+
+      if (!downloadUrl) {
+        toast.error('Không lấy được link xem file');
+        return;
+      }
+
+      previewCache.current.set(key, downloadUrl);
+
+      setPreviewUrl(downloadUrl);
+      setPreviewFileName(fileName);
+      setPreviewFileType(fileType);
+      setShowPreview(true);
+    } catch (e) {
+      toast.error('Lỗi khi tải file');
+    }
+  };
+
   const columns: ColumnDef<Penalty>[] = [
     {
       accessorKey: 'staffId',
       header: 'Nhân viên',
       cell: ({ row }) => {
         const staff = row.original.staff;
-        return staff?.email
+        return staff?.email;
       },
     },
     {
@@ -148,13 +208,16 @@ export function PenaltiesDataTable({
                 <div>
                   <p className="text-sm text-muted-foreground">Nhân viên</p>
                   <p className="font-medium">
-                    {selectedPenalty.staff?.user?.name || selectedPenalty.staff?.email || selectedPenalty.staffId}
+                    {selectedPenalty.staff?.user?.name ||
+                      selectedPenalty.staff?.email ||
+                      selectedPenalty.staffId}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Loại phạt</p>
                   <p className="font-medium">
-                    {selectedPenalty.penaltyType?.name || `Loại ${selectedPenalty.penaltyTypeId}`}
+                    {selectedPenalty.penaltyType?.name ||
+                      `Loại ${selectedPenalty.penaltyTypeId}`}
                   </p>
                 </div>
                 <div>
@@ -180,53 +243,59 @@ export function PenaltiesDataTable({
                   {selectedPenalty.reason}
                 </p>
               </div>
-              {selectedPenalty.evidenceUrls &&
-                selectedPenalty.evidenceUrls.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Bằng chứng
-                    </p>
-                    <div className="grid grid-cols-1 gap-2">
-                      {selectedPenalty.evidenceUrls.map((url, index) => {
-                        const isImage = url.match(/\.(jpeg|jpg|gif|png)$/i) != null;
-                        const fileName = url.split('/').pop() || `Evidence ${index + 1}`;
-                        
-                        return (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
-                          >
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              <div className="h-10 w-10 flex items-center justify-center bg-primary/10 rounded-lg text-xl text-primary">
-                                {isImage ? <ImageIcon className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium truncate" title={fileName}>
-                                  {fileName}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {isImage ? 'Hình ảnh' : 'Tài liệu'}
-                                </p>
-                              </div>
+              {selectedPenalty.proofs && selectedPenalty.proofs.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Bằng chứng
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {selectedPenalty.proofs.map((url, index) => {
+                      const isImage =
+                        url.imageKey.match(/\.(jpeg|jpg|gif|png)$/i) != null;
+                      const fileName =
+                        url.imageKey.split('/').pop() ||
+                        `Evidence ${index + 1}`;
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
+                        >
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="h-10 w-10 flex items-center justify-center bg-primary/10 rounded-lg text-xl text-primary">
+                              {isImage ? (
+                                <ImageIcon className="h-5 w-5" />
+                              ) : (
+                                <FileText className="h-5 w-5" />
+                              )}
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="gap-2"
-                              onClick={() => {
-                                setPreviewUrl(url);
-                                setShowPreview(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4" />
-                              Xem
-                            </Button>
+                            <div className="min-w-0">
+                              <p
+                                className="text-sm font-medium truncate"
+                                title={fileName}
+                              >
+                                {fileName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {isImage ? 'Hình ảnh' : 'Tài liệu'}
+                              </p>
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => handlePreview(url)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            Xem
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -236,8 +305,8 @@ export function PenaltiesDataTable({
         open={showPreview}
         onOpenChange={setShowPreview}
         url={previewUrl}
-        fileName={previewUrl?.split('/').pop() || 'Bằng chứng'}
-        fileType={previewUrl?.split('.').pop()}
+        fileName={previewFileName}
+        fileType={previewFileType}
       />
     </>
   );

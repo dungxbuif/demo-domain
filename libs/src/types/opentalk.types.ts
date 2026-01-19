@@ -1,9 +1,9 @@
 import {
-    CycleStatus,
-    EventStatus,
-    OpentalkSlideStatus,
-    OpentalkSlideType,
-    ScheduleType,
+  CycleStatus,
+  EventStatus,
+  OpentalkSlideStatus,
+  OpentalkSlideType,
+  ScheduleType,
 } from '../enums';
 import { SearchParams } from './pagination.types';
 
@@ -95,6 +95,7 @@ export interface IOpentalkSlide {
   rejectedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  mimeType?: string;
 }
 
 /**

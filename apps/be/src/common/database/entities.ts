@@ -5,6 +5,7 @@ import HolidayEntity from '@src/modules/holiday/holiday.entity';
 import OpentalkSlideEntity from '@src/modules/opentalk/entities/opentalk-slide.entity';
 import { PantryMenuItemEntity } from '@src/modules/pantry-menu/entities/pantry-menu-item.entity';
 import { PenaltyType } from '@src/modules/penalty-type/penalty-type.entity';
+import { PenaltyProofEntity } from '@src/modules/penalty/entities/penalty-proof.entity';
 import { Penalty } from '@src/modules/penalty/penalty.entity';
 import ScheduleCycleEntity from '@src/modules/schedule/enties/schedule-cycle.entity';
 import ScheduleEventParticipantEntity from '@src/modules/schedule/enties/schedule-event-participant.entity';
@@ -27,6 +28,7 @@ const entities = [
   ScheduleEventParticipantEntity,
   AuditLogEntity,
   OpentalkSlideEntity,
-  PantryMenuItemEntity
+  PantryMenuItemEntity,
+  PenaltyProofEntity,
 ];
 export default entities;

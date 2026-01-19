@@ -1,13 +1,16 @@
 import { ICreatePenaltyDto } from '@qnoffice/shared';
+import { Type } from 'class-transformer';
 import {
-    IsArray,
-    IsDateString,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
-    Min,
+  IsArray,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
 } from 'class-validator';
+import { CreatePenaltyProofDto } from './create-penalty-proof.dto';
 
 export class CreatePenaltyDto implements ICreatePenaltyDto {
   @IsNumber()
@@ -32,7 +35,8 @@ export class CreatePenaltyDto implements ICreatePenaltyDto {
   reason: string;
 
   @IsArray()
-  @IsString({ each: true })
+  @ValidateNested({ each: true })
+  @Type(() => CreatePenaltyProofDto)
   @IsOptional()
-  evidenceUrls?: string[];
+  proofs?: CreatePenaltyProofDto[];
 }

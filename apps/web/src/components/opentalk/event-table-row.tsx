@@ -16,7 +16,6 @@ interface EventTableRowProps {
   editedValue: string;
 
   canEditTopic: boolean;
-  canEditSlide: boolean;
   canManageOpentalk: boolean;
   isSelected: boolean;
   isLocked?: boolean;
@@ -37,9 +36,7 @@ export function EventTableRow({
   isEditingTopic,
   isEditingDate,
   editedValue,
-
   canEditTopic,
-  canEditSlide,
   canManageOpentalk,
   isSelected,
   isLocked,
@@ -53,7 +50,6 @@ export function EventTableRow({
 
   onSlideClick,
   onSelect,
-  
 }: EventTableRowProps) {
   const renderPresenter = () => {
     if (event.eventParticipants && event.eventParticipants.length > 0) {
@@ -173,7 +169,7 @@ export function EventTableRow({
       <TableCell>
         <Button size="sm" variant="outline" onClick={onSlideClick}>
           <FileText className="h-4 w-4 mr-1" />
-          {canEditSlide ? 'Update' : 'View'}
+          {canEditTopic && !isCheckboxDisabled ? 'Update' : 'View'}
         </Button>
       </TableCell>
     </TableRow>

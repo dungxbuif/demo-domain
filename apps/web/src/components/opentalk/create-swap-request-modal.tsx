@@ -2,28 +2,28 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { swapRequestClientService } from '@/shared/services/client/swap-request-client-service';
 import { formatDateVN } from '@/shared/utils';
 import {
-    ICreateSwapRequestDto,
-    ScheduleEvent,
-    ScheduleType,
+  ICreateSwapRequestDto,
+  ScheduleEvent,
+  ScheduleType,
 } from '@qnoffice/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -34,6 +34,7 @@ interface CreateSwapRequestModalProps {
   scheduleId: number;
   onSuccess?: () => void;
   lockedEventIds?: number[];
+  userStaffId?: number;
 }
 
 export function CreateSwapRequestModal({
@@ -42,6 +43,7 @@ export function CreateSwapRequestModal({
   scheduleId,
   onSuccess,
   lockedEventIds = [],
+  userStaffId,
 }: CreateSwapRequestModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [availableEvents, setAvailableEvents] = useState<ScheduleEvent[]>([]);
@@ -51,7 +53,7 @@ export function CreateSwapRequestModal({
   const fetchAvailableEvents = useCallback(async () => {
     try {
       const response = await fetch(
-        `/api/opentalk/events/${scheduleId}/cycle-events`,
+        `/api/opentalk/events/${scheduleId}/cycle-events?participantId=${userStaffId}`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -105,7 +107,7 @@ export function CreateSwapRequestModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl ">
         <DialogHeader>
           <DialogTitle>Gửi yêu cầu đổi lịch</DialogTitle>
           <DialogDescription>
